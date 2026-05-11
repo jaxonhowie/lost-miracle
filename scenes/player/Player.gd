@@ -129,6 +129,9 @@ func _die():
 	$CollisionShape2D.set_deferred("disabled", true)
 	hurtbox.set_deferred("monitoring", false)
 
+func add_gold(amount: int):
+	gold += amount
+
 func get_total_attack() -> int:
 	return attack
 

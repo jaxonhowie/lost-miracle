@@ -1,6 +1,9 @@
 # Godot cache
 .godot/
 
+# Claude Code
+.claude/
+
 # Godot export
 export/
 

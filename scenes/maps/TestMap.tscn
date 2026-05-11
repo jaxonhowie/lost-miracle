@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/monsters/SkeletonSoldier.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/monsters/Zombie.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/monsters/Ghost.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/InventoryPanel.tscn" id="5"]
 
 [sub_resource type="RectangleShape2D" id="ground_shape"]
 size = Vector2(3000, 40)
@@ -108,3 +109,7 @@ offset_top = -200.0
 offset_right = 3200.0
 offset_bottom = 800.0
 color = Color(0.08, 0.06, 0.1, 1)
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="InventoryPanel" parent="UILayer" instance=ExtResource("5")]

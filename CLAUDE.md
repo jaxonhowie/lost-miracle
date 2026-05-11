@@ -34,7 +34,7 @@ res://
 ### Core Systems
 
 - **Data-driven design**: All item/monster/drop definitions live in JSON files under `data/`, not hardcoded in scripts.
-- **Systems as autoloads**: Game systems (DropSystem, SpawnSystem, InventorySystem, etc.) should be autoload singletons.
+- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`.
 - **Monsters use inheritance**: BaseMonster provides the state machine (Idle/Patrol/Chase/Attack/Hit/Dead); individual monsters extend it.
 - **Equipment instances**: Equipped items have a unique UID and enhance level — they are NOT just item_id references.
 
@@ -85,6 +85,17 @@ Mobs must not respawn if player is within 300px of spawn point. Max 6 mobs per a
 12. UI polish
 
 Do NOT start with Boss or enhancement UI. Get "kill mob → loot → equip → get stronger" loop working first.
+
+## Controls
+
+| Action | Key |
+|--------|-----|
+| Move | A / D |
+| Jump | Space |
+| Attack | Left Mouse Button |
+| Skills 1/2/3 | 1 / 2 / 3 |
+| Quick Item 1 | F1 |
+| Inventory | Tab |
 
 ## Art Specs
 

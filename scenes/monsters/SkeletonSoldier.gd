@@ -1,6 +1,7 @@
 extends "res://scenes/monsters/BaseMonster.gd"
 
 func _setup_stats():
+	monster_id = "skeleton_soldier"
 	hp = 60
 	max_hp = 60
 	attack_power = 8

@@ -1,0 +1,212 @@
+{
+  "gold": {
+    "name": "金币",
+    "type": "currency",
+    "stackable": true,
+    "max_stack": 99999
+  },
+  "broken_bone": {
+    "name": "破碎骨片",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "rotten_leather": {
+    "name": "腐烂皮革",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "ghost_fragment": {
+    "name": "幽魂残片",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "knight_medal": {
+    "name": "骑士骨章",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "iron_shard": {
+    "name": "精铁碎片",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "necromancer_dust": {
+    "name": "亡灵法尘",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "soul_crystal": {
+    "name": "灵魂结晶",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "grave_keeper_token": {
+    "name": "守墓人徽记",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "enhance_stone": {
+    "name": "强化石",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "mid_enhance_stone": {
+    "name": "中级强化石",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "high_enhance_stone": {
+    "name": "高级强化石",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "boss_enhance_core": {
+    "name": "Boss强化核心",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 99
+  },
+  "rusty_sword": {
+    "name": "生锈短剑",
+    "type": "equipment",
+    "slot": "weapon",
+    "quality": "normal",
+    "attack": 6,
+    "defense": 0,
+    "hp": 0,
+    "enhanceable": true
+  },
+  "skeleton_knight_sword": {
+    "name": "骷髅骑士长剑",
+    "type": "equipment",
+    "slot": "weapon",
+    "quality": "rare",
+    "attack": 22,
+    "defense": 0,
+    "hp": 0,
+    "crit_rate": 0.03,
+    "enhanceable": true
+  },
+  "grave_keeper_greatsword": {
+    "name": "守墓人巨剑",
+    "type": "equipment",
+    "slot": "weapon",
+    "quality": "epic",
+    "attack": 45,
+    "defense": 0,
+    "hp": 0,
+    "crit_damage": 0.2,
+    "enhanceable": true
+  },
+  "necromancer_staff": {
+    "name": "亡灵法杖",
+    "type": "equipment",
+    "slot": "weapon",
+    "quality": "rare",
+    "attack": 28,
+    "defense": 0,
+    "hp": 0,
+    "enhanceable": true
+  },
+  "old_armor": {
+    "name": "破旧护甲",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "normal",
+    "attack": 0,
+    "defense": 3,
+    "hp": 20,
+    "enhanceable": true
+  },
+  "rotten_gauntlet": {
+    "name": "腐尸护手",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "fine",
+    "attack": 0,
+    "defense": 5,
+    "hp": 30,
+    "enhanceable": true
+  },
+  "rough_iron_armor": {
+    "name": "粗糙铁甲",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "fine",
+    "attack": 0,
+    "defense": 7,
+    "hp": 40,
+    "enhanceable": true
+  },
+  "knight_chestplate": {
+    "name": "骑士胸甲",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "rare",
+    "attack": 0,
+    "defense": 12,
+    "hp": 80,
+    "enhanceable": true
+  },
+  "grave_keeper_heavy_armor": {
+    "name": "守墓人重甲",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "epic",
+    "attack": 0,
+    "defense": 24,
+    "hp": 160,
+    "enhanceable": true
+  },
+  "mage_cloak": {
+    "name": "法师披风",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "rare",
+    "attack": 5,
+    "defense": 8,
+    "hp": 50,
+    "enhanceable": true
+  },
+  "soul_cloth_boots": {
+    "name": "灵魂布靴",
+    "type": "equipment",
+    "slot": "boots",
+    "quality": "fine",
+    "attack": 0,
+    "defense": 2,
+    "hp": 10,
+    "enhanceable": true
+  },
+  "shadow_ring": {
+    "name": "暗影戒指",
+    "type": "equipment",
+    "slot": "ring",
+    "quality": "fine",
+    "attack": 4,
+    "defense": 0,
+    "hp": 0,
+    "enhanceable": true
+  },
+  "undead_ring": {
+    "name": "亡灵戒指",
+    "type": "equipment",
+    "slot": "ring",
+    "quality": "epic",
+    "attack": 15,
+    "defense": 5,
+    "hp": 30,
+    "enhanceable": true
+  }
+}

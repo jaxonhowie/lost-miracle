@@ -3,6 +3,7 @@ extends CharacterBody2D
 signal died(monster)
 
 # Stats — override in subclasses
+var monster_id: String = ""
 var hp: int = 60
 var max_hp: int = 60
 var attack_power: int = 8
@@ -190,6 +191,9 @@ func _die():
 	$CollisionShape2D.set_deferred("disabled", true)
 	detection_area.set_deferred("monitoring", false)
 	attack_area.set_deferred("monitoring", false)
+	# Trigger drop system
+	if monster_id != "":
+		DropSystem.on_monster_died(monster_id, global_position)
 	# Fade out
 	var tween = create_tween()
 	tween.tween_property(sprite, "modulate:a", 0.0, 0.5)
