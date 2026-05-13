@@ -1,0 +1,74 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/PlayerHUD.gd" id="1"]
+
+[node name="PlayerHUD" type="Control"]
+anchors_preset = 0
+offset_right = 350.0
+offset_bottom = 120.0
+script = ExtResource("1")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 340.0
+offset_bottom = 110.0
+
+[node name="PortraitFrame" type="PanelContainer" parent="HBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+
+[node name="Portrait" type="ColorRect" parent="HBoxContainer/PortraitFrame"]
+layout_mode = 2
+color = Color(0.3, 0.35, 0.4, 1)
+
+[node name="InfoContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameLevel" type="HBoxContainer" parent="HBoxContainer/InfoContainer"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="HBoxContainer/InfoContainer/NameLevel"]
+layout_mode = 2
+text = "冒险者"
+
+[node name="LevelLabel" type="Label" parent="HBoxContainer/InfoContainer/NameLevel"]
+layout_mode = 2
+text = "Lv.1"
+
+[node name="HPBar" type="ProgressBar" parent="HBoxContainer/InfoContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 25)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="MPBar" type="ProgressBar" parent="HBoxContainer/InfoContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 20)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="StatsRow" type="HBoxContainer" parent="HBoxContainer/InfoContainer"]
+layout_mode = 2
+
+[node name="GoldIcon" type="ColorRect" parent="HBoxContainer/InfoContainer/StatsRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(16, 16)
+color = Color(1, 0.84, 0, 1)
+
+[node name="GoldLabel" type="Label" parent="HBoxContainer/InfoContainer/StatsRow"]
+layout_mode = 2
+text = "0"
+
+[node name="StatIcon" type="ColorRect" parent="HBoxContainer/InfoContainer/StatsRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(16, 16)
+color = Color(0.4, 0.6, 1, 1)
+
+[node name="StatLabel" type="Label" parent="HBoxContainer/InfoContainer/StatsRow"]
+layout_mode = 2
+text = "攻:12"

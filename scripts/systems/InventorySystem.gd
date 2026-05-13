@@ -80,3 +80,17 @@ func get_all_materials() -> Array:
 		if slot.has("count"):
 			result.append(slot)
 	return result
+
+func add_equipment(item_id: String, uid: String, enhance_level: int = 0):
+	inventory.append({
+		"item_id": item_id,
+		"uid": uid,
+		"enhance_level": enhance_level,
+	})
+	inventory_changed.emit()
+
+func get_by_uid(uid: String) -> Dictionary:
+	for slot in inventory:
+		if slot.get("uid", "") == uid:
+			return slot
+	return {}

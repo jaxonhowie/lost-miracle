@@ -63,5 +63,12 @@ func _on_slot_pressed(slot: Dictionary):
 			text += "\n防御: +" + str(item_data["defense"])
 		if item_data.get("hp", 0) > 0:
 			text += "\n生命: +" + str(item_data["hp"])
+		text += "\n\n点击穿戴"
 
 	detail_label.text = text
+
+	# Try to equip if it's equipment
+	if item_data.get("type", "") == "equipment" and slot.has("uid"):
+		var equip_sys = get_node_or_null("/root/EquipmentSystem")
+		if equip_sys:
+			equip_sys.equip(slot["uid"])

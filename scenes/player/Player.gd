@@ -35,6 +35,7 @@ var facing_right: bool = true
 
 func _ready():
 	hitbox.monitoring = false
+	add_to_group("player")
 
 func _physics_process(delta):
 	if is_dead:
@@ -106,13 +107,14 @@ func take_damage(raw_damage: int, attacker_position: Vector2):
 	if is_dead:
 		return
 
-	var final_damage = maxi(1, raw_damage - defense)
+	var total_defense = get_total_defense()
+	var final_damage = maxi(1, raw_damage - total_defense)
 	hp -= final_damage
 
 	# Knockback
 	var knockback_dir = (global_position - attacker_position).normalized()
-	velocity = knockback_dir * 200
-	velocity.y = -100
+	velocity = knockback_dir * 80
+	velocity.y = -40
 
 	is_hit = true
 	hit_timer = HIT_DURATION
@@ -133,12 +135,42 @@ func add_gold(amount: int):
 	gold += amount
 
 func get_total_attack() -> int:
+	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	if equip_sys:
+		return attack + equip_sys.get_total_stats()["attack"]
 	return attack
+
+func get_total_defense() -> int:
+	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	if equip_sys:
+		return defense + equip_sys.get_total_stats()["defense"]
+	return defense
+
+func get_total_max_hp() -> int:
+	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	if equip_sys:
+		return max_hp + equip_sys.get_total_stats()["hp"]
+	return max_hp
+
+func get_total_crit_rate() -> float:
+	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	if equip_sys:
+		return crit_rate + equip_sys.get_total_stats()["crit_rate"]
+	return crit_rate
+
+func get_total_crit_damage() -> float:
+	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	if equip_sys:
+		return crit_damage + equip_sys.get_total_stats()["crit_damage"]
+	return crit_damage
 
 func _on_hitbox_area_entered(area: Area2D):
 	if area.get_parent().has_method("take_damage"):
-		var is_crit = randf() < crit_rate
-		var dmg = attack
+		var total_attack = get_total_attack()
+		var total_crit_rate = get_total_crit_rate()
+		var total_crit_damage = get_total_crit_damage()
+		var is_crit = randf() < total_crit_rate
+		var dmg = total_attack
 		if is_crit:
-			dmg = int(dmg * crit_damage)
+			dmg = int(dmg * total_crit_damage)
 		area.get_parent().take_damage(dmg, global_position)

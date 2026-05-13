@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/monsters/BaseMonster.tscn" id="1"]
+[ext_resource type="Script" path="res://scenes/monsters/GraveKeeperBoss.gd" id="2"]
+
+[sub_resource type="CapsuleShape2D" id="1"]
+radius = 30.0
+height = 70.0
+
+[sub_resource type="CircleShape2D" id="2"]
+radius = 300.0
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(90, 60)
+
+[node name="GraveKeeperBoss" instance=ExtResource("1")]
+script = ExtResource("2")
+
+[node name="CollisionShape2D" parent="." index="0"]
+shape = SubResource("1")
+
+[node name="SpritePlaceholder" parent="." index="1"]
+offset_left = -64.0
+offset_top = -74.0
+offset_right = 64.0
+offset_bottom = 54.0
+
+[node name="CollisionShape2D" parent="DetectionArea" index="0"]
+shape = SubResource("2")
+
+[node name="CollisionShape2D" parent="AttackArea" index="0"]
+shape = SubResource("3")

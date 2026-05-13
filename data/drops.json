@@ -3,19 +3,22 @@
     {"item_id": "gold", "min": 3, "max": 8, "rate": 0.7},
     {"item_id": "broken_bone", "min": 1, "max": 2, "rate": 0.35},
     {"item_id": "rusty_sword", "min": 1, "max": 1, "rate": 0.05},
-    {"item_id": "old_armor", "min": 1, "max": 1, "rate": 0.04}
+    {"item_id": "old_armor", "min": 1, "max": 1, "rate": 0.04},
+    {"item_id": "enhance_stone", "min": 1, "max": 1, "rate": 0.08}
   ],
   "zombie": [
     {"item_id": "gold", "min": 5, "max": 12, "rate": 0.75},
     {"item_id": "rotten_leather", "min": 1, "max": 2, "rate": 0.35},
     {"item_id": "rotten_gauntlet", "min": 1, "max": 1, "rate": 0.05},
-    {"item_id": "rough_iron_armor", "min": 1, "max": 1, "rate": 0.03}
+    {"item_id": "rough_iron_armor", "min": 1, "max": 1, "rate": 0.03},
+    {"item_id": "enhance_stone", "min": 1, "max": 1, "rate": 0.1}
   ],
   "ghost": [
     {"item_id": "gold", "min": 4, "max": 10, "rate": 0.65},
     {"item_id": "ghost_fragment", "min": 1, "max": 2, "rate": 0.3},
     {"item_id": "shadow_ring", "min": 1, "max": 1, "rate": 0.04},
-    {"item_id": "soul_cloth_boots", "min": 1, "max": 1, "rate": 0.04}
+    {"item_id": "soul_cloth_boots", "min": 1, "max": 1, "rate": 0.04},
+    {"item_id": "enhance_stone", "min": 1, "max": 1, "rate": 0.1}
   ],
   "elite_skeleton_knight": [
     {"item_id": "gold", "min": 30, "max": 60, "rate": 1.0},
