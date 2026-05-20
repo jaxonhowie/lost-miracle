@@ -2,10 +2,12 @@ extends Node
 
 signal inventory_changed
 signal item_added(item_id: String, count: int)
+signal item_used(item_id: String)
 
 # inventory: array of { "item_id": String, "count": int } for materials
 #                       { "item_id": String, "uid": String } for equipment
 var inventory: Array = []
+var quick_use_slot: String = ""
 
 func add_item(item_id: String, count: int = 1):
 	if ItemDatabase.is_equipment(item_id):
@@ -94,3 +96,18 @@ func get_by_uid(uid: String) -> Dictionary:
 		if slot.get("uid", "") == uid:
 			return slot
 	return {}
+
+func use_item(item_id: String) -> bool:
+	if not has_item(item_id):
+		return false
+	if not ItemDatabase.is_consumable(item_id):
+		return false
+	remove_item(item_id, 1)
+	item_used.emit(item_id)
+	return true
+
+func set_quick_use(item_id: String):
+	quick_use_slot = item_id
+
+func get_quick_use() -> String:
+	return quick_use_slot

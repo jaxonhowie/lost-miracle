@@ -53,6 +53,7 @@ const HEALTH_BAR_VISIBLE_TIME: float = 3.0
 func _ready():
 	patrol_origin = global_position
 	attack_area.monitoring = false
+	add_to_group("monsters")
 	_setup_stats()
 	_create_health_bar()
 	_on_ready_extra()

@@ -27,6 +27,18 @@ func is_material(item_id: String) -> bool:
 	var t = get_item(item_id).get("type", "")
 	return t == "material" or t == "currency"
 
+func is_consumable(item_id: String) -> bool:
+	return get_item(item_id).get("type", "") == "consumable"
+
+func get_consumable_effect(item_id: String) -> Dictionary:
+	var item = get_item(item_id)
+	if item.get("type", "") != "consumable":
+		return {}
+	return {
+		"effect": item.get("effect", ""),
+		"value": item.get("value", 0),
+	}
+
 func get_quality_color(quality: String) -> Color:
 	match quality:
 		"normal":

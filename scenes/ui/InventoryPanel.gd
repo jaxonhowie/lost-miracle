@@ -12,10 +12,6 @@ func _ready():
 	if inv:
 		inv.inventory_changed.connect(_refresh)
 
-func _input(event):
-	if event.is_action_pressed("inventory"):
-		toggle()
-
 func toggle():
 	is_open = !is_open
 	visible = is_open
@@ -44,6 +40,8 @@ func _refresh():
 		var quality = item_data.get("quality", "")
 		if quality != "":
 			btn.modulate = ItemDatabase.get_quality_color(quality)
+		elif item_data.get("type", "") == "consumable":
+			btn.modulate = Color(0.4, 1.0, 0.4, 1)
 
 		btn.pressed.connect(_on_slot_pressed.bind(slot))
 		grid.add_child(btn)
@@ -52,7 +50,8 @@ func _refresh():
 
 func _on_slot_pressed(slot: Dictionary):
 	var item_data = ItemDatabase.get_item(slot["item_id"])
-	var text = item_data.get("name", slot["item_id"])
+	var item_id = slot["item_id"]
+	var text = item_data.get("name", item_id)
 	text += "\n类型: " + item_data.get("type", "未知")
 
 	if item_data.get("type", "") == "equipment":
@@ -64,6 +63,18 @@ func _on_slot_pressed(slot: Dictionary):
 		if item_data.get("hp", 0) > 0:
 			text += "\n生命: +" + str(item_data["hp"])
 		text += "\n\n点击穿戴"
+	elif item_data.get("type", "") == "consumable":
+		var eff = item_data.get("effect", "")
+		var val = item_data.get("value", 0)
+		match eff:
+			"heal":
+				if val < 0:
+					text += "\n效果: 回复全部生命"
+				else:
+					text += "\n效果: 回复 %d 生命" % val
+			"speed":
+				text += "\n效果: 移速 +50%% 持续 %d 秒" % val
+		text += "\n\n点击使用 | Q设为F1"
 
 	detail_label.text = text
 
@@ -72,3 +83,23 @@ func _on_slot_pressed(slot: Dictionary):
 		var equip_sys = get_node_or_null("/root/EquipmentSystem")
 		if equip_sys:
 			equip_sys.equip(slot["uid"])
+	# Use if consumable
+	elif item_data.get("type", "") == "consumable":
+		var sys = get_node_or_null("/root/InventorySystem")
+		if sys:
+			sys.use_item(item_id)
+
+	# Store last pressed item_id for quick-use assignment
+	_last_pressed_item_id = item_id
+
+var _last_pressed_item_id: String = ""
+
+func _input(event):
+	if event.is_action_pressed("inventory"):
+		toggle()
+	elif is_open and event is InputEventKey and event.pressed and event.keycode == KEY_Q:
+		if _last_pressed_item_id != "" and ItemDatabase.is_consumable(_last_pressed_item_id):
+			var inv = get_node_or_null("/root/InventorySystem")
+			if inv:
+				inv.set_quick_use(_last_pressed_item_id)
+				detail_label.text += "\n[F1快捷槽已设置]"

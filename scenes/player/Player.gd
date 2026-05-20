@@ -28,6 +28,21 @@ const HIT_DURATION = 0.3
 var is_dead: bool = false
 var facing_right: bool = true
 
+# Skills
+var _skill_cooldowns: Dictionary = {
+	"whirlwind": 0.0,
+	"charge": 0.0,
+	"war_cry": 0.0,
+}
+const SKILL_COOLDOWNS = {
+	"whirlwind": 6.0,
+	"charge": 8.0,
+	"war_cry": 15.0,
+}
+
+# Buffs
+var _buffs: Dictionary = {}  # buff_id -> { timer, value }
+
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite: ColorRect = $SpritePlaceholder
 @onready var hitbox: Area2D = $HitBox
@@ -36,10 +51,19 @@ var facing_right: bool = true
 func _ready():
 	hitbox.monitoring = false
 	add_to_group("player")
+	_setup_consumable_listener()
+
+func _setup_consumable_listener():
+	var inv = get_node_or_null("/root/InventorySystem")
+	if inv:
+		inv.item_used.connect(_on_item_used)
 
 func _physics_process(delta):
 	if is_dead:
 		return
+
+	_process_skills(delta)
+	_process_buffs(delta)
 
 	if is_hit:
 		hit_timer -= delta
@@ -58,16 +82,20 @@ func _physics_process(delta):
 	if attack_cooldown_timer > 0:
 		attack_cooldown_timer -= delta
 
-	# Movement
+	# Movement (apply speed buff)
+	var move_speed = MOVE_SPEED
+	if _buffs.has("speed"):
+		move_speed *= 1.5
+
 	var direction = Input.get_axis("ui_left", "ui_right")
 	if direction != 0 and not is_attacking:
-		velocity.x = direction * MOVE_SPEED
+		velocity.x = direction * move_speed
 		facing_right = direction > 0
 		sprite.scale.x = 1 if facing_right else -1
 		# Flip hitbox position
 		hitbox.position.x = abs(hitbox.position.x) * (1 if facing_right else -1)
 	else:
-		velocity.x = move_toward(velocity.x, 0, MOVE_SPEED)
+		velocity.x = move_toward(velocity.x, 0, move_speed)
 
 	# Jump
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor() and not is_attacking:
@@ -76,6 +104,18 @@ func _physics_process(delta):
 	# Attack
 	if Input.is_action_just_pressed("attack") and attack_cooldown_timer <= 0 and not is_attacking:
 		_start_attack()
+
+	# Skills
+	if Input.is_action_just_pressed("skill_1") and not is_attacking:
+		_try_use_skill("whirlwind")
+	if Input.is_action_just_pressed("skill_2") and not is_attacking:
+		_try_use_skill("charge")
+	if Input.is_action_just_pressed("skill_3") and not is_attacking:
+		_try_use_skill("war_cry")
+
+	# Quick use item (F1)
+	if Input.is_action_just_pressed("use_item_1"):
+		_quick_use_item()
 
 	move_and_slide()
 
@@ -147,9 +187,12 @@ func add_gold(amount: int):
 
 func get_total_attack() -> int:
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	var base = attack
 	if equip_sys:
-		return attack + equip_sys.get_total_stats()["attack"]
-	return attack
+		base += equip_sys.get_total_stats()["attack"]
+	if _buffs.has("war_cry"):
+		base = int(base * 1.3)
+	return base
 
 func get_total_defense() -> int:
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
@@ -174,6 +217,117 @@ func get_total_crit_damage() -> float:
 	if equip_sys:
 		return crit_damage + equip_sys.get_total_stats()["crit_damage"]
 	return crit_damage
+
+func _process_skills(delta):
+	for skill_id in _skill_cooldowns:
+		if _skill_cooldowns[skill_id] > 0:
+			_skill_cooldowns[skill_id] = maxf(0.0, _skill_cooldowns[skill_id] - delta)
+
+func _process_buffs(delta):
+	var expired = []
+	for buff_id in _buffs:
+		_buffs[buff_id]["timer"] -= delta
+		if _buffs[buff_id]["timer"] <= 0:
+			expired.append(buff_id)
+	for buff_id in expired:
+		_buffs.erase(buff_id)
+
+func _try_use_skill(skill_id: String):
+	if _skill_cooldowns.get(skill_id, 0.0) > 0:
+		return
+	_skill_cooldowns[skill_id] = SKILL_COOLDOWNS[skill_id]
+	is_attacking = true
+	match skill_id:
+		"whirlwind":
+			await _skill_whirlwind()
+		"charge":
+			await _skill_charge()
+		"war_cry":
+			await _skill_war_cry()
+	is_attacking = false
+
+func _skill_whirlwind():
+	var total_atk = get_total_attack()
+	var dmg = int(total_atk * 0.8)
+	# Visual: flash sprite
+	sprite.color = Color(1, 0.8, 0.3, 1)
+	# Hit all monsters in 80px radius
+	for monster in get_tree().get_nodes_in_group("monsters"):
+		if monster.has_method("take_damage") and monster.current_state != 5:  # not DEAD
+			var dist = global_position.distance_to(monster.global_position)
+			if dist <= 80.0:
+				var is_crit = randf() < get_total_crit_rate()
+				var final_dmg = dmg
+				if is_crit:
+					final_dmg = int(final_dmg * get_total_crit_damage())
+				monster.take_damage(final_dmg, global_position)
+	await get_tree().create_timer(0.4).timeout
+	sprite.color = Color(1, 1, 1, 1)
+
+func _skill_charge():
+	var total_atk = get_total_attack()
+	var dmg = int(total_atk * 1.2)
+	var dir = 1 if facing_right else -1
+	var charge_dur = 0.3
+	var hit_monsters = []
+	# Visual: tint
+	sprite.color = Color(0.3, 0.8, 1.0, 1)
+	while charge_dur > 0 and not is_dead:
+		velocity.x = dir * 400.0
+		velocity.y = 0
+		# Hit monsters in path
+		for monster in get_tree().get_nodes_in_group("monsters"):
+			if monster in hit_monsters:
+				continue
+			if monster.has_method("take_damage") and monster.current_state != 5:
+				var dist = global_position.distance_to(monster.global_position)
+				if dist <= 60.0:
+					var is_crit = randf() < get_total_crit_rate()
+					var final_dmg = dmg
+					if is_crit:
+						final_dmg = int(final_dmg * get_total_crit_damage())
+					monster.take_damage(final_dmg, global_position)
+					hit_monsters.append(monster)
+		await get_tree().physics_frame
+		charge_dur -= get_physics_process_delta_time()
+	velocity.x = 0
+	sprite.color = Color(1, 1, 1, 1)
+
+func _skill_war_cry():
+	# Heal 20% max HP
+	var heal_amount = int(get_total_max_hp() * 0.2)
+	hp = mini(hp + heal_amount, get_total_max_hp())
+	# Damage buff for 5 seconds
+	_buffs["war_cry"] = { "timer": 5.0, "value": 0.3 }
+	# Visual: flash gold
+	sprite.color = Color(1, 0.9, 0.2, 1)
+	await get_tree().create_timer(0.5).timeout
+	sprite.color = Color(1, 1, 1, 1)
+
+func _quick_use_item():
+	var inv = get_node_or_null("/root/InventorySystem")
+	if not inv:
+		return
+	var item_id = inv.get_quick_use()
+	if item_id == "":
+		return
+	inv.use_item(item_id)
+
+func _on_item_used(item_id: String):
+	var effect_data = ItemDatabase.get_consumable_effect(item_id)
+	if effect_data.is_empty():
+		return
+	use_consumable(effect_data["effect"], effect_data["value"])
+
+func use_consumable(effect: String, value: int):
+	match effect:
+		"heal":
+			if value < 0:
+				hp = get_total_max_hp()
+			else:
+				hp = mini(hp + value, get_total_max_hp())
+		"speed":
+			_buffs["speed"] = { "timer": float(value), "value": 1.5 }
 
 func _on_hitbox_area_entered(area: Area2D):
 	if area.get_parent().has_method("take_damage"):

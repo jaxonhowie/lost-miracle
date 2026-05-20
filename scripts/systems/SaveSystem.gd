@@ -94,6 +94,8 @@ func apply_save_data():
 	if inv and _pending_save.has("inventory"):
 		inv.inventory = _pending_save["inventory"]
 		inv.inventory_changed.emit()
+	if inv and _pending_save.has("quick_use_slot"):
+		inv.quick_use_slot = _pending_save["quick_use_slot"]
 
 	# Restore equipment
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
@@ -130,6 +132,7 @@ func save_game():
 			},
 		},
 		"inventory": [],
+		"quick_use_slot": "",
 		"equipment": {
 			"weapon": null,
 			"armor": null,
@@ -142,6 +145,7 @@ func save_game():
 	var inv = get_node_or_null("/root/InventorySystem")
 	if inv:
 		data["inventory"] = inv.inventory
+		data["quick_use_slot"] = inv.quick_use_slot
 
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
 	if equip_sys:

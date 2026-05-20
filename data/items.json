@@ -77,6 +77,38 @@
     "stackable": true,
     "max_stack": 99
   },
+  "health_potion": {
+    "name": "生命药水",
+    "type": "consumable",
+    "effect": "heal",
+    "value": 50,
+    "stackable": true,
+    "max_stack": 20
+  },
+  "mid_health_potion": {
+    "name": "中级生命药水",
+    "type": "consumable",
+    "effect": "heal",
+    "value": 120,
+    "stackable": true,
+    "max_stack": 20
+  },
+  "max_health_potion": {
+    "name": "高级生命药水",
+    "type": "consumable",
+    "effect": "heal",
+    "value": -1,
+    "stackable": true,
+    "max_stack": 10
+  },
+  "speed_potion": {
+    "name": "速度药水",
+    "type": "consumable",
+    "effect": "speed",
+    "value": 10,
+    "stackable": true,
+    "max_stack": 10
+  },
   "rusty_sword": {
     "name": "生锈短剑",
     "type": "equipment",
