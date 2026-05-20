@@ -4,7 +4,7 @@ func _setup_stats():
 	monster_id = "zombie"
 	hp = 100
 	max_hp = 100
-	attack_power = 10
+	attack_power = 14
 	defense = 2
 	move_speed = 45.0
 	attack_interval = 1.6

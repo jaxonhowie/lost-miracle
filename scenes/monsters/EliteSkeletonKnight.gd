@@ -10,9 +10,9 @@ var is_charging: bool = false
 
 func _setup_stats():
 	monster_id = "elite_skeleton_knight"
-	hp = 450
-	max_hp = 450
-	attack_power = 24
+	hp = 350
+	max_hp = 350
+	attack_power = 20
 	defense = 6
 	move_speed = 95.0
 	attack_interval = 1.1

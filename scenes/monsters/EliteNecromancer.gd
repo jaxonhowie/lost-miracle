@@ -7,9 +7,9 @@ const MAX_SUMMONS: int = 2
 
 func _setup_stats():
 	monster_id = "elite_necromancer"
-	hp = 360
-	max_hp = 360
-	attack_power = 30
+	hp = 300
+	max_hp = 300
+	attack_power = 25
 	defense = 3
 	move_speed = 60.0
 	attack_interval = 1.8

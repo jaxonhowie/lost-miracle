@@ -57,15 +57,15 @@ if crit: final_damage *= crit_damage
 - +1 to +5: failure does NOT downgrade
 - +6 to +8: failure downgrades by 1
 - +9 to +10: failure downgrades by 1, no gear destruction
-- Weapon: +10% attack per level; Armor: +8% defense, +5% HP per level
+- Weapon: +7% attack per level; Armor: +6% defense, +4% HP per level
 
 ### Refresh Timers
 
 | Type   | Respawn  | Persisted in save? |
 |--------|----------|--------------------|
 | Mob    | 60s      | No                 |
-| Elite  | 15min    | Yes                |
-| Boss   | 1 hour   | Yes                |
+| Elite  | 10min    | Yes                |
+| Boss   | 30min    | Yes                |
 
 Mobs must not respawn if player is within 300px of spawn point. Max 6 mobs per area.
 

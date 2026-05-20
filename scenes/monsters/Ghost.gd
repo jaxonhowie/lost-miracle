@@ -2,9 +2,9 @@ extends "res://scenes/monsters/BaseMonster.gd"
 
 func _setup_stats():
 	monster_id = "ghost"
-	hp = 45
-	max_hp = 45
-	attack_power = 12
+	hp = 60
+	max_hp = 60
+	attack_power = 15
 	defense = 0
 	move_speed = 120.0
 	attack_interval = 1.4

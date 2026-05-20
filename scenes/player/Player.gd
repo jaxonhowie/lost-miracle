@@ -248,7 +248,7 @@ func _try_use_skill(skill_id: String):
 
 func _skill_whirlwind():
 	var total_atk = get_total_attack()
-	var dmg = int(total_atk * 0.8)
+	var dmg = int(total_atk * 1.0)
 	# Visual: flash sprite
 	sprite.color = Color(1, 0.8, 0.3, 1)
 	# Hit all monsters in 80px radius
@@ -266,7 +266,7 @@ func _skill_whirlwind():
 
 func _skill_charge():
 	var total_atk = get_total_attack()
-	var dmg = int(total_atk * 1.2)
+	var dmg = int(total_atk * 1.3)
 	var dir = 1 if facing_right else -1
 	var charge_dur = 0.3
 	var hit_monsters = []
@@ -295,7 +295,7 @@ func _skill_charge():
 
 func _skill_war_cry():
 	# Heal 20% max HP
-	var heal_amount = int(get_total_max_hp() * 0.2)
+	var heal_amount = int(get_total_max_hp() * 0.3)
 	hp = mini(hp + heal_amount, get_total_max_hp())
 	# Damage buff for 5 seconds
 	_buffs["war_cry"] = { "timer": 5.0, "value": 0.3 }

@@ -12,8 +12,8 @@ const MAX_SUMMONS: int = 4
 
 func _setup_stats():
 	monster_id = "grave_keeper_boss"
-	hp = 1800
-	max_hp = 1800
+	hp = 1400
+	max_hp = 1400
 	attack_power = 42
 	defense = 10
 	move_speed = 70.0
@@ -81,12 +81,12 @@ func _setup_phase_three():
 
 # --- Phase 1 Skills ---
 
-func _boss_slash():
+func _boss_slash(multiplier: float = 1.3):
 	attack_area.monitoring = true
 	await get_tree().create_timer(0.2).timeout
 	for body in attack_area.get_overlapping_bodies():
 		if body.is_in_group("player") and body.has_method("take_damage"):
-			body.take_damage(int(attack_power * 1.3), global_position)
+			body.take_damage(int(attack_power * multiplier), global_position)
 	await get_tree().create_timer(0.1).timeout
 	attack_area.monitoring = false
 
@@ -154,13 +154,13 @@ func _triple_slash():
 	for i in range(3):
 		if current_state == State.DEAD:
 			return
-		_boss_slash()
+		_boss_slash(1.1)
 		await get_tree().create_timer(0.35).timeout
 
 func _falling_bones():
 	if not is_instance_valid(player_ref):
 		return
-	for i in range(3):
+	for i in range(2):
 		if current_state == State.DEAD:
 			return
 		var offset_x = randf_range(-200, 200)

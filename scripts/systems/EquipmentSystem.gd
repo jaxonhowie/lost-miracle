@@ -93,10 +93,10 @@ func get_total_stats() -> Dictionary:
 
 		# Enhancement bonus
 		if slot_name == "weapon":
-			base_attack = int(base_attack * (1.0 + enhance_level * 0.1))
+			base_attack = int(base_attack * (1.0 + enhance_level * 0.07))
 		else:
-			base_defense = int(base_defense * (1.0 + enhance_level * 0.08))
-			base_hp = int(base_hp * (1.0 + enhance_level * 0.05))
+			base_defense = int(base_defense * (1.0 + enhance_level * 0.06))
+			base_hp = int(base_hp * (1.0 + enhance_level * 0.04))
 
 		stats["attack"] += base_attack
 		stats["defense"] += base_defense

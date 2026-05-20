@@ -59,7 +59,7 @@
     "spawn_id": "elite_1",
     "monster_id": "elite_skeleton_knight",
     "position": [2050, 550],
-    "respawn_seconds": 900,
+    "respawn_seconds": 600,
     "zone": "elite_area_1"
   },
   {
@@ -94,14 +94,14 @@
     "spawn_id": "elite_2",
     "monster_id": "elite_necromancer",
     "position": [3750, 550],
-    "respawn_seconds": 900,
+    "respawn_seconds": 600,
     "zone": "elite_area_2"
   },
   {
     "spawn_id": "boss_1",
     "monster_id": "grave_keeper_boss",
     "position": [4650, 500],
-    "respawn_seconds": 3600,
+    "respawn_seconds": 1800,
     "zone": "boss_room"
   }
 ]
