@@ -311,6 +311,9 @@ func take_damage(raw_damage: int, attacker_position: Vector2, is_crit: bool = fa
 
 	_spawn_floating_damage(final_damage, is_crit)
 
+	# Hit particle effect
+	preload("res://scenes/effects/HitEffect.gd").spawn(get_parent(), global_position + Vector2(0, -15))
+
 	# Show health bar
 	health_bar.value = hp
 	health_bar.visible = true
@@ -333,6 +336,8 @@ func _die():
 	velocity = Vector2.ZERO
 	died.emit(self)
 	$CollisionShape2D.set_deferred("disabled", true)
+	# Death particle effect
+	preload("res://scenes/effects/DeathEffect.gd").spawn(get_parent(), global_position)
 	detection_area.set_deferred("monitoring", false)
 	attack_area.set_deferred("monitoring", false)
 	# Trigger drop system (skip for summoned monsters)

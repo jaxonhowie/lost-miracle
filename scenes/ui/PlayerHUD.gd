@@ -3,6 +3,7 @@ extends Control
 @onready var name_label: Label = $HBoxContainer/InfoContainer/NameLevel/NameLabel
 @onready var level_label: Label = $HBoxContainer/InfoContainer/NameLevel/LevelLabel
 @onready var hp_bar: ProgressBar = $HBoxContainer/InfoContainer/HPBar
+@onready var xp_bar: ProgressBar = $HBoxContainer/InfoContainer/XPBar
 @onready var gold_label: Label = $HBoxContainer/InfoContainer/StatsRow/GoldLabel
 @onready var stat_label: Label = $HBoxContainer/InfoContainer/StatsRow/StatLabel
 
@@ -14,6 +15,10 @@ func _ready():
 	# Style HP bar
 	hp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.8, 0.2, 0.2)))
 	hp_bar.add_theme_stylebox_override("background", _create_bar_style(Color(0.2, 0.2, 0.2)))
+
+	# Style XP bar
+	xp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.2, 0.6, 0.9)))
+	xp_bar.add_theme_stylebox_override("background", _create_bar_style(Color(0.15, 0.15, 0.2)))
 
 	# Create loot notification container
 	_loot_container = VBoxContainer.new()
@@ -52,10 +57,12 @@ func _update_display():
 	var def = player.get_total_defense()
 	stat_label.text = "攻:%d 防:%d" % [atk, def]
 
-	# Level
+	# Level & XP
 	var level_sys = get_node_or_null("/root/LevelSystem")
 	if level_sys:
 		level_label.text = "Lv.%d" % level_sys.level
+		xp_bar.max_value = level_sys.xp_to_next_level()
+		xp_bar.value = level_sys.xp
 
 func _on_item_dropped(item_id: String, count: int, _position: Vector2):
 	if item_id == "gold":

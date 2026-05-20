@@ -20,6 +20,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [autoload]
 
+ThemeSystem="*res://scripts/systems/ThemeSystem.gd"
 MonsterDatabase="*res://scripts/data/MonsterDatabase.gd"
 LevelSystem="*res://scripts/systems/LevelSystem.gd"
 ItemDatabase="*res://scripts/data/ItemDatabase.gd"

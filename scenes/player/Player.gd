@@ -153,6 +153,9 @@ func take_damage(raw_damage: int, attacker_position: Vector2):
 
 	_spawn_floating_damage(final_damage, false)
 
+	# Hit particle effect
+	preload("res://scenes/effects/HitEffect.gd").spawn(get_parent(), global_position + Vector2(0, -15), Color(1, 0.2, 0.2))
+
 	# Knockback
 	var knockback_dir = (global_position - attacker_position).normalized()
 	velocity = knockback_dir * 80

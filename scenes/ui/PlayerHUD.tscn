@@ -40,9 +40,16 @@ text = "Lv.1"
 
 [node name="HPBar" type="ProgressBar" parent="HBoxContainer/InfoContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(200, 25)
+custom_minimum_size = Vector2(200, 22)
 max_value = 100.0
 value = 100.0
+show_percentage = false
+
+[node name="XPBar" type="ProgressBar" parent="HBoxContainer/InfoContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 10)
+max_value = 100.0
+value = 0.0
 show_percentage = false
 
 [node name="StatsRow" type="HBoxContainer" parent="HBoxContainer/InfoContainer"]
