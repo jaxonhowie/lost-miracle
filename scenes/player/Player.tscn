@@ -74,7 +74,7 @@ shape = SubResource("hurtbox_shape")
 zoom = Vector2(1.5, 1.5)
 limit_bottom = 800
 limit_left = -100
-limit_right = 3100
+limit_right = 5200
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 

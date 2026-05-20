@@ -177,12 +177,9 @@ func respawn_player():
 		return
 
 	var pd = _pending_save.get("player", {})
-	if pd.has("hp"):
-		player.hp = pd["hp"]
-	else:
-		player.hp = player.get_total_max_hp()
 	if pd.has("position"):
 		player.global_position = Vector2(pd["position"]["x"], pd["position"]["y"])
+	player.hp = player.get_total_max_hp()
 
 	player.is_dead = false
 	player.get_node("CollisionShape2D").disabled = false

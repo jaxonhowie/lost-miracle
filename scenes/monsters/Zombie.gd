@@ -2,13 +2,7 @@ extends "res://scenes/monsters/BaseMonster.gd"
 
 func _setup_stats():
 	monster_id = "zombie"
-	hp = 100
-	max_hp = 100
-	attack_power = 14
-	defense = 2
-	move_speed = 45.0
-	attack_interval = 1.6
-	experience = 7
+	super()
 	sprite.color = Color(0.4, 0.5, 0.2, 1)
 
 func _perform_attack():

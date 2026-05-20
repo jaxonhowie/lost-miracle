@@ -10,13 +10,7 @@ var is_charging: bool = false
 
 func _setup_stats():
 	monster_id = "elite_skeleton_knight"
-	hp = 350
-	max_hp = 350
-	attack_power = 20
-	defense = 6
-	move_speed = 95.0
-	attack_interval = 1.1
-	experience = 50
+	super()
 	sprite.color = Color(0.7, 0.7, 0.75, 1)
 
 	skills = [

@@ -94,10 +94,9 @@ func _update_enhance_info():
 	# Materials
 	var stone_name = ItemDatabase.get_item_name(info["stone_id"])
 	var stone_text = "%s x%d" % [stone_name, info["stone_count"]]
-	if info["has_stone"]:
-		materials_label.text = "需要: " + stone_text + " ✓"
-	else:
-		materials_label.text = "需要: " + stone_text + " ✗"
+	var stone_ok = " ✓" if info["has_stone"] else " ✗"
+	var gold_ok = " ✓" if info["has_gold"] else " ✗"
+	materials_label.text = "需要: " + stone_text + stone_ok + "  金币: %d" % info["gold_cost"] + gold_ok
 
 	# Core
 	core_check.disabled = not info["use_core"]
@@ -106,7 +105,7 @@ func _update_enhance_info():
 	else:
 		core_check.text = "使用Boss强化核心 (无)"
 
-	enhance_btn.disabled = not info["has_stone"]
+	enhance_btn.disabled = not info["has_stone"] or not info["has_gold"]
 	result_label.text = ""
 
 func _on_enhance_pressed():
@@ -120,6 +119,8 @@ func _on_enhance_pressed():
 		match result["error"]:
 			"no_stone":
 				result_label.text = "材料不足!"
+			"no_gold":
+				result_label.text = "金币不足!"
 			"max_level":
 				result_label.text = "已达最大等级!"
 

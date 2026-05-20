@@ -18,6 +18,19 @@ const SUCCESS_RATES: Array[float] = [
 
 const MAX_LEVEL: int = 10
 
+const GOLD_COSTS: Array[int] = [
+	20,    # +0 -> +1
+	40,    # +1 -> +2
+	80,    # +2 -> +3
+	150,   # +3 -> +4
+	250,   # +4 -> +5
+	400,   # +5 -> +6
+	650,   # +6 -> +7
+	900,   # +7 -> +8
+	1300,  # +8 -> +9
+	1800,  # +9 -> +10
+]
+
 # Returns { success_rate, stone_id, stone_count, use_core, core_count }
 func get_enhance_info(uid: String) -> Dictionary:
 	var inv = get_node_or_null("/root/InventorySystem")
@@ -49,11 +62,18 @@ func get_enhance_info(uid: String) -> Dictionary:
 	var has_stone = inv.get_item_count(stone_id) >= stone_count
 	var has_core = inv.get_item_count("boss_enhance_core") >= 1
 	var rate = SUCCESS_RATES[current_level]
+	var gold_cost = GOLD_COSTS[current_level]
 
 	# Boss core adds 20% success rate
 	var bonus_rate = 0.0
 	if has_core:
 		bonus_rate = 0.2
+
+	# Check gold via player node
+	var players = get_tree().get_nodes_in_group("player")
+	var has_gold = false
+	if not players.is_empty():
+		has_gold = players[0].gold >= gold_cost
 
 	return {
 		"max_level": false,
@@ -66,6 +86,8 @@ func get_enhance_info(uid: String) -> Dictionary:
 		"has_stone": has_stone,
 		"use_core": has_core,
 		"core_count": 1,
+		"gold_cost": gold_cost,
+		"has_gold": has_gold,
 	}
 
 func try_enhance(uid: String, use_core: bool = false) -> Dictionary:
@@ -79,6 +101,14 @@ func try_enhance(uid: String, use_core: bool = false) -> Dictionary:
 
 	if not info.get("has_stone", false):
 		return { "success": false, "error": "no_stone" }
+
+	if not info.get("has_gold", false):
+		return { "success": false, "error": "no_gold" }
+
+	# Consume gold
+	var players = get_tree().get_nodes_in_group("player")
+	if not players.is_empty():
+		players[0].gold -= info["gold_cost"]
 
 	# Consume stone
 	inv.remove_item(info["stone_id"], info["stone_count"])

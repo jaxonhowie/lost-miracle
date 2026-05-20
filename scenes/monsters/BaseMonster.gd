@@ -86,7 +86,18 @@ func _create_health_bar():
 	health_bar.add_theme_stylebox_override("fill", fill)
 
 func _setup_stats():
-	pass
+	if monster_id.is_empty():
+		return
+	var data = MonsterDatabase.get_monster(monster_id)
+	if data.is_empty():
+		return
+	hp = data.get("hp", hp)
+	max_hp = data.get("hp", max_hp)
+	attack_power = data.get("attack_power", attack_power)
+	defense = data.get("defense", defense)
+	move_speed = data.get("move_speed", move_speed)
+	attack_interval = data.get("attack_interval", attack_interval)
+	experience = data.get("experience", experience)
 
 func _on_ready_extra():
 	pass
@@ -322,8 +333,8 @@ func _die():
 	$CollisionShape2D.set_deferred("disabled", true)
 	detection_area.set_deferred("monitoring", false)
 	attack_area.set_deferred("monitoring", false)
-	# Trigger drop system
-	if monster_id != "":
+	# Trigger drop system (skip for summoned monsters)
+	if monster_id != "" and not get("is_summoned"):
 		DropSystem.on_monster_died(monster_id, global_position)
 	# Trigger auto-save
 	var save_sys = get_node_or_null("/root/SaveSystem")

@@ -7,13 +7,7 @@ const MAX_SUMMONS: int = 2
 
 func _setup_stats():
 	monster_id = "elite_necromancer"
-	hp = 300
-	max_hp = 300
-	attack_power = 25
-	defense = 3
-	move_speed = 60.0
-	attack_interval = 1.8
-	experience = 60
+	super()
 	sprite.color = Color(0.5, 0.2, 0.7, 1)
 
 	projectile_scene = preload("res://scenes/monsters/Projectile.tscn")

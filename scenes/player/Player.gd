@@ -294,7 +294,7 @@ func _skill_charge():
 	sprite.color = Color(1, 1, 1, 1)
 
 func _skill_war_cry():
-	# Heal 20% max HP
+	# Heal 30% max HP
 	var heal_amount = int(get_total_max_hp() * 0.3)
 	hp = mini(hp + heal_amount, get_total_max_hp())
 	# Damage buff for 5 seconds

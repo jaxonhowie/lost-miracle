@@ -34,7 +34,7 @@ res://
 ### Core Systems
 
 - **Data-driven design**: All item/monster/drop definitions live in JSON files under `data/`, not hardcoded in scripts.
-- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`.
+- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `MonsterDatabase`, `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`, `EquipmentSystem`, `EnhanceSystem`, `SpawnSystem`, `SaveSystem`.
 - **Monsters use inheritance**: BaseMonster provides the state machine (Idle/Patrol/Chase/Attack/Hit/Dead); individual monsters extend it.
 - **Equipment instances**: Equipped items have a unique UID and enhance level — they are NOT just item_id references.
 
@@ -58,6 +58,7 @@ if crit: final_damage *= crit_damage
 - +6 to +8: failure downgrades by 1
 - +9 to +10: failure downgrades by 1, no gear destruction
 - Weapon: +7% attack per level; Armor: +6% defense, +4% HP per level
+- Gold cost per level: [20, 40, 80, 150, 250, 400, 650, 900, 1300, 1800]
 
 ### Refresh Timers
 

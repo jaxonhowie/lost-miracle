@@ -12,13 +12,7 @@ const MAX_SUMMONS: int = 4
 
 func _setup_stats():
 	monster_id = "grave_keeper_boss"
-	hp = 1400
-	max_hp = 1400
-	attack_power = 42
-	defense = 10
-	move_speed = 70.0
-	attack_interval = 1.5
-	experience = 200
+	super()
 	sprite.color = Color(0.25, 0.3, 0.2, 1)
 
 	projectile_scene = preload("res://scenes/monsters/Projectile.tscn")
