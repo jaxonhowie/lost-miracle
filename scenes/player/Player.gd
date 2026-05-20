@@ -151,6 +151,8 @@ func take_damage(raw_damage: int, attacker_position: Vector2):
 	var final_damage = maxi(1, raw_damage - total_defense)
 	hp -= final_damage
 
+	_spawn_floating_damage(final_damage, false)
+
 	# Knockback
 	var knockback_dir = (global_position - attacker_position).normalized()
 	velocity = knockback_dir * 80
@@ -260,7 +262,7 @@ func _skill_whirlwind():
 				var final_dmg = dmg
 				if is_crit:
 					final_dmg = int(final_dmg * get_total_crit_damage())
-				monster.take_damage(final_dmg, global_position)
+				monster.take_damage(final_dmg, global_position, is_crit)
 	await get_tree().create_timer(0.4).timeout
 	sprite.color = Color(1, 1, 1, 1)
 
@@ -286,7 +288,7 @@ func _skill_charge():
 					var final_dmg = dmg
 					if is_crit:
 						final_dmg = int(final_dmg * get_total_crit_damage())
-					monster.take_damage(final_dmg, global_position)
+					monster.take_damage(final_dmg, global_position, is_crit)
 					hit_monsters.append(monster)
 		await get_tree().physics_frame
 		charge_dur -= get_physics_process_delta_time()
@@ -329,6 +331,13 @@ func use_consumable(effect: String, value: int):
 		"speed":
 			_buffs["speed"] = { "timer": float(value), "value": 1.5 }
 
+func _spawn_floating_damage(damage: int, is_crit: bool = false):
+	var fd = Label.new()
+	fd.set_script(preload("res://scenes/ui/FloatingDamage.gd"))
+	fd.position = Vector2(randf_range(-20, 20), -40)
+	add_child(fd)
+	fd.setup(damage, is_crit)
+
 func _on_hitbox_area_entered(area: Area2D):
 	if area.get_parent().has_method("take_damage"):
 		var total_attack = get_total_attack()
@@ -338,4 +347,4 @@ func _on_hitbox_area_entered(area: Area2D):
 		var dmg = total_attack
 		if is_crit:
 			dmg = int(dmg * total_crit_damage)
-		area.get_parent().take_damage(dmg, global_position)
+		area.get_parent().take_damage(dmg, global_position, is_crit)

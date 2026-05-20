@@ -300,7 +300,7 @@ func _update_facing_toward(target_pos: Vector2):
 		sprite.scale.x = -1
 		attack_area.position.x = -abs(attack_area.position.x)
 
-func take_damage(raw_damage: int, attacker_position: Vector2):
+func take_damage(raw_damage: int, attacker_position: Vector2, is_crit: bool = false):
 	if current_state == State.DEAD:
 		return
 
@@ -308,6 +308,8 @@ func take_damage(raw_damage: int, attacker_position: Vector2):
 	var final_damage = _on_damage_taken(raw_damage, base_damage)
 	hp -= final_damage
 	_on_hp_changed(hp, max_hp)
+
+	_spawn_floating_damage(final_damage, is_crit)
 
 	# Show health bar
 	health_bar.value = hp
@@ -336,6 +338,11 @@ func _die():
 	# Trigger drop system (skip for summoned monsters)
 	if monster_id != "" and not get("is_summoned"):
 		DropSystem.on_monster_died(monster_id, global_position)
+	# Award XP
+	if experience > 0:
+		var level_sys = get_node_or_null("/root/LevelSystem")
+		if level_sys:
+			level_sys.add_xp(experience)
 	# Trigger auto-save
 	var save_sys = get_node_or_null("/root/SaveSystem")
 	if save_sys:
@@ -344,6 +351,13 @@ func _die():
 	var tween = create_tween()
 	tween.tween_property(sprite, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(queue_free)
+
+func _spawn_floating_damage(damage: int, is_crit: bool = false):
+	var fd = Label.new()
+	fd.set_script(preload("res://scenes/ui/FloatingDamage.gd"))
+	fd.position = Vector2(randf_range(-20, 20), -40)
+	add_child(fd)
+	fd.setup(damage, is_crit)
 
 func _on_detection_area_body_entered(body):
 	if body.is_in_group("player"):

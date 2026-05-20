@@ -103,6 +103,11 @@ func apply_save_data():
 		equip_sys.equipped = _pending_save["equipment"]
 		equip_sys.equipment_changed.emit()
 
+	# Restore level system
+	var level_sys = get_node_or_null("/root/LevelSystem")
+	if level_sys and _pending_save.has("level_system"):
+		level_sys.load_save_data(_pending_save["level_system"])
+
 	# Restore spawn respawn state
 	var spawn_sys = get_node_or_null("/root/SpawnSystem")
 	if spawn_sys and _pending_save.has("spawn_respawn"):
@@ -140,7 +145,12 @@ func save_game():
 			"ring": null,
 		},
 		"spawn_respawn": {},
+		"level_system": {},
 	}
+
+	var level_sys = get_node_or_null("/root/LevelSystem")
+	if level_sys:
+		data["level_system"] = level_sys.get_save_data()
 
 	var inv = get_node_or_null("/root/InventorySystem")
 	if inv:

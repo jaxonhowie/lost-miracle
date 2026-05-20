@@ -21,6 +21,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 [autoload]
 
 MonsterDatabase="*res://scripts/data/MonsterDatabase.gd"
+LevelSystem="*res://scripts/systems/LevelSystem.gd"
 ItemDatabase="*res://scripts/data/ItemDatabase.gd"
 DropTableDatabase="*res://scripts/data/DropTableDatabase.gd"
 DropSystem="*res://scripts/systems/DropSystem.gd"
