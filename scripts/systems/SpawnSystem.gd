@@ -49,6 +49,8 @@ func _load_spawn_data():
 
 func register_spawn_point(data: Dictionary):
 	var spawn_id = data["spawn_id"]
+	if spawn_points.has(spawn_id):
+		return
 	var zone = data.get("zone", "default")
 	spawn_points[spawn_id] = {
 		"config": data,
@@ -60,6 +62,11 @@ func register_spawn_point(data: Dictionary):
 		zone_alive[zone] = 0
 	# Spawn immediately on load
 	_try_spawn(spawn_id)
+
+func apply_respawn_state(state: Dictionary):
+	for spawn_id in state:
+		if spawn_points.has(spawn_id):
+			spawn_points[spawn_id]["death_time"] = state[spawn_id]
 
 func _process(delta):
 	for spawn_id in spawn_points:

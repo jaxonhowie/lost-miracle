@@ -130,6 +130,17 @@ func _die():
 	# Disable collision
 	$CollisionShape2D.set_deferred("disabled", true)
 	hurtbox.set_deferred("monitoring", false)
+	# Auto-respawn after 3 seconds
+	await get_tree().create_timer(3.0).timeout
+	var save_sys = get_node_or_null("/root/SaveSystem")
+	if save_sys:
+		save_sys.respawn_player()
+	else:
+		# Fallback: just reset HP
+		hp = get_total_max_hp()
+		is_dead = false
+		$CollisionShape2D.disabled = false
+		hurtbox.monitoring = true
 
 func add_gold(amount: int):
 	gold += amount

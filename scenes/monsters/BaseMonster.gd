@@ -324,6 +324,10 @@ func _die():
 	# Trigger drop system
 	if monster_id != "":
 		DropSystem.on_monster_died(monster_id, global_position)
+	# Trigger auto-save
+	var save_sys = get_node_or_null("/root/SaveSystem")
+	if save_sys:
+		save_sys.on_monster_died()
 	# Fade out
 	var tween = create_tween()
 	tween.tween_property(sprite, "modulate:a", 0.0, 0.5)
