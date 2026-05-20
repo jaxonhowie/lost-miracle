@@ -23,6 +23,10 @@ func _ready():
 
 func _input(event):
 	if event.is_action_pressed("equipment"):
+		# Don't open equipment if near merchant (shop takes priority)
+		var shop = get_node_or_null("../ShopPanel")
+		if shop and (shop.near_merchant or shop.is_open):
+			return
 		toggle()
 
 func toggle():

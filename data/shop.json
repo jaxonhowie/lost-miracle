@@ -1,0 +1,25 @@
+{
+  "buy_items": [
+    {"item_id": "health_potion", "price": 30},
+    {"item_id": "mid_health_potion", "price": 80},
+    {"item_id": "max_health_potion", "price": 200},
+    {"item_id": "speed_potion", "price": 50},
+    {"item_id": "enhance_stone", "price": 100},
+    {"item_id": "mid_enhance_stone", "price": 300},
+    {"item_id": "high_enhance_stone", "price": 800}
+  ],
+  "sell_prices": {
+    "broken_bone": 5,
+    "rotten_leather": 5,
+    "ghost_fragment": 8,
+    "knight_medal": 15,
+    "iron_shard": 10,
+    "necromancer_dust": 20,
+    "soul_crystal": 25,
+    "grave_keeper_token": 30,
+    "enhance_stone": 50,
+    "mid_enhance_stone": 150,
+    "high_enhance_stone": 400,
+    "boss_enhance_core": 500
+  }
+}

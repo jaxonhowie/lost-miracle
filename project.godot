@@ -30,6 +30,7 @@ EquipmentSystem="*res://scripts/systems/EquipmentSystem.gd"
 EnhanceSystem="*res://scripts/systems/EnhanceSystem.gd"
 SpawnSystem="*res://scripts/systems/SpawnSystem.gd"
 SaveSystem="*res://scripts/systems/SaveSystem.gd"
+ShopSystem="*res://scripts/systems/ShopSystem.gd"
 
 [display]
 

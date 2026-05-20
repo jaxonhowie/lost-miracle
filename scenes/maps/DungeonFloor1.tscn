@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scenes/maps/DungeonFloor1.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="2"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/maps/BossGate.gd" id="boss_gate_script"]
 [ext_resource type="Script" path="res://scenes/traps/SpikeTrap.gd" id="spike_trap_script"]
 [ext_resource type="Script" path="res://scenes/traps/FallingRock.gd" id="falling_rock_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ShopPanel.tscn" id="shop_panel_scene"]
+[ext_resource type="Script" path="res://scenes/npcs/MerchantNPC.gd" id="merchant_script"]
 
 [sub_resource type="RectangleShape2D" id="ground"]
 size = Vector2(5000, 40)
@@ -30,6 +32,9 @@ size = Vector2(250, 20)
 
 [sub_resource type="RectangleShape2D" id="rock_trigger"]
 size = Vector2(60, 200)
+
+[sub_resource type="RectangleShape2D" id="merchant_zone"]
+size = Vector2(80, 60)
 
 [node name="DungeonFloor1" type="Node2D"]
 script = ExtResource("1")
@@ -303,6 +308,22 @@ text = "Boss Room"
 [node name="Player" parent="." instance=ExtResource("2")]
 position = Vector2(100, 550)
 
+[node name="MerchantNPC" type="Area2D" parent="."]
+position = Vector2(220, 580)
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("merchant_script")
+
+[node name="Shape" type="CollisionShape2D" parent="MerchantNPC"]
+shape = SubResource("merchant_zone")
+
+[node name="Visual" type="ColorRect" parent="MerchantNPC"]
+offset_left = -20.0
+offset_top = -40.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.3, 0.5, 0.7, 1)
+
 [node name="UILayer" type="CanvasLayer" parent="."]
 
 [node name="InventoryPanel" parent="UILayer" instance=ExtResource("3")]
@@ -312,6 +333,8 @@ offset_left = 220.0
 offset_right = 420.0
 
 [node name="EnhancePanel" parent="UILayer" instance=ExtResource("5")]
+
+[node name="ShopPanel" parent="UILayer" instance=ExtResource("shop_panel_scene")]
 
 [node name="PlayerHUD" parent="UILayer" instance=ExtResource("6")]
 
