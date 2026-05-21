@@ -324,6 +324,11 @@ func take_damage(raw_damage: int, attacker_position: Vector2, is_crit: bool = fa
 	# Hit particle effect
 	preload("res://scenes/effects/HitEffect.gd").spawn(get_parent(), global_position + Vector2(0, -15))
 
+	if is_crit:
+		VFX.shake(4.0, 0.15)
+	else:
+		VFX.shake(2.0, 0.10)
+
 	# Show health bar
 	health_bar.value = hp
 	health_bar.visible = true
@@ -346,6 +351,16 @@ func _die():
 	velocity = Vector2.ZERO
 	died.emit(self)
 	AudioManager.play_sfx("res://assets/audio/sfx_monster_death.ogg")
+	# VFX based on monster type
+	if monster_id.ends_with("_boss"):
+		VFX.shake(6.0, 0.25)
+		VFX.hitstop(80)
+	elif monster_id.begins_with("elite_"):
+		VFX.shake(5.0, 0.2)
+		VFX.hitstop(40)
+	else:
+		VFX.shake(3.0, 0.15)
+		VFX.hitstop(40)
 	$CollisionShape2D.set_deferred("disabled", true)
 	# Death particle effect
 	preload("res://scenes/effects/DeathEffect.gd").spawn(get_parent(), global_position)

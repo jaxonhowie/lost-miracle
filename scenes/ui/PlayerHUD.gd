@@ -14,6 +14,9 @@ const MAX_LOOT_LINES: int = 5
 var _skill_nodes: Array = []
 const SKILL_KEYS = ["whirlwind", "charge", "war_cry"]
 
+var _combo_label: Label = null
+var _prev_combo: int = 0
+
 func _ready():
 	# Style HP bar
 	hp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.8, 0.2, 0.2)))
@@ -49,9 +52,25 @@ func _ready():
 	if drop_sys:
 		drop_sys.item_dropped.connect(_on_item_dropped)
 
+	# Combo label
+	_combo_label = Label.new()
+	_combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_combo_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_combo_label.position = Vector2(-75, 80)
+	_combo_label.size = Vector2(150, 60)
+	_combo_label.add_theme_font_size_override("font_size", 32)
+	_combo_label.visible = false
+	add_child(_combo_label)
+
+	# Level-up flash
+	var level_sys = get_node_or_null("/root/LevelSystem")
+	if level_sys:
+		level_sys.leveled_up.connect(_on_leveled_up)
+
 func _process(_delta):
 	if player:
 		_update_display()
+		_update_combo()
 
 func _update_display():
 	if not player:
@@ -121,6 +140,35 @@ func _update_skill_cooldowns():
 		else:
 			node_data["overlay"].visible = false
 			node_data["cd_label"].visible = false
+
+func _update_combo():
+	if not _combo_label or not player:
+		return
+	if player.combo_count > 0:
+		_combo_label.text = "x%d" % player.combo_count
+		_combo_label.visible = true
+		if player.combo_count >= 5:
+			_combo_label.modulate = Color(1, 0.85, 0.0, 1.0)
+		else:
+			_combo_label.modulate = Color(1, 1, 1, 1.0)
+		# Scale punch on increment
+		if player.combo_count != _prev_combo:
+			_prev_combo = player.combo_count
+			var punch = create_tween()
+			_combo_label.scale = Vector2(1.3, 1.3)
+			punch.tween_property(_combo_label, "scale", Vector2(1.0, 1.0), 0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+			var base_size = 32
+			if player.combo_count >= 10:
+				base_size = 42
+			elif player.combo_count >= 5:
+				base_size = 36
+			_combo_label.add_theme_font_size_override("font_size", base_size)
+	else:
+		_combo_label.visible = false
+		_prev_combo = 0
+
+func _on_leveled_up(_new_level: int):
+	VFX.flash(Color(1, 0.85, 0.0, 1), 0.15)
 
 func _create_bar_style(fill_color: Color) -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()

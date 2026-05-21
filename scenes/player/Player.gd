@@ -43,6 +43,11 @@ const SKILL_COOLDOWNS = {
 # Buffs
 var _buffs: Dictionary = {}  # buff_id -> { timer, value }
 
+# Combo
+var combo_count: int = 0
+var combo_last_hit_ms: int = 0
+const COMBO_WINDOW_MS: int = 2000
+
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite: ColorRect = $SpritePlaceholder
 @onready var hitbox: Area2D = $HitBox
@@ -61,6 +66,10 @@ func _setup_consumable_listener():
 func _physics_process(delta):
 	if is_dead:
 		return
+
+	# Combo expiry
+	if combo_count > 0 and Time.get_ticks_msec() - combo_last_hit_ms > COMBO_WINDOW_MS:
+		combo_count = 0
 
 	_process_skills(delta)
 	_process_buffs(delta)
@@ -157,6 +166,9 @@ func take_damage(raw_damage: int, attacker_position: Vector2):
 
 	# Hit particle effect
 	preload("res://scenes/effects/HitEffect.gd").spawn(get_parent(), global_position + Vector2(0, -15), Color(1, 0.2, 0.2))
+
+	VFX.shake(3.0, 0.12)
+	VFX.flash(Color(1, 0, 0, 1), 0.1)
 
 	# Knockback
 	var knockback_dir = (global_position - attacker_position).normalized()
@@ -262,9 +274,10 @@ func _try_use_skill(skill_id: String):
 func _skill_whirlwind():
 	var total_atk = get_total_attack()
 	var dmg = int(total_atk * 1.0)
-	# Visual: flash sprite
-	sprite.color = Color(1, 0.8, 0.3, 1)
+	preload("res://scenes/effects/SkillVFX.gd").spawn_whirlwind(get_parent(), global_position + Vector2(0, -10))
+	VFX.flash(Color(1, 0.8, 0.3, 1), 0.1)
 	# Hit all monsters in 80px radius
+	var hit_any = false
 	for monster in get_tree().get_nodes_in_group("monsters"):
 		if monster.has_method("take_damage") and monster.current_state != 5:  # not DEAD
 			var dist = global_position.distance_to(monster.global_position)
@@ -274,8 +287,12 @@ func _skill_whirlwind():
 				if is_crit:
 					final_dmg = int(final_dmg * get_total_crit_damage())
 				monster.take_damage(final_dmg, global_position, is_crit)
+				_increment_combo()
+				hit_any = true
+	if hit_any:
+		VFX.shake(3.5, 0.12)
+		VFX.hitstop(30)
 	await get_tree().create_timer(0.4).timeout
-	sprite.color = Color(1, 1, 1, 1)
 
 func _skill_charge():
 	var total_atk = get_total_attack()
@@ -283,11 +300,14 @@ func _skill_charge():
 	var dir = 1 if facing_right else -1
 	var charge_dur = 0.3
 	var hit_monsters = []
-	# Visual: tint
-	sprite.color = Color(0.3, 0.8, 1.0, 1)
+	var trail_frame := 0
+	VFX.flash(Color(0.3, 0.8, 1.0, 1), 0.1)
 	while charge_dur > 0 and not is_dead:
 		velocity.x = dir * 400.0
 		velocity.y = 0
+		trail_frame += 1
+		if trail_frame % 3 == 0:
+			preload("res://scenes/effects/SkillVFX.gd").spawn_charge_trail(get_parent(), global_position + Vector2(0, -10))
 		# Hit monsters in path
 		for monster in get_tree().get_nodes_in_group("monsters"):
 			if monster in hit_monsters:
@@ -301,10 +321,12 @@ func _skill_charge():
 						final_dmg = int(final_dmg * get_total_crit_damage())
 					monster.take_damage(final_dmg, global_position, is_crit)
 					hit_monsters.append(monster)
+					_increment_combo()
+					VFX.shake(3.0, 0.10)
+					VFX.hitstop(30)
 		await get_tree().physics_frame
 		charge_dur -= get_physics_process_delta_time()
 	velocity.x = 0
-	sprite.color = Color(1, 1, 1, 1)
 
 func _skill_war_cry():
 	# Heal 30% max HP
@@ -312,10 +334,15 @@ func _skill_war_cry():
 	hp = mini(hp + heal_amount, get_total_max_hp())
 	# Damage buff for 5 seconds
 	_buffs["war_cry"] = { "timer": 5.0, "value": 0.3 }
-	# Visual: flash gold
-	sprite.color = Color(1, 0.9, 0.2, 1)
-	await get_tree().create_timer(0.5).timeout
-	sprite.color = Color(1, 1, 1, 1)
+	preload("res://scenes/effects/SkillVFX.gd").spawn_war_cry(get_parent(), global_position + Vector2(0, -10))
+	VFX.flash(Color(1, 0.9, 0.2, 1), 0.15)
+	VFX.shake(4.0, 0.2)
+	# Scale punch
+	var base_scale_x = 1.0 if facing_right else -1.0
+	var tw = create_tween()
+	tw.tween_property(sprite, "scale", Vector2(base_scale_x * 1.3, 1.3), 0.08)
+	tw.tween_property(sprite, "scale", Vector2(base_scale_x, 1.0), 0.12)
+	await tw.finished
 
 func _quick_use_item():
 	var inv = get_node_or_null("/root/InventorySystem")
@@ -344,6 +371,13 @@ func use_consumable(effect: String, value: int):
 			_buffs["speed"] = { "timer": float(value), "value": 1.5 }
 			AudioManager.play_sfx("res://assets/audio/sfx_buff.ogg")
 
+func _increment_combo():
+	var now = Time.get_ticks_msec()
+	if now - combo_last_hit_ms > COMBO_WINDOW_MS:
+		combo_count = 0
+	combo_count += 1
+	combo_last_hit_ms = now
+
 func _spawn_floating_damage(damage: int, is_crit: bool = false):
 	var fd = Label.new()
 	fd.set_script(preload("res://scenes/ui/FloatingDamage.gd"))
@@ -361,3 +395,10 @@ func _on_hitbox_area_entered(area: Area2D):
 		if is_crit:
 			dmg = int(dmg * total_crit_damage)
 		area.get_parent().take_damage(dmg, global_position, is_crit)
+		_increment_combo()
+		if is_crit:
+			VFX.shake(4.0, 0.15)
+			VFX.hitstop(50)
+			VFX.flash(Color(1, 1, 1, 1), 0.1)
+		else:
+			VFX.shake(2.0, 0.10)
