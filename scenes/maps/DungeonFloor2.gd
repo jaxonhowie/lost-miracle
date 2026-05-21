@@ -8,3 +8,4 @@ func _ready():
 	var save_sys = get_node_or_null("/root/SaveSystem")
 	if save_sys:
 		save_sys.apply_save_data()
+	AudioManager.play_bgm("res://assets/audio/bgm_floor2.ogg")

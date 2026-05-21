@@ -31,6 +31,7 @@ func _apply_level_up():
 	player.defense += 1
 	player.max_hp += 15
 	player.hp = player.get_total_max_hp()
+	AudioManager.play_sfx("res://assets/audio/sfx_levelup.ogg")
 
 func get_save_data() -> Dictionary:
 	return { "level": level, "xp": xp }

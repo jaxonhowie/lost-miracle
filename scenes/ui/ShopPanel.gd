@@ -153,6 +153,7 @@ func _on_buy_pressed(item_id: String):
 		return
 	var result = shop_sys.buy_item(item_id)
 	if result["success"]:
+		AudioManager.play_sfx("res://assets/audio/sfx_buy.ogg")
 		var item_data = ItemDatabase.get_item(item_id)
 		result_label.text = "购买了 %s" % item_data.get("name", item_id)
 		result_label.modulate = Color.GREEN
@@ -171,6 +172,7 @@ func _on_sell_pressed(item_id: String, uid: String):
 		return
 	var result = shop_sys.sell_item(item_id, uid)
 	if result["success"]:
+		AudioManager.play_sfx("res://assets/audio/sfx_sell.ogg")
 		var item_data = ItemDatabase.get_item(item_id)
 		result_label.text = "出售了 %s (+%d G)" % [item_data.get("name", item_id), result["price"]]
 		result_label.modulate = Color.GREEN

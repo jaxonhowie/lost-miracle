@@ -19,8 +19,13 @@ func get_drops(monster_id: String) -> Array:
 func roll_drops(monster_id: String) -> Array:
 	var results = []
 	var table = get_drops(monster_id)
+	var bonus: float = 0.0
+	var diff_sys = get_node_or_null("/root/DifficultySystem")
+	if diff_sys:
+		bonus = diff_sys.get_drop_bonus()
 	for entry in table:
-		if randf() <= entry["rate"]:
+		var rate = minf(entry["rate"] + bonus, 1.0)
+		if randf() <= rate:
 			var count = randi_range(entry["min"], entry["max"])
 			results.append({"item_id": entry["item_id"], "count": count})
 	return results

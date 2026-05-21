@@ -61,6 +61,7 @@ func pickup(player):
 	if not is_pickupable:
 		return
 	is_pickupable = false
+	AudioManager.play_sfx("res://assets/audio/sfx_pickup.ogg")
 	var inv = get_node_or_null("/root/InventorySystem")
 	if inv:
 		inv.add_item(item_id, count)

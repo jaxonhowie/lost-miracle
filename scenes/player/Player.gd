@@ -126,6 +126,7 @@ func _start_attack():
 	is_attacking = true
 	attack_cooldown_timer = ATTACK_COOLDOWN
 	hitbox.monitoring = true
+	AudioManager.play_sfx("res://assets/audio/sfx_attack.ogg")
 	# Attack duration handled by animation or timer
 	await get_tree().create_timer(0.3).timeout
 	hitbox.monitoring = false
@@ -152,6 +153,7 @@ func take_damage(raw_damage: int, attacker_position: Vector2):
 	hp -= final_damage
 
 	_spawn_floating_damage(final_damage, false)
+	AudioManager.play_sfx("res://assets/audio/sfx_hit.ogg")
 
 	# Hit particle effect
 	preload("res://scenes/effects/HitEffect.gd").spawn(get_parent(), global_position + Vector2(0, -15), Color(1, 0.2, 0.2))
@@ -171,21 +173,26 @@ func take_damage(raw_damage: int, attacker_position: Vector2):
 func _die():
 	is_dead = true
 	velocity = Vector2.ZERO
+	AudioManager.play_sfx("res://assets/audio/sfx_death.ogg")
 	anim_player.play("death")
 	# Disable collision
 	$CollisionShape2D.set_deferred("disabled", true)
 	hurtbox.set_deferred("monitoring", false)
-	# Auto-respawn after 3 seconds
-	await get_tree().create_timer(3.0).timeout
-	var save_sys = get_node_or_null("/root/SaveSystem")
-	if save_sys:
-		save_sys.respawn_player()
+	# Show death screen
+	var death_screen = get_tree().current_scene.get_node_or_null("DeathScreen")
+	if death_screen:
+		death_screen.show_death()
 	else:
-		# Fallback: just reset HP
-		hp = get_total_max_hp()
-		is_dead = false
-		$CollisionShape2D.disabled = false
-		hurtbox.monitoring = true
+		# Fallback: auto-respawn after 3 seconds
+		await get_tree().create_timer(3.0).timeout
+		var save_sys = get_node_or_null("/root/SaveSystem")
+		if save_sys:
+			save_sys.respawn_player()
+		else:
+			hp = get_total_max_hp()
+			is_dead = false
+			$CollisionShape2D.disabled = false
+			hurtbox.monitoring = true
 
 func add_gold(amount: int):
 	gold += amount
@@ -242,6 +249,7 @@ func _try_use_skill(skill_id: String):
 		return
 	_skill_cooldowns[skill_id] = SKILL_COOLDOWNS[skill_id]
 	is_attacking = true
+	AudioManager.play_sfx("res://assets/audio/sfx_skill.ogg")
 	match skill_id:
 		"whirlwind":
 			await _skill_whirlwind()
@@ -331,8 +339,10 @@ func use_consumable(effect: String, value: int):
 				hp = get_total_max_hp()
 			else:
 				hp = mini(hp + value, get_total_max_hp())
+			AudioManager.play_sfx("res://assets/audio/sfx_heal.ogg")
 		"speed":
 			_buffs["speed"] = { "timer": float(value), "value": 1.5 }
+			AudioManager.play_sfx("res://assets/audio/sfx_buff.ogg")
 
 func _spawn_floating_damage(damage: int, is_crit: bool = false):
 	var fd = Label.new()

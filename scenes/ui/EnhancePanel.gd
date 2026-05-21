@@ -126,9 +126,11 @@ func _on_enhance_pressed():
 
 func _on_enhance_result(uid: String, success: bool, new_level: int):
 	if success:
+		AudioManager.play_sfx("res://assets/audio/sfx_enhance_success.ogg")
 		result_label.text = "强化成功! +" + str(new_level)
 		result_label.modulate = Color.GREEN
 	else:
+		AudioManager.play_sfx("res://assets/audio/sfx_enhance_fail.ogg")
 		var old_level = new_level + 1
 		if new_level < old_level:
 			result_label.text = "强化失败... 降至 +" + str(new_level)

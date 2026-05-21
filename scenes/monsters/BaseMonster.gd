@@ -98,6 +98,15 @@ func _setup_stats():
 	move_speed = data.get("move_speed", move_speed)
 	attack_interval = data.get("attack_interval", attack_interval)
 	experience = data.get("experience", experience)
+	# Apply difficulty scaling
+	var diff_sys = get_node_or_null("/root/DifficultySystem")
+	if diff_sys:
+		var scaled = diff_sys.get_stats(hp, attack_power, defense, experience)
+		hp = scaled["hp"]
+		max_hp = scaled["hp"]
+		attack_power = scaled["attack"]
+		defense = scaled["defense"]
+		experience = scaled["xp"]
 
 func _on_ready_extra():
 	pass
@@ -310,6 +319,7 @@ func take_damage(raw_damage: int, attacker_position: Vector2, is_crit: bool = fa
 	_on_hp_changed(hp, max_hp)
 
 	_spawn_floating_damage(final_damage, is_crit)
+	AudioManager.play_sfx("res://assets/audio/sfx_hit.ogg")
 
 	# Hit particle effect
 	preload("res://scenes/effects/HitEffect.gd").spawn(get_parent(), global_position + Vector2(0, -15))
@@ -335,6 +345,7 @@ func _die():
 	_set_state(State.DEAD)
 	velocity = Vector2.ZERO
 	died.emit(self)
+	AudioManager.play_sfx("res://assets/audio/sfx_monster_death.ogg")
 	$CollisionShape2D.set_deferred("disabled", true)
 	# Death particle effect
 	preload("res://scenes/effects/DeathEffect.gd").spawn(get_parent(), global_position)
