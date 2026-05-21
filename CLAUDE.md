@@ -34,7 +34,7 @@ res://
 ### Core Systems
 
 - **Data-driven design**: All item/monster/drop definitions live in JSON files under `data/`, not hardcoded in scripts.
-- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `MonsterDatabase`, `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`, `EquipmentSystem`, `EnhanceSystem`, `SpawnSystem`, `SaveSystem`.
+- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `ThemeSystem`, `MonsterDatabase`, `LevelSystem`, `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`, `EquipmentSystem`, `EnhanceSystem`, `SpawnSystem`, `SaveSystem`, `ShopSystem`.
 - **Monsters use inheritance**: BaseMonster provides the state machine (Idle/Patrol/Chase/Attack/Hit/Dead); individual monsters extend it.
 - **Equipment instances**: Equipped items have a unique UID and enhance level — they are NOT just item_id references.
 
@@ -97,6 +97,8 @@ Do NOT start with Boss or enhancement UI. Get "kill mob → loot → equip → g
 | Skills 1/2/3 | 1 / 2 / 3 |
 | Quick Item 1 | F1 |
 | Inventory | Tab |
+| Equipment / Shop | E |
+| Enhance | R |
 
 ## Art Specs
 
