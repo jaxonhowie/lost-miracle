@@ -50,5 +50,52 @@
     {"item_id": "undead_ring", "min": 1, "max": 1, "rate": 0.25},
     {"item_id": "high_enhance_stone", "min": 1, "max": 1, "rate": 0.4},
     {"item_id": "max_health_potion", "min": 1, "max": 2, "rate": 0.5}
+  ],
+  "crystal_golem": [
+    {"item_id": "gold", "min": 8, "max": 18, "rate": 0.8},
+    {"item_id": "crystal_shard", "min": 1, "max": 2, "rate": 0.4},
+    {"item_id": "crystal_ring", "min": 1, "max": 1, "rate": 0.08},
+    {"item_id": "crystal_greaves", "min": 1, "max": 1, "rate": 0.06},
+    {"item_id": "enhance_stone", "min": 1, "max": 1, "rate": 0.2},
+    {"item_id": "health_potion", "min": 1, "max": 1, "rate": 0.2}
+  ],
+  "dark_assassin": [
+    {"item_id": "gold", "min": 6, "max": 15, "rate": 0.7},
+    {"item_id": "shadow_essence", "min": 1, "max": 2, "rate": 0.35},
+    {"item_id": "shadow_blade", "min": 1, "max": 1, "rate": 0.06},
+    {"item_id": "enhance_stone", "min": 1, "max": 1, "rate": 0.18},
+    {"item_id": "speed_potion", "min": 1, "max": 1, "rate": 0.15}
+  ],
+  "wraith": [
+    {"item_id": "gold", "min": 7, "max": 16, "rate": 0.75},
+    {"item_id": "ghost_fragment", "min": 1, "max": 2, "rate": 0.3},
+    {"item_id": "shadow_essence", "min": 1, "max": 1, "rate": 0.25},
+    {"item_id": "crystal_ring", "min": 1, "max": 1, "rate": 0.07},
+    {"item_id": "enhance_stone", "min": 1, "max": 1, "rate": 0.2},
+    {"item_id": "health_potion", "min": 1, "max": 1, "rate": 0.18}
+  ],
+  "elite_crystal_guardian": [
+    {"item_id": "gold", "min": 60, "max": 120, "rate": 1.0},
+    {"item_id": "crystal_shard", "min": 2, "max": 4, "rate": 0.5},
+    {"item_id": "crystal_sword", "min": 1, "max": 1, "rate": 0.2},
+    {"item_id": "crystal_armor", "min": 1, "max": 1, "rate": 0.2},
+    {"item_id": "mid_enhance_stone", "min": 1, "max": 1, "rate": 0.3},
+    {"item_id": "mid_health_potion", "min": 1, "max": 2, "rate": 0.4}
+  ],
+  "elite_shadow_lord": [
+    {"item_id": "gold", "min": 70, "max": 140, "rate": 1.0},
+    {"item_id": "shadow_essence", "min": 2, "max": 4, "rate": 0.5},
+    {"item_id": "shadow_blade", "min": 1, "max": 1, "rate": 0.2},
+    {"item_id": "mid_enhance_stone", "min": 1, "max": 1, "rate": 0.3},
+    {"item_id": "mid_health_potion", "min": 1, "max": 2, "rate": 0.35}
+  ],
+  "crystal_overlord_boss": [
+    {"item_id": "gold", "min": 300, "max": 600, "rate": 1.0},
+    {"item_id": "overlord_core", "min": 1, "max": 1, "rate": 1.0},
+    {"item_id": "boss_enhance_core", "min": 1, "max": 2, "rate": 0.7},
+    {"item_id": "overlord_greatsword", "min": 1, "max": 1, "rate": 0.3},
+    {"item_id": "overlord_plate", "min": 1, "max": 1, "rate": 0.3},
+    {"item_id": "high_enhance_stone", "min": 1, "max": 2, "rate": 0.5},
+    {"item_id": "max_health_potion", "min": 1, "max": 3, "rate": 0.6}
   ]
 }

@@ -65,6 +65,12 @@ func apply_save_data():
 	if _pending_save.is_empty():
 		return
 
+	# Restore floor
+	var saved_floor = _pending_save.get("floor", 1)
+	var spawn_sys = get_node_or_null("/root/SpawnSystem")
+	if spawn_sys and spawn_sys.current_floor != saved_floor:
+		spawn_sys.switch_floor(saved_floor)
+
 	var players = get_tree().get_nodes_in_group("player")
 	if players.is_empty():
 		return
@@ -121,8 +127,14 @@ func save_game():
 		return
 	var player = players[0]
 
+	var spawn_sys = get_node_or_null("/root/SpawnSystem")
+	var current_floor = 1
+	if spawn_sys:
+		current_floor = spawn_sys.current_floor
+
 	var data = {
-		"version": 1,
+		"version": 2,
+		"floor": current_floor,
 		"player": {
 			"hp": player.hp,
 			"max_hp": player.max_hp,
@@ -161,7 +173,6 @@ func save_game():
 	if equip_sys:
 		data["equipment"] = equip_sys.equipped
 
-	var spawn_sys = get_node_or_null("/root/SpawnSystem")
 	if spawn_sys:
 		data["spawn_respawn"] = spawn_sys.get_respawn_state()
 

@@ -1,6 +1,8 @@
 extends Node
 
-const SPAWN_DATA_PATH = "res://data/spawns_dungeon_1.json"
+const SPAWN_DATA_F1 = "res://data/spawns_dungeon_1.json"
+const SPAWN_DATA_F2 = "res://data/spawns_dungeon_2.json"
+var current_floor: int = 1
 const PLAYER_DISTANCE_MIN = 300.0
 const MAX_PER_ZONE = 6
 
@@ -11,6 +13,12 @@ var monster_scenes: Dictionary = {
 	"elite_skeleton_knight": "res://scenes/monsters/EliteSkeletonKnight.tscn",
 	"elite_necromancer": "res://scenes/monsters/EliteNecromancer.tscn",
 	"grave_keeper_boss": "res://scenes/monsters/GraveKeeperBoss.tscn",
+	"crystal_golem": "res://scenes/monsters/CrystalGolem.tscn",
+	"dark_assassin": "res://scenes/monsters/DarkAssassin.tscn",
+	"wraith": "res://scenes/monsters/Wraith.tscn",
+	"elite_crystal_guardian": "res://scenes/monsters/CrystalGuardian.tscn",
+	"elite_shadow_lord": "res://scenes/monsters/ShadowLord.tscn",
+	"crystal_overlord_boss": "res://scenes/monsters/CrystalOverlordBoss.tscn",
 }
 
 # spawn_id -> {config, monster_node, death_time, scene}
@@ -31,9 +39,10 @@ func _preload_scenes():
 		_scene_cache[monster_id] = load(monster_scenes[monster_id])
 
 func _load_spawn_data():
-	var file = FileAccess.open(SPAWN_DATA_PATH, FileAccess.READ)
+	var path = SPAWN_DATA_F1 if current_floor == 1 else SPAWN_DATA_F2
+	var file = FileAccess.open(path, FileAccess.READ)
 	if not file:
-		push_error("SpawnSystem: cannot open " + SPAWN_DATA_PATH)
+		push_error("SpawnSystem: cannot open " + path)
 		return
 	var json = JSON.new()
 	var err = json.parse(file.get_as_text())
@@ -122,6 +131,18 @@ func _player_too_close(pos: Vector2) -> bool:
 	if players.is_empty():
 		return false
 	return pos.distance_to(players[0].global_position) < PLAYER_DISTANCE_MIN
+
+func switch_floor(floor_num: int):
+	# Clear existing spawns
+	for spawn_id in spawn_points:
+		var sp = spawn_points[spawn_id]
+		if sp["monster_node"] != null and is_instance_valid(sp["monster_node"]):
+			sp["monster_node"].queue_free()
+	spawn_points.clear()
+	zone_alive.clear()
+	current_floor = floor_num
+	_preload_scenes()
+	_load_spawn_data()
 
 func get_respawn_state() -> Dictionary:
 	var state = {}

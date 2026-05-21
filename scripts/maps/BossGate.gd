@@ -6,8 +6,8 @@ var _message_label: Label = null
 var _message_timer: float = 0.0
 
 const OPEN_DISTANCE: float = 200.0
-const ELITE_1_ID: String = "elite_1"
-const ELITE_2_ID: String = "elite_2"
+@export var elite_1_id: String = "elite_1"
+@export var elite_2_id: String = "elite_2"
 
 func _ready():
 	# Create message label
@@ -46,16 +46,16 @@ func _try_open():
 		return
 
 	# Check if both elites are dead (on cooldown)
-	var e1 = spawn_sys.spawn_points.get(ELITE_1_ID, {})
-	var e2 = spawn_sys.spawn_points.get(ELITE_2_ID, {})
+	var e1 = spawn_sys.spawn_points.get(elite_1_id, {})
+	var e2 = spawn_sys.spawn_points.get(elite_2_id, {})
 
 	var e1_dead = e1.get("death_time", 0) > 0 or e1.get("monster_node") == null
 	var e2_dead = e2.get("death_time", 0) > 0 or e2.get("monster_node") == null
 
 	# If elites haven't been spawned yet (no entry), they're not dead
-	if not spawn_sys.spawn_points.has(ELITE_1_ID):
+	if not spawn_sys.spawn_points.has(elite_1_id):
 		e1_dead = false
-	if not spawn_sys.spawn_points.has(ELITE_2_ID):
+	if not spawn_sys.spawn_points.has(elite_2_id):
 		e2_dead = false
 
 	if e1_dead and e2_dead:

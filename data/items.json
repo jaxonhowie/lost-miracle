@@ -240,5 +240,97 @@
     "defense": 5,
     "hp": 30,
     "enhanceable": true
+  },
+  "crystal_shard": {
+    "name": "水晶碎片",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "shadow_essence": {
+    "name": "暗影精华",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 999
+  },
+  "overlord_core": {
+    "name": "霸主核心",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 99
+  },
+  "crystal_sword": {
+    "name": "水晶长剑",
+    "type": "equipment",
+    "slot": "weapon",
+    "quality": "rare",
+    "attack": 35,
+    "defense": 0,
+    "hp": 0,
+    "crit_rate": 0.05,
+    "enhanceable": true
+  },
+  "shadow_blade": {
+    "name": "暗影之刃",
+    "type": "equipment",
+    "slot": "weapon",
+    "quality": "epic",
+    "attack": 50,
+    "defense": 0,
+    "hp": 0,
+    "crit_damage": 0.25,
+    "enhanceable": true
+  },
+  "crystal_armor": {
+    "name": "水晶铠甲",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "rare",
+    "attack": 0,
+    "defense": 18,
+    "hp": 120,
+    "enhanceable": true
+  },
+  "crystal_greaves": {
+    "name": "水晶护胫",
+    "type": "equipment",
+    "slot": "boots",
+    "quality": "rare",
+    "attack": 0,
+    "defense": 8,
+    "hp": 50,
+    "enhanceable": true
+  },
+  "crystal_ring": {
+    "name": "水晶指环",
+    "type": "equipment",
+    "slot": "ring",
+    "quality": "rare",
+    "attack": 10,
+    "defense": 5,
+    "hp": 20,
+    "enhanceable": true
+  },
+  "overlord_greatsword": {
+    "name": "霸主巨剑",
+    "type": "equipment",
+    "slot": "weapon",
+    "quality": "epic",
+    "attack": 65,
+    "defense": 0,
+    "hp": 0,
+    "crit_rate": 0.05,
+    "crit_damage": 0.3,
+    "enhanceable": true
+  },
+  "overlord_plate": {
+    "name": "霸主重甲",
+    "type": "equipment",
+    "slot": "armor",
+    "quality": "epic",
+    "attack": 0,
+    "defense": 32,
+    "hp": 220,
+    "enhanceable": true
   }
 }

@@ -54,5 +54,53 @@
     "move_speed": 90.0,
     "attack_interval": 1.0,
     "experience": 0
+  },
+  "crystal_golem": {
+    "hp": 180,
+    "attack_power": 22,
+    "defense": 8,
+    "move_speed": 40.0,
+    "attack_interval": 2.0,
+    "experience": 18
+  },
+  "dark_assassin": {
+    "hp": 90,
+    "attack_power": 28,
+    "defense": 2,
+    "move_speed": 160.0,
+    "attack_interval": 0.8,
+    "experience": 15
+  },
+  "wraith": {
+    "hp": 120,
+    "attack_power": 24,
+    "defense": 3,
+    "move_speed": 100.0,
+    "attack_interval": 1.5,
+    "experience": 16
+  },
+  "elite_crystal_guardian": {
+    "hp": 600,
+    "attack_power": 35,
+    "defense": 15,
+    "move_speed": 60.0,
+    "attack_interval": 1.8,
+    "experience": 120
+  },
+  "elite_shadow_lord": {
+    "hp": 500,
+    "attack_power": 40,
+    "defense": 8,
+    "move_speed": 130.0,
+    "attack_interval": 1.2,
+    "experience": 140
+  },
+  "crystal_overlord_boss": {
+    "hp": 2800,
+    "attack_power": 55,
+    "defense": 18,
+    "move_speed": 55.0,
+    "attack_interval": 1.6,
+    "experience": 500
   }
 }
