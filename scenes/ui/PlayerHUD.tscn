@@ -72,3 +72,61 @@ color = Color(0.4, 0.6, 1, 1)
 [node name="StatLabel" type="Label" parent="HBoxContainer/InfoContainer/StatsRow"]
 layout_mode = 2
 text = "攻:12"
+
+[node name="SkillRow" type="HBoxContainer" parent="."]
+layout_mode = 2
+offset_left = 10.0
+offset_top = 120.0
+offset_right = 160.0
+offset_bottom = 155.0
+
+[node name="Skill1" type="PanelContainer" parent="SkillRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(42, 35)
+
+[node name="Key" type="Label" parent="SkillRow/Skill1"]
+layout_mode = 2
+text = "1"
+horizontal_alignment = 1
+
+[node name="CDOverlay" type="ColorRect" parent="SkillRow/Skill1"]
+layout_mode = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="CDLabel" type="Label" parent="SkillRow/Skill1"]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Skill2" type="PanelContainer" parent="SkillRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(42, 35)
+
+[node name="Key" type="Label" parent="SkillRow/Skill2"]
+layout_mode = 2
+text = "2"
+horizontal_alignment = 1
+
+[node name="CDOverlay" type="ColorRect" parent="SkillRow/Skill2"]
+layout_mode = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="CDLabel" type="Label" parent="SkillRow/Skill2"]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Skill3" type="PanelContainer" parent="SkillRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(42, 35)
+
+[node name="Key" type="Label" parent="SkillRow/Skill3"]
+layout_mode = 2
+text = "3"
+horizontal_alignment = 1
+
+[node name="CDOverlay" type="ColorRect" parent="SkillRow/Skill3"]
+layout_mode = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="CDLabel" type="Label" parent="SkillRow/Skill3"]
+layout_mode = 2
+horizontal_alignment = 1

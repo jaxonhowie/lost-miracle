@@ -56,12 +56,24 @@ func _on_slot_pressed(slot: Dictionary):
 
 	if item_data.get("type", "") == "equipment":
 		text += "\n品质: " + item_data.get("quality", "普通")
+		var slot_type = item_data.get("slot", "")
+		var compare = _get_equipped_stats(slot_type)
 		if item_data.get("attack", 0) > 0:
 			text += "\n攻击: +" + str(item_data["attack"])
+			if compare.has("attack"):
+				text += _diff_str(item_data["attack"], compare["attack"])
 		if item_data.get("defense", 0) > 0:
 			text += "\n防御: +" + str(item_data["defense"])
+			if compare.has("defense"):
+				text += _diff_str(item_data["defense"], compare["defense"])
 		if item_data.get("hp", 0) > 0:
 			text += "\n生命: +" + str(item_data["hp"])
+			if compare.has("hp"):
+				text += _diff_str(item_data["hp"], compare["hp"])
+		if item_data.get("crit_rate", 0) > 0:
+			text += "\n暴击率: +" + str(int(item_data["crit_rate"] * 100)) + "%"
+		if item_data.get("crit_damage", 0) > 0:
+			text += "\n暴击伤害: +" + str(int(item_data["crit_damage"] * 100)) + "%"
 		text += "\n\n点击穿戴"
 	elif item_data.get("type", "") == "consumable":
 		var eff = item_data.get("effect", "")
@@ -93,6 +105,28 @@ func _on_slot_pressed(slot: Dictionary):
 	_last_pressed_item_id = item_id
 
 var _last_pressed_item_id: String = ""
+
+func _get_equipped_stats(slot_type: String) -> Dictionary:
+	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	if not equip_sys:
+		return {}
+	var equipped = equip_sys.get_equipped(slot_type)
+	if not equipped:
+		return {}
+	var data = ItemDatabase.get_item(equipped["item_id"])
+	var result = {}
+	for stat in ["attack", "defense", "hp"]:
+		if data.get(stat, 0) > 0:
+			result[stat] = data[stat]
+	return result
+
+func _diff_str(new_val: int, old_val: int) -> String:
+	var diff = new_val - old_val
+	if diff > 0:
+		return " (↑%d)" % diff
+	elif diff < 0:
+		return " (↓%d)" % abs(diff)
+	return " (=)"
 
 func _input(event):
 	if event.is_action_pressed("inventory"):

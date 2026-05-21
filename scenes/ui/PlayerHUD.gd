@@ -11,6 +11,9 @@ var player: Node2D = null
 var _loot_container: VBoxContainer = null
 const MAX_LOOT_LINES: int = 5
 
+var _skill_nodes: Array = []
+const SKILL_KEYS = ["whirlwind", "charge", "war_cry"]
+
 func _ready():
 	# Style HP bar
 	hp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.8, 0.2, 0.2)))
@@ -19,6 +22,15 @@ func _ready():
 	# Style XP bar
 	xp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.2, 0.6, 0.9)))
 	xp_bar.add_theme_stylebox_override("background", _create_bar_style(Color(0.15, 0.15, 0.2)))
+
+	# Setup skill cooldown nodes
+	for i in range(3):
+		var skill_node = $SkillRow.get_child(i)
+		var overlay = skill_node.get_node("CDOverlay")
+		var cd_label = skill_node.get_node("CDLabel")
+		overlay.visible = false
+		cd_label.visible = false
+		_skill_nodes.append({"panel": skill_node, "overlay": overlay, "cd_label": cd_label})
 
 	# Create loot notification container
 	_loot_container = VBoxContainer.new()
@@ -64,6 +76,9 @@ func _update_display():
 		xp_bar.max_value = level_sys.xp_to_next_level()
 		xp_bar.value = level_sys.xp
 
+	# Skill cooldowns
+	_update_skill_cooldowns()
+
 func _on_item_dropped(item_id: String, count: int, _position: Vector2):
 	if item_id == "gold":
 		return
@@ -87,6 +102,25 @@ func _on_item_dropped(item_id: String, count: int, _position: Vector2):
 	tween.tween_interval(3.0)
 	tween.tween_property(label, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(label.queue_free)
+
+func _update_skill_cooldowns():
+	if not player or _skill_nodes.is_empty():
+		return
+	for i in range(3):
+		var skill_key = SKILL_KEYS[i]
+		var cd = player._skill_cooldowns.get(skill_key, 0.0)
+		var max_cd = player.SKILL_COOLDOWNS.get(skill_key, 1.0)
+		var node_data = _skill_nodes[i]
+		if cd > 0:
+			node_data["overlay"].visible = true
+			node_data["cd_label"].visible = true
+			node_data["cd_label"].text = "%.1f" % cd
+			var ratio = cd / max_cd
+			node_data["overlay"].size.y = 35 * ratio
+			node_data["overlay"].position.y = 0
+		else:
+			node_data["overlay"].visible = false
+			node_data["cd_label"].visible = false
 
 func _create_bar_style(fill_color: Color) -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()
