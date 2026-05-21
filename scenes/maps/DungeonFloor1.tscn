@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scenes/maps/DungeonFloor1.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="2"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/ShopPanel.tscn" id="shop_panel_scene"]
 [ext_resource type="Script" path="res://scenes/npcs/MerchantNPC.gd" id="merchant_script"]
 [ext_resource type="Script" path="res://scripts/maps/F2Portal.gd" id="f2_portal_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="minimap_scene"]
 
 [sub_resource type="RectangleShape2D" id="ground"]
 size = Vector2(5000, 40)
@@ -344,6 +345,8 @@ offset_right = 420.0
 [node name="ShopPanel" parent="UILayer" instance=ExtResource("shop_panel_scene")]
 
 [node name="PlayerHUD" parent="UILayer" instance=ExtResource("6")]
+
+[node name="Minimap" parent="UILayer" instance=ExtResource("minimap_scene")]
 
 [node name="SpikeTrap_1" type="Area2D" parent="."]
 position = Vector2(3150, 598)

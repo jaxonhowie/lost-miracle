@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scenes/maps/DungeonFloor2.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="2"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scenes/traps/FallingRock.gd" id="falling_rock_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ShopPanel.tscn" id="shop_panel_scene"]
 [ext_resource type="Script" path="res://scripts/maps/ReturnPortal.gd" id="return_portal_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Minimap.tscn" id="minimap_scene"]
 
 [sub_resource type="RectangleShape2D" id="ground"]
 size = Vector2(5000, 40)
@@ -337,3 +338,5 @@ offset_right = 420.0
 [node name="ShopPanel" parent="UILayer" instance=ExtResource("shop_panel_scene")]
 
 [node name="PlayerHUD" parent="UILayer" instance=ExtResource("6")]
+
+[node name="Minimap" parent="UILayer" instance=ExtResource("minimap_scene")]
