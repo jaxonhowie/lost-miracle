@@ -332,5 +332,83 @@
     "defense": 32,
     "hp": 220,
     "enhanceable": true
+  },
+  "iron_boots": {
+    "name": "粗铁战靴",
+    "type": "equipment",
+    "slot": "boots",
+    "quality": "normal",
+    "attack": 0,
+    "defense": 2,
+    "hp": 10,
+    "enhanceable": true
+  },
+  "knight_greaves": {
+    "name": "骑士护胫",
+    "type": "equipment",
+    "slot": "boots",
+    "quality": "rare",
+    "attack": 0,
+    "defense": 6,
+    "hp": 40,
+    "enhanceable": true
+  },
+  "shadow_boots": {
+    "name": "暗影长靴",
+    "type": "equipment",
+    "slot": "boots",
+    "quality": "epic",
+    "attack": 0,
+    "defense": 10,
+    "hp": 60,
+    "crit_rate": 0.03,
+    "enhanceable": true
+  },
+  "bone_ring": {
+    "name": "骸骨指环",
+    "type": "equipment",
+    "slot": "ring",
+    "quality": "normal",
+    "attack": 3,
+    "defense": 0,
+    "hp": 0,
+    "enhanceable": true
+  },
+  "guardian_ring": {
+    "name": "守护指环",
+    "type": "equipment",
+    "slot": "ring",
+    "quality": "rare",
+    "attack": 0,
+    "defense": 8,
+    "hp": 40,
+    "enhanceable": true
+  },
+  "overlord_ring": {
+    "name": "霸主之戒",
+    "type": "equipment",
+    "slot": "ring",
+    "quality": "epic",
+    "attack": 12,
+    "defense": 8,
+    "hp": 50,
+    "crit_damage": 0.15,
+    "enhanceable": true
+  },
+  "defense_potion": {
+    "name": "铁壁药水",
+    "type": "consumable",
+    "effect": "defense_buff",
+    "value": 15,
+    "stackable": true,
+    "max_stack": 10
+  },
+  "attack_potion": {
+    "name": "力量药水",
+    "type": "consumable",
+    "effect": "attack_buff",
+    "value": 15,
+    "stackable": true,
+    "max_stack": 10
   }
 }

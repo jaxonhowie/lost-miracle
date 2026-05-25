@@ -26,6 +26,34 @@ layout_mode = 2
 text = "背包"
 horizontal_alignment = 1
 
+[node name="FilterBar" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BtnAll" type="Button" parent="VBoxContainer/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "全部"
+
+[node name="BtnEquip" type="Button" parent="VBoxContainer/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "装备"
+
+[node name="BtnConsume" type="Button" parent="VBoxContainer/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "消耗"
+
+[node name="BtnMaterial" type="Button" parent="VBoxContainer/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "材料"
+
+[node name="BtnSort" type="Button" parent="VBoxContainer/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "排序:默认"
+
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3

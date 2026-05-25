@@ -4,6 +4,8 @@
     {"item_id": "mid_health_potion", "price": 80},
     {"item_id": "max_health_potion", "price": 200},
     {"item_id": "speed_potion", "price": 50},
+    {"item_id": "defense_potion", "price": 60},
+    {"item_id": "attack_potion", "price": 80},
     {"item_id": "enhance_stone", "price": 100},
     {"item_id": "mid_enhance_stone", "price": 300},
     {"item_id": "high_enhance_stone", "price": 800}
@@ -20,6 +22,14 @@
     "enhance_stone": 50,
     "mid_enhance_stone": 150,
     "high_enhance_stone": 400,
-    "boss_enhance_core": 500
+    "boss_enhance_core": 500,
+    "iron_boots": 8,
+    "knight_greaves": 80,
+    "shadow_boots": 200,
+    "bone_ring": 6,
+    "guardian_ring": 80,
+    "overlord_ring": 250,
+    "defense_potion": 30,
+    "attack_potion": 40
   }
 }
