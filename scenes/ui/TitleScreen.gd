@@ -12,7 +12,7 @@ var _pending_action: String = ""
 
 func _ready():
 	confirm_panel.visible = false
-	var has_save = FileAccess.file_exists("user://save_game.json")
+	var has_save = FileAccess.file_exists("user://save.json")
 	continue_btn.disabled = not has_save
 	continue_btn.pressed.connect(_on_continue)
 	new_game_btn.pressed.connect(_on_new_game)
@@ -24,7 +24,7 @@ func _on_continue():
 	get_tree().change_scene_to_file("res://scenes/maps/DungeonFloor1.tscn")
 
 func _on_new_game():
-	if FileAccess.file_exists("user://save_game.json"):
+	if FileAccess.file_exists("user://save.json"):
 		_pending_action = "new_game"
 		confirm_label.text = "已有存档，开始新游戏将覆盖存档。\n确定继续？"
 		confirm_panel.visible = true
@@ -35,7 +35,7 @@ func _on_quit():
 	get_tree().quit()
 
 func _start_new_game():
-	DirAccess.remove_absolute("user://save_game.json")
+	DirAccess.remove_absolute("user://save.json")
 	get_tree().change_scene_to_file("res://scenes/maps/DungeonFloor1.tscn")
 
 func _on_confirm_yes():

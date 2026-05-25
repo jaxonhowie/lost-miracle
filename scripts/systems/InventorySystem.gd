@@ -4,6 +4,8 @@ signal inventory_changed
 signal item_added(item_id: String, count: int)
 signal item_used(item_id: String)
 
+const MAX_INVENTORY_SIZE: int = 50
+
 # inventory: array of { "item_id": String, "count": int } for materials
 #                       { "item_id": String, "uid": String } for equipment
 var inventory: Array = []

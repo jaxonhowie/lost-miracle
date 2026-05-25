@@ -22,6 +22,9 @@ func _ready():
 	var drop_sys = get_node_or_null("/root/DropSystem")
 	if drop_sys:
 		drop_sys.item_dropped.connect(_on_item_dropped)
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		talent_sys.talent_learned.connect(_on_talent_learned)
 
 func _process(delta):
 	if _save_dirty:
@@ -35,6 +38,9 @@ func _mark_dirty():
 	_save_timer = AUTO_SAVE_DELAY
 
 func _on_enhance_result(_uid: String, _success: bool, _new_level: int):
+	_mark_dirty()
+
+func _on_talent_learned(_talent_id: String, _new_rank: int):
 	_mark_dirty()
 
 func _on_item_dropped(item_id: String, _count: int, _position: Vector2):
@@ -119,6 +125,29 @@ func apply_save_data():
 	if spawn_sys and _pending_save.has("spawn_respawn"):
 		spawn_sys.apply_respawn_state(_pending_save["spawn_respawn"])
 
+	# Restore achievement system
+	var ach_sys = get_node_or_null("/root/AchievementSystem")
+	if ach_sys and _pending_save.has("achievements"):
+		ach_sys.load_save_data(_pending_save["achievements"])
+
+	# Restore quest system
+	var quest_sys = get_node_or_null("/root/QuestSystem")
+	if quest_sys and _pending_save.has("quests"):
+		quest_sys.load_save_data(_pending_save["quests"])
+
+	# Restore talent system
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys and _pending_save.has("talent_system"):
+		talent_sys.load_save_data(_pending_save["talent_system"])
+
+	# Restore tutorial
+	var tutorial_sys = get_tree().current_scene.get_node_or_null("TutorialSystem")
+	if tutorial_sys:
+		if _pending_save.get("tutorial_completed", false):
+			tutorial_sys.skip_and_hide()
+		elif _pending_save.has("tutorial_step") and _pending_save["tutorial_step"] > 0:
+			tutorial_sys.resume_from_step(_pending_save["tutorial_step"])
+
 	_pending_save = {}
 
 func save_game():
@@ -133,7 +162,7 @@ func save_game():
 		current_floor = spawn_sys.current_floor
 
 	var data = {
-		"version": 2,
+		"version": 3,
 		"floor": current_floor,
 		"player": {
 			"hp": player.hp,
@@ -175,6 +204,27 @@ func save_game():
 
 	if spawn_sys:
 		data["spawn_respawn"] = spawn_sys.get_respawn_state()
+
+	# Save achievement system
+	var ach_sys = get_node_or_null("/root/AchievementSystem")
+	if ach_sys:
+		data["achievements"] = ach_sys.get_save_data()
+
+	# Save quest system
+	var quest_sys = get_node_or_null("/root/QuestSystem")
+	if quest_sys:
+		data["quests"] = quest_sys.get_save_data()
+
+	# Save tutorial state
+	var tutorial_sys = get_tree().current_scene.get_node_or_null("TutorialSystem")
+	if tutorial_sys:
+		data["tutorial_completed"] = tutorial_sys.is_completed
+		data["tutorial_step"] = tutorial_sys._current_step_index
+
+	# Save talent system
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		data["talent_system"] = talent_sys.get_save_data()
 
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:

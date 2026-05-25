@@ -32,6 +32,10 @@ func _apply_level_up():
 	player.max_hp += 15
 	player.hp = player.get_total_max_hp()
 	AudioManager.play_sfx("res://assets/audio/sfx_levelup.ogg")
+	# Grant talent point
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		talent_sys.add_talent_points(1)
 
 func get_save_data() -> Dictionary:
 	return { "level": level, "xp": xp }

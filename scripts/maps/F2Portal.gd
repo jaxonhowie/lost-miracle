@@ -54,5 +54,9 @@ func _on_body_exited(body):
 
 func _input(event):
 	if _player_nearby and _active and event.is_action_pressed("equipment"):
+		# Save before transition
+		var save_sys = get_node_or_null("/root/SaveSystem")
+		if save_sys:
+			save_sys.save_game()
 		# Transition to F2
 		get_tree().change_scene_to_file("res://scenes/maps/DungeonFloor2.tscn")

@@ -374,6 +374,11 @@ func _die():
 		var level_sys = get_node_or_null("/root/LevelSystem")
 		if level_sys:
 			level_sys.add_xp(experience)
+	# Boss kill: grant talent points
+	if monster_id.begins_with("elite_") or monster_id.ends_with("_boss"):
+		var talent_sys = get_node_or_null("/root/TalentSystem")
+		if talent_sys:
+			talent_sys.add_talent_points(2)
 	# Trigger auto-save
 	var save_sys = get_node_or_null("/root/SaveSystem")
 	if save_sys:

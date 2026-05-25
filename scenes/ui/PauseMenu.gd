@@ -30,7 +30,7 @@ func _resume():
 	$Panel.visible = false
 
 func _close_all_panels():
-	var panels = ["InventoryPanel", "EquipmentPanel", "EnhancePanel", "ShopPanel"]
+	var panels = ["InventoryPanel", "EquipmentPanel", "EnhancePanel", "ShopPanel", "QuestPanel", "TalentPanel"]
 	for panel_name in panels:
 		var ui_layer = get_node_or_null("../UILayer")
 		if not ui_layer:

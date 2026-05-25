@@ -9,6 +9,15 @@ func _ready():
 
 func on_monster_died(monster_id: String, death_position: Vector2):
 	var drops = DropTableDatabase.roll_drops(monster_id)
+	# Talent bonus: luck tree increases drop rate
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		var extra_rate = talent_sys.get_bonus("drop_rate")
+		if extra_rate > 0:
+			var bonus_drops = DropTableDatabase.roll_drops(monster_id)
+			for drop in bonus_drops:
+				if randf() < extra_rate:
+					drops.append(drop)
 	for drop in drops:
 		if drop["item_id"] == "gold":
 			# Gold goes directly to player
