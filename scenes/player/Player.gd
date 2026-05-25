@@ -24,6 +24,14 @@ var is_hit: bool = false
 var hit_timer: float = 0.0
 const HIT_DURATION = 0.3
 
+# Dodge
+var is_dodging: bool = false
+var dodge_timer: float = 0.0
+var dodge_cooldown: float = 0.0
+const DODGE_DURATION: float = 0.25
+const DODGE_COOLDOWN: float = 0.8
+const DODGE_SPEED: float = 350.0
+
 # State
 var is_dead: bool = false
 var facing_right: bool = true
@@ -48,15 +56,25 @@ var combo_count: int = 0
 var combo_last_hit_ms: int = 0
 const COMBO_WINDOW_MS: int = 2000
 
+# HP regen accumulator (from talents)
+var _hp_regen_accumulator: float = 0.0
+
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite: ColorRect = $SpritePlaceholder
 @onready var hitbox: Area2D = $HitBox
 @onready var hurtbox: Area2D = $HurtBox
 
+var _anim: Node
+var _was_on_floor: bool = true
+var _anim_state: String = ""
+
 func _ready():
 	hitbox.monitoring = false
 	add_to_group("player")
 	_setup_consumable_listener()
+	_anim = preload("res://scripts/systems/ProceduralAnimator.gd").new()
+	add_child(_anim)
+	_anim.setup(sprite)
 
 func _setup_consumable_listener():
 	var inv = get_node_or_null("/root/InventorySystem")
@@ -83,6 +101,17 @@ func _physics_process(delta):
 			move_and_slide()
 			return
 
+	# Dodge
+	if is_dodging:
+		dodge_timer -= delta
+		if dodge_timer <= 0:
+			is_dodging = false
+		velocity.y += GRAVITY * delta
+		move_and_slide()
+		return
+	if dodge_cooldown > 0:
+		dodge_cooldown -= delta
+
 	# Gravity
 	if not is_on_floor():
 		velocity.y += GRAVITY * delta
@@ -91,13 +120,28 @@ func _physics_process(delta):
 	if attack_cooldown_timer > 0:
 		attack_cooldown_timer -= delta
 
+	# HP regen from talents
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		var regen_rate = talent_sys.get_stat_bonus("hp_regen")
+		if regen_rate > 0:
+			_hp_regen_accumulator += regen_rate * delta
+			var regen_amount = int(_hp_regen_accumulator)
+			if regen_amount > 0:
+				hp = mini(hp + regen_amount, get_total_max_hp())
+				_hp_regen_accumulator -= regen_amount
+
 	# Movement (apply speed buff)
 	var move_speed = MOVE_SPEED
 	if _buffs.has("speed"):
 		move_speed *= 1.5
+	if is_dodging:
+		move_speed = DODGE_SPEED
 
 	var direction = Input.get_axis("ui_left", "ui_right")
-	if direction != 0 and not is_attacking:
+	if is_dodging:
+		velocity.x = (1 if facing_right else -1) * DODGE_SPEED
+	elif direction != 0 and not is_attacking:
 		velocity.x = direction * move_speed
 		facing_right = direction > 0
 		sprite.scale.x = 1 if facing_right else -1
@@ -106,12 +150,18 @@ func _physics_process(delta):
 	else:
 		velocity.x = move_toward(velocity.x, 0, move_speed)
 
+	# Dodge
+	if Input.is_action_just_pressed("dodge") and not is_dodging and dodge_cooldown <= 0 and not is_attacking:
+		is_dodging = true
+		dodge_timer = DODGE_DURATION
+		dodge_cooldown = DODGE_COOLDOWN
+
 	# Jump
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor() and not is_attacking:
+	if Input.is_action_just_pressed("ui_accept") and is_on_floor() and not is_attacking and not is_dodging:
 		velocity.y = JUMP_VELOCITY
 
 	# Attack
-	if Input.is_action_just_pressed("attack") and attack_cooldown_timer <= 0 and not is_attacking:
+	if Input.is_action_just_pressed("attack") and attack_cooldown_timer <= 0 and not is_attacking and not is_dodging:
 		_start_attack()
 
 	# Skills
@@ -144,17 +194,39 @@ func _start_attack():
 func _update_animation(direction):
 	if is_attacking:
 		anim_player.play("attack")
+		_anim_state = "attack"
 	elif is_hit:
 		anim_player.play("hit")
+		_anim_state = "hit"
+	elif is_dodging:
+		if _anim_state != "dodge":
+			_anim.stop_all()
+			_anim.lean(15.0 if facing_right else -15.0)
+			_anim_state = "dodge"
 	elif not is_on_floor():
-		anim_player.play("jump")
+		if _anim_state != "jump":
+			_anim.stop_all()
+			_anim.breathe(0.02, 3.0)
+			_anim_state = "jump"
 	elif direction != 0:
-		anim_player.play("run")
+		if _anim_state != "run":
+			_anim.stop_all()
+			_anim.bounce(2.0, 10.0)
+			_anim.lean(5.0 if direction > 0 else -5.0)
+			_anim_state = "run"
 	else:
-		anim_player.play("idle")
+		if _anim_state != "idle":
+			_anim.stop_all()
+			_anim.breathe()
+			_anim.reset_lean()
+			_anim_state = "idle"
+	# Land detection
+	if is_on_floor() and not _was_on_floor:
+		_anim.squash_stretch(0.12, 0.15)
+	_was_on_floor = is_on_floor()
 
 func take_damage(raw_damage: int, attacker_position: Vector2):
-	if is_dead:
+	if is_dead or is_dodging:
 		return
 
 	var total_defense = get_total_defense()
@@ -214,33 +286,52 @@ func get_total_attack() -> int:
 	var base = attack
 	if equip_sys:
 		base += equip_sys.get_total_stats()["attack"]
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		base += talent_sys.get_stat_bonus("attack")
 	if _buffs.has("war_cry"):
 		base = int(base * 1.3)
 	return base
 
 func get_total_defense() -> int:
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	var base = defense
 	if equip_sys:
-		return defense + equip_sys.get_total_stats()["defense"]
-	return defense
+		base += equip_sys.get_total_stats()["defense"]
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		base += talent_sys.get_stat_bonus("defense")
+	return base
 
 func get_total_max_hp() -> int:
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	var base = max_hp
 	if equip_sys:
-		return max_hp + equip_sys.get_total_stats()["hp"]
-	return max_hp
+		base += equip_sys.get_total_stats()["hp"]
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		base += talent_sys.get_stat_bonus("max_hp")
+	return base
 
 func get_total_crit_rate() -> float:
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	var base = crit_rate
 	if equip_sys:
-		return crit_rate + equip_sys.get_total_stats()["crit_rate"]
-	return crit_rate
+		base += equip_sys.get_total_stats()["crit_rate"]
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		base += talent_sys.get_stat_bonus("crit_rate")
+	return base
 
 func get_total_crit_damage() -> float:
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	var base = crit_damage
 	if equip_sys:
-		return crit_damage + equip_sys.get_total_stats()["crit_damage"]
-	return crit_damage
+		base += equip_sys.get_total_stats()["crit_damage"]
+	var talent_sys = get_node_or_null("/root/TalentSystem")
+	if talent_sys:
+		base += talent_sys.get_stat_bonus("crit_damage")
+	return base
 
 func _process_skills(delta):
 	for skill_id in _skill_cooldowns:
