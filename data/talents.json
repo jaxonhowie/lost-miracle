@@ -1,0 +1,123 @@
+{
+	"respec_gold_cost": 500,
+	"categories": [
+		{
+			"id": "power",
+			"name": "力量",
+			"description": "提升攻击能力",
+			"talents": [
+				{
+					"id": "power_attack",
+					"name": "攻击强化",
+					"description": "永久提升基础攻击力",
+					"stat_key": "attack",
+					"bonus_per_rank": 3,
+					"max_rank": 5,
+					"bonus_type": "flat"
+				},
+				{
+					"id": "power_crit_dmg",
+					"name": "暴击伤害",
+					"description": "提升暴击伤害倍率",
+					"stat_key": "crit_damage",
+					"bonus_per_rank": 0.10,
+					"max_rank": 5,
+					"bonus_type": "flat"
+				},
+				{
+					"id": "power_penetrate",
+					"name": "穿透打击",
+					"description": "提升暴击率",
+					"stat_key": "crit_rate",
+					"bonus_per_rank": 0.02,
+					"max_rank": 3,
+					"bonus_type": "flat"
+				}
+			]
+		},
+		{
+			"id": "resilience",
+			"name": "坚韧",
+			"description": "提升生存能力",
+			"talents": [
+				{
+					"id": "res_hp",
+					"name": "生命强化",
+					"description": "永久提升最大生命值",
+					"stat_key": "max_hp",
+					"bonus_per_rank": 20,
+					"max_rank": 5,
+					"bonus_type": "flat"
+				},
+				{
+					"id": "res_defense",
+					"name": "防御强化",
+					"description": "永久提升防御力",
+					"stat_key": "defense",
+					"bonus_per_rank": 2,
+					"max_rank": 5,
+					"bonus_type": "flat"
+				},
+				{
+					"id": "res_regen",
+					"name": "生命回复",
+					"description": "每秒恢复生命值",
+					"stat_key": "hp_regen",
+					"bonus_per_rank": 1.0,
+					"max_rank": 3,
+					"bonus_type": "flat"
+				}
+			]
+		},
+		{
+			"id": "finesse",
+			"name": "技巧",
+			"description": "提升战斗技巧",
+			"talents": [
+				{
+					"id": "finesse_crit",
+					"name": "精准打击",
+					"description": "提升暴击率",
+					"stat_key": "crit_rate",
+					"bonus_per_rank": 0.02,
+					"max_rank": 5,
+					"bonus_type": "flat"
+				},
+				{
+					"id": "finesse_speed",
+					"name": "疾风步",
+					"description": "提升移动速度",
+					"stat_key": "move_speed",
+					"bonus_per_rank": 0.05,
+					"max_rank": 3,
+					"bonus_type": "percent"
+				}
+			]
+		},
+		{
+			"id": "fortune",
+			"name": "幸运",
+			"description": "提升战利品收益",
+			"talents": [
+				{
+					"id": "fortune_gold",
+					"name": "财运亨通",
+					"description": "提升金币掉落量",
+					"stat_key": "gold_bonus",
+					"bonus_per_rank": 0.10,
+					"max_rank": 5,
+					"bonus_type": "percent"
+				},
+				{
+					"id": "fortune_drop",
+					"name": "宝藏猎人",
+					"description": "提升物品掉落率",
+					"stat_key": "drop_rate",
+					"bonus_per_rank": 0.05,
+					"max_rank": 5,
+					"bonus_type": "percent"
+				}
+			]
+		}
+	]
+}

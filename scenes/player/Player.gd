@@ -123,7 +123,7 @@ func _physics_process(delta):
 	# HP regen from talents
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
-		var regen_rate = talent_sys.get_stat_bonus("hp_regen")
+		var regen_rate = talent_sys.get_bonus("hp_regen")
 		if regen_rate > 0:
 			_hp_regen_accumulator += regen_rate * delta
 			var regen_amount = int(_hp_regen_accumulator)
@@ -288,7 +288,7 @@ func get_total_attack() -> int:
 		base += equip_sys.get_total_stats()["attack"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
-		base += talent_sys.get_stat_bonus("attack")
+		base += talent_sys.get_bonus("attack")
 	if _buffs.has("war_cry"):
 		base = int(base * 1.3)
 	return base
@@ -300,7 +300,7 @@ func get_total_defense() -> int:
 		base += equip_sys.get_total_stats()["defense"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
-		base += talent_sys.get_stat_bonus("defense")
+		base += talent_sys.get_bonus("defense")
 	return base
 
 func get_total_max_hp() -> int:
@@ -310,7 +310,7 @@ func get_total_max_hp() -> int:
 		base += equip_sys.get_total_stats()["hp"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
-		base += talent_sys.get_stat_bonus("max_hp")
+		base += talent_sys.get_bonus("max_hp")
 	return base
 
 func get_total_crit_rate() -> float:
@@ -320,7 +320,7 @@ func get_total_crit_rate() -> float:
 		base += equip_sys.get_total_stats()["crit_rate"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
-		base += talent_sys.get_stat_bonus("crit_rate")
+		base += talent_sys.get_bonus("crit_rate")
 	return base
 
 func get_total_crit_damage() -> float:
@@ -330,7 +330,7 @@ func get_total_crit_damage() -> float:
 		base += equip_sys.get_total_stats()["crit_damage"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
-		base += talent_sys.get_stat_bonus("crit_damage")
+		base += talent_sys.get_bonus("crit_damage")
 	return base
 
 func _process_skills(delta):
