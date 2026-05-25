@@ -8,6 +8,7 @@ func _setup_stats():
 	super()
 	sprite.color = Color(0.6, 0.55, 0.4, 0.8)
 	sprite.size = Vector2(30, 30)
+	collision_mask = 0
 
 func _physics_process(delta):
 	super(delta)
