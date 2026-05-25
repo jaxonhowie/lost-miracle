@@ -1,0 +1,204 @@
+{
+	"achievements": [
+		{
+			"id": "first_kill",
+			"name": "初出茅庐",
+			"description": "击杀第一只怪物",
+			"icon": "sword",
+			"condition": "total_kills >= 1",
+			"reward_gold": 10
+		},
+		{
+			"id": "kill_100",
+			"name": "百人斩",
+			"description": "累计击杀100只怪物",
+			"icon": "sword",
+			"condition": "total_kills >= 100",
+			"reward_gold": 200
+		},
+		{
+			"id": "kill_500",
+			"name": "千军破",
+			"description": "累计击杀500只怪物",
+			"icon": "sword",
+			"condition": "total_kills >= 500",
+			"reward_gold": 500
+		},
+		{
+			"id": "first_boss",
+			"name": "屠龙者",
+			"description": "首次击杀Boss",
+			"icon": "skull",
+			"condition": "boss_kills >= 1",
+			"reward_gold": 100
+		},
+		{
+			"id": "elite_hunter",
+			"name": "精英猎手",
+			"description": "击杀10只精英怪",
+			"icon": "skull",
+			"condition": "elite_kills >= 10",
+			"reward_gold": 150
+		},
+		{
+			"id": "first_enhance",
+			"name": "初次锻造",
+			"description": "首次强化装备成功",
+			"icon": "hammer",
+			"condition": "enhance_successes >= 1",
+			"reward_gold": 20
+		},
+		{
+			"id": "enhance_master",
+			"name": "锻造大师",
+			"description": "将任意装备强化到+10",
+			"icon": "hammer",
+			"condition": "max_enhance >= 10",
+			"reward_gold": 500
+		},
+		{
+			"id": "enhance_10",
+			"name": "坚持不懈",
+			"description": "累计强化10次",
+			"icon": "hammer",
+			"condition": "enhance_attempts >= 10",
+			"reward_gold": 50
+		},
+		{
+			"id": "level_5",
+			"name": "初有所成",
+			"description": "达到5级",
+			"icon": "star",
+			"condition": "max_level >= 5",
+			"reward_gold": 50
+		},
+		{
+			"id": "level_10",
+			"name": "身经百战",
+			"description": "达到10级",
+			"icon": "star",
+			"condition": "max_level >= 10",
+			"reward_gold": 200
+		},
+		{
+			"id": "explore_floor_2",
+			"name": "深入地牢",
+			"description": "到达地牢第二层",
+			"icon": "map",
+			"condition": "floors_explored >= 2",
+			"reward_gold": 30
+		},
+		{
+			"id": "death_10",
+			"name": "不屈之魂",
+			"description": "死亡10次后继续战斗",
+			"icon": "skull",
+			"condition": "total_deaths >= 10",
+			"reward_gold": 50
+		},
+		{
+			"id": "death_50",
+			"name": "百折不挠",
+			"description": "死亡50次",
+			"icon": "skull",
+			"condition": "total_deaths >= 50",
+			"reward_gold": 200
+		},
+		{
+			"id": "skeleton_slayer",
+			"name": "骷髅克星",
+			"description": "击杀50只骷髅兵",
+			"icon": "sword",
+			"condition": "kills_by_type/skeleton_soldier >= 50",
+			"reward_gold": 100
+		},
+		{
+			"id": "gold_hoarder",
+			"name": "守财奴",
+			"description": "累计获得1000金币",
+			"icon": "coin",
+			"condition": "total_gold >= 1000",
+			"reward_gold": 100
+		},
+		{
+			"id": "combo_5",
+			"name": "连击入门",
+			"description": "达成5连击",
+			"icon": "star",
+			"condition": "max_combo >= 5",
+			"reward_gold": 30
+		},
+		{
+			"id": "combo_20",
+			"name": "连击大师",
+			"description": "达成20连击",
+			"icon": "star",
+			"condition": "max_combo >= 20",
+			"reward_gold": 200
+		},
+		{
+			"id": "kill_1000",
+			"name": "万人敌",
+			"description": "累计击杀1000只怪物",
+			"icon": "sword",
+			"condition": "total_kills >= 1000",
+			"reward_gold": 1000
+		},
+		{
+			"id": "gold_5000",
+			"name": "富甲一方",
+			"description": "累计获得5000金币",
+			"icon": "coin",
+			"condition": "total_gold >= 5000",
+			"reward_gold": 500
+		},
+		{
+			"id": "enhance_50",
+			"name": "百炼成钢",
+			"description": "累计强化50次",
+			"icon": "hammer",
+			"condition": "enhance_attempts >= 50",
+			"reward_gold": 300
+		},
+		{
+			"id": "consumable_10",
+			"name": "药罐子",
+			"description": "使用10次消耗品",
+			"icon": "star",
+			"condition": "consumables_used >= 10",
+			"reward_gold": 30
+		},
+		{
+			"id": "consumable_100",
+			"name": "药王",
+			"description": "使用100次消耗品",
+			"icon": "star",
+			"condition": "consumables_used >= 100",
+			"reward_gold": 200
+		},
+		{
+			"id": "level_15",
+			"name": "登峰造极",
+			"description": "达到15级",
+			"icon": "star",
+			"condition": "max_level >= 15",
+			"reward_gold": 500
+		},
+		{
+			"id": "no_death_boss",
+			"name": "无伤屠Boss",
+			"description": "不死亡击杀Boss",
+			"icon": "skull",
+			"condition": "boss_kills_no_death >= 1",
+			"reward_gold": 1000
+		},
+		{
+			"id": "all_epic",
+			"name": "全身紫装",
+			"description": "穿戴4件史诗装备",
+			"icon": "star",
+			"condition": "epic_equipped >= 4",
+			"reward_gold": 800
+		}
+	]
+}

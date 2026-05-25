@@ -24,17 +24,18 @@ res://
     monsters/        — BaseMonster.tscn/gd + per-monster scenes
     maps/            — DungeonFloor1.tscn/gd
     items/           — DropItem.tscn/gd
-    ui/              — HUD, Inventory, Equipment, Enhance panels
+    npcs/            — QuestNPC.gd
+    ui/              — HUD, Inventory, Equipment, Enhance, Talent, Quest panels
   scripts/
-    systems/         — Drop, Spawn, Inventory, Equipment, Enhance, Save systems
+    systems/         — Drop, Spawn, Inventory, Equipment, Enhance, Save, Achievement, Quest, Talent systems
     data/            — Database autoloads (Item, Monster, DropTable)
-  data/              — JSON data files (items, monsters, drops, spawns)
+  data/              — JSON data files (items, monsters, drops, spawns, talents, achievements, quests)
 ```
 
 ### Core Systems
 
 - **Data-driven design**: All item/monster/drop definitions live in JSON files under `data/`, not hardcoded in scripts.
-- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `ThemeSystem`, `AudioManager`, `VFX`, `MonsterDatabase`, `LevelSystem`, `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`, `EquipmentSystem`, `EnhanceSystem`, `SpawnSystem`, `DifficultySystem`, `SaveSystem`, `ShopSystem`.
+- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `ThemeSystem`, `AudioManager`, `VFX`, `MonsterDatabase`, `LevelSystem`, `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`, `EquipmentSystem`, `EnhanceSystem`, `SpawnSystem`, `DifficultySystem`, `SaveSystem`, `ShopSystem`, `AchievementSystem`, `QuestSystem`, `TalentSystem`.
 - **Monsters use inheritance**: BaseMonster provides the state machine (Idle/Patrol/Chase/Attack/Hit/Dead); individual monsters extend it.
 - **Equipment instances**: Equipped items have a unique UID and enhance level — they are NOT just item_id references.
 
@@ -70,6 +71,15 @@ if crit: final_damage *= crit_damage
 
 Mobs must not respawn if player is within 300px of spawn point. Max 6 mobs per area.
 
+### Talent System
+
+- 4 categories (力量/坚韧/技巧/幸运), 10 talents, 44 total ranks
+- Talent points: +1 per level-up, +2 per boss kill
+- Respec costs 500 gold, refunds all points
+- Stat computation chain: `base + equipment + talent + buff(war_cry)`
+- HP regen uses float accumulator for fractional regen values
+- `data/talents.json` defines all talent data
+
 ## Development Order
 
 1. Player movement, jumping, attack
@@ -93,12 +103,15 @@ Do NOT start with Boss or enhancement UI. Get "kill mob → loot → equip → g
 |--------|-----|
 | Move | A / D |
 | Jump | Space |
+| Dodge | Shift |
 | Attack | Left Mouse Button |
 | Skills 1/2/3 | 1 / 2 / 3 |
 | Quick Item 1 | F1 |
 | Inventory | Tab |
 | Equipment / Shop | E |
 | Enhance | R |
+| Quest Panel | Q |
+| Talent Panel | T |
 | Pause | Escape |
 
 ## Art Specs

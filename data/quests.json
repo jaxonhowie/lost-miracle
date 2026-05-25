@@ -1,0 +1,154 @@
+{
+	"quests": [
+		{
+			"id": "first_blood",
+			"name": "初战告捷",
+			"description": "击杀1只骷髅兵",
+			"type": "kill",
+			"target_id": "skeleton_soldier",
+			"target_count": 1,
+			"prerequisite": "",
+			"reward_gold": 20
+		},
+		{
+			"id": "skeleton_hunter",
+			"name": "骷髅猎人",
+			"description": "击杀10只骷髅兵",
+			"type": "kill",
+			"target_id": "skeleton_soldier",
+			"target_count": 10,
+			"prerequisite": "first_blood",
+			"reward_gold": 80
+		},
+		{
+			"id": "clear_floor_1",
+			"name": "清扫地牢",
+			"description": "击杀30只任意怪物",
+			"type": "kill",
+			"target_id": "",
+			"target_count": 30,
+			"prerequisite": "skeleton_hunter",
+			"reward_gold": 200
+		},
+		{
+			"id": "elite_slayer",
+			"name": "精英挑战",
+			"description": "击杀1只精英怪",
+			"type": "kill",
+			"target_id": "",
+			"target_count": 1,
+			"prerequisite": "",
+			"reward_gold": 50
+		},
+		{
+			"id": "boss_hunter",
+			"name": "讨伐Boss",
+			"description": "击杀Boss",
+			"type": "kill",
+			"target_id": "",
+			"target_count": 1,
+			"prerequisite": "elite_slayer",
+			"reward_gold": 150
+		},
+		{
+			"id": "gear_up",
+			"name": "初次强化",
+			"description": "将任意装备强化到+3",
+			"type": "enhance",
+			"target_id": "",
+			"target_count": 3,
+			"prerequisite": "",
+			"reward_gold": 30
+		},
+		{
+			"id": "power_enhance",
+			"name": "精工锻造",
+			"description": "将任意装备强化到+7",
+			"type": "enhance",
+			"target_id": "",
+			"target_count": 7,
+			"prerequisite": "gear_up",
+			"reward_gold": 200
+		},
+		{
+			"id": "reach_level_5",
+			"name": "初有所成",
+			"description": "达到5级",
+			"type": "level",
+			"target_id": "",
+			"target_count": 5,
+			"prerequisite": "",
+			"reward_gold": 50
+		},
+		{
+			"id": "ghost_hunter",
+			"name": "幽魂猎人",
+			"description": "击杀10只幽魂",
+			"type": "kill",
+			"target_id": "ghost",
+			"target_count": 10,
+			"prerequisite": "first_blood",
+			"reward_gold": 60
+		},
+		{
+			"id": "clear_floor_2",
+			"name": "二层清扫",
+			"description": "击杀50只任意怪物",
+			"type": "kill",
+			"target_id": "",
+			"target_count": 50,
+			"prerequisite": "clear_floor_1",
+			"reward_gold": 300
+		},
+		{
+			"id": "boss_rush",
+			"name": "Boss连讨",
+			"description": "击杀3只Boss",
+			"type": "kill",
+			"target_id": "",
+			"target_count": 3,
+			"prerequisite": "boss_hunter",
+			"reward_gold": 500
+		},
+		{
+			"id": "collect_bones",
+			"name": "骨片收集",
+			"description": "收集20个破碎骨片",
+			"type": "collect",
+			"target_id": "broken_bone",
+			"target_count": 20,
+			"prerequisite": "first_blood",
+			"reward_gold": 40
+		},
+		{
+			"id": "collect_crystals",
+			"name": "水晶收集",
+			"description": "收集15个水晶碎片",
+			"type": "collect",
+			"target_id": "crystal_shard",
+			"target_count": 15,
+			"prerequisite": "",
+			"reward_gold": 80
+		},
+		{
+			"id": "enhance_10",
+			"name": "满强化",
+			"description": "将任意装备强化到+10",
+			"type": "enhance",
+			"target_id": "",
+			"target_count": 10,
+			"prerequisite": "power_enhance",
+			"reward_gold": 500
+		},
+		{
+			"id": "reach_level_10",
+			"name": "大成之路",
+			"description": "达到10级",
+			"type": "level",
+			"target_id": "",
+			"target_count": 10,
+			"prerequisite": "reach_level_5",
+			"reward_gold": 200
+		}
+	]
+}
