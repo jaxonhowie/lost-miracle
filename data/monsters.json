@@ -5,7 +5,8 @@
     "defense": 1,
     "move_speed": 80.0,
     "attack_interval": 1.2,
-    "experience": 5
+    "experience": 5,
+    "description": "生前是认真的守卫，死后依然在巡逻，只是偶尔会对墙壁敬礼。"
   },
   "zombie": {
     "hp": 100,
@@ -13,7 +14,8 @@
     "defense": 2,
     "move_speed": 45.0,
     "attack_interval": 1.6,
-    "experience": 7
+    "experience": 7,
+    "description": "曾经是农民，现在是最慢的追击者。它追你的时候你可以先去泡杯茶。"
   },
   "ghost": {
     "hp": 60,
@@ -21,7 +23,8 @@
     "defense": 0,
     "move_speed": 120.0,
     "attack_interval": 1.4,
-    "experience": 8
+    "experience": 8,
+    "description": "社恐幽灵，飘过来问你有没有空，然后自己也不知道要干嘛。"
   },
   "elite_skeleton_knight": {
     "hp": 350,
@@ -29,7 +32,8 @@
     "defense": 6,
     "move_speed": 95.0,
     "attack_interval": 1.1,
-    "experience": 50
+    "experience": 50,
+    "description": "骷髅兵的进化版，多了盔甲和自尊心，坚信自己生前是大人物。"
   },
   "elite_necromancer": {
     "hp": 300,
@@ -37,7 +41,8 @@
     "defense": 3,
     "move_speed": 60.0,
     "attack_interval": 1.8,
-    "experience": 60
+    "experience": 60,
+    "description": "复活术成功率3%的法师，剩下的97%都成了你的经验值。"
   },
   "grave_keeper_boss": {
     "hp": 1400,
@@ -45,7 +50,8 @@
     "defense": 10,
     "move_speed": 70.0,
     "attack_interval": 1.5,
-    "experience": 200
+    "experience": 200,
+    "description": "地牢的物业管理者，对每座坟墓都有深厚感情。你踩到花花草草它会很生气。"
   },
   "summoned_skeleton": {
     "hp": 30,
@@ -53,7 +59,8 @@
     "defense": 0,
     "move_speed": 90.0,
     "attack_interval": 1.0,
-    "experience": 0
+    "experience": 0,
+    "description": "法师用3%成功率召唤出来的精锐，和刚被放出笼的猫一样到处乱跑。"
   },
   "crystal_golem": {
     "hp": 180,
@@ -61,7 +68,8 @@
     "defense": 8,
     "move_speed": 40.0,
     "attack_interval": 2.0,
-    "experience": 18
+    "experience": 18,
+    "description": "全身水晶构成的巨人，最讨厌别人说它中看不中用。"
   },
   "dark_assassin": {
     "hp": 90,
@@ -69,7 +77,8 @@
     "defense": 2,
     "move_speed": 160.0,
     "attack_interval": 0.8,
-    "experience": 15
+    "experience": 15,
+    "description": "自以为很隐蔽，实际上它那闪亮的水晶匕首出卖了它。"
   },
   "wraith": {
     "hp": 120,
@@ -77,7 +86,8 @@
     "defense": 3,
     "move_speed": 100.0,
     "attack_interval": 1.5,
-    "experience": 16
+    "experience": 16,
+    "description": "比幽灵更有存在感的怨灵，至少它还记得自己在生气，虽然忘了为什么。"
   },
   "elite_crystal_guardian": {
     "hp": 600,
@@ -85,7 +95,8 @@
     "defense": 15,
     "move_speed": 60.0,
     "attack_interval": 1.8,
-    "experience": 120
+    "experience": 120,
+    "description": "水晶保安队长，如果你称赞它的水晶，它会害羞地停下来聊天。"
   },
   "elite_shadow_lord": {
     "hp": 500,
@@ -93,7 +104,8 @@
     "defense": 8,
     "move_speed": 130.0,
     "attack_interval": 1.2,
-    "experience": 140
+    "experience": 140,
+    "description": "自称暗影王子而非小Boss，叫它二把手它也会暴怒。"
   },
   "crystal_overlord_boss": {
     "hp": 2800,
@@ -101,6 +113,7 @@
     "defense": 18,
     "move_speed": 55.0,
     "attack_interval": 1.6,
-    "experience": 500
+    "experience": 500,
+    "description": "每天花两小时保养水晶外壳，必杀技是闪瞎你的眼。"
   }
 }

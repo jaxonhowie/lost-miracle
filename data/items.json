@@ -3,79 +3,92 @@
     "name": "金币",
     "type": "currency",
     "stackable": true,
-    "max_stack": 99999
+    "max_stack": 99999,
+    "description": "王国通用货币，虽然王国已经没了，但钱还是钱。"
   },
   "broken_bone": {
     "name": "破碎骨片",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "摸起来嘎吱作响，别问为什么你知道。"
   },
   "rotten_leather": {
     "name": "腐烂皮革",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "散发着'古早味'的皮革，建议用夹子夹着携带。"
   },
   "ghost_fragment": {
     "name": "幽魂残片",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "冰凉的半透明碎片，拿在手里会听到细微的叹息声。"
   },
   "knight_medal": {
     "name": "骑士骨章",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "骷髅骑士的荣誉勋章，上面刻着'本月最佳巡逻员'。"
   },
   "iron_shard": {
     "name": "精铁碎片",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "从各种生锈的东西上掰下来的，质量参差不齐。"
   },
   "necromancer_dust": {
     "name": "亡灵法尘",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "亡灵法师施法后掉落的灰尘，据说闻起来像黑咖啡加旧书。"
   },
   "soul_crystal": {
     "name": "灵魂结晶",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "凝固的灵魂能量，拿近耳朵能听到'救救我'和'今天天气不错'的混合声。"
   },
   "grave_keeper_token": {
     "name": "守墓人徽记",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "守墓人的身份证明，背面刻着'专业守墓300年，好评率99%'。"
   },
   "enhance_stone": {
     "name": "强化石",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "装备强化的必需品，成功率不保证但仪式感满满。"
   },
   "mid_enhance_stone": {
     "name": "中级强化石",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "比普通强化石更闪亮，所以成功率肯定更高……大概。"
   },
   "high_enhance_stone": {
     "name": "高级强化石",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "传说中的强化神器，虽然用起来还是会失败，但失败得很高级。"
   },
   "boss_enhance_core": {
     "name": "Boss强化核心",
     "type": "material",
     "stackable": true,
-    "max_stack": 99
+    "max_stack": 99,
+    "description": "Boss身上掉出来的核心，散发着'我很贵'的气息。"
   },
   "health_potion": {
     "name": "生命药水",
@@ -83,7 +96,8 @@
     "effect": "heal",
     "value": 50,
     "stackable": true,
-    "max_stack": 20
+    "max_stack": 20,
+    "description": "基础款恢复药水，味道像草莓味的创可贴。"
   },
   "mid_health_potion": {
     "name": "中级生命药水",
@@ -91,7 +105,8 @@
     "effect": "heal",
     "value": 120,
     "stackable": true,
-    "max_stack": 20
+    "max_stack": 20,
+    "description": "升级版恢复药水，恢复量翻倍，味道也翻倍——更难喝了。"
   },
   "max_health_potion": {
     "name": "高级生命药水",
@@ -99,7 +114,8 @@
     "effect": "heal",
     "value": -1,
     "stackable": true,
-    "max_stack": 10
+    "max_stack": 10,
+    "description": "一口回满，堪称液体版的'妈妈的拥抱'。"
   },
   "speed_potion": {
     "name": "速度药水",
@@ -107,7 +123,8 @@
     "effect": "speed",
     "value": 10,
     "stackable": true,
-    "max_stack": 10
+    "max_stack": 10,
+    "description": "喝完感觉自己能追上风，虽然风从来没跑过。"
   },
   "rusty_sword": {
     "name": "生锈短剑",
@@ -117,7 +134,8 @@
     "attack": 6,
     "defense": 0,
     "hp": 0,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "你的第一把武器，虽然锈迹斑斑但胜在……便宜？"
   },
   "skeleton_knight_sword": {
     "name": "骷髅骑士长剑",
@@ -128,7 +146,8 @@
     "defense": 0,
     "hp": 0,
     "crit_rate": 0.03,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "骑士生前的佩剑，现在被你继承了。剑柄上刻着'小心使用，勿对队友'。"
   },
   "grave_keeper_greatsword": {
     "name": "守墓人巨剑",
@@ -139,7 +158,8 @@
     "defense": 0,
     "hp": 0,
     "crit_damage": 0.2,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "守墓人的看家武器，专门用来……修剪墓地的杂草。对，修剪杂草。"
   },
   "necromancer_staff": {
     "name": "亡灵法杖",
@@ -149,7 +169,8 @@
     "attack": 28,
     "defense": 0,
     "hp": 0,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "法师的法杖，顶端的骷髅头会在你挥砍时发出'哎呀'的声音。"
   },
   "old_armor": {
     "name": "破旧护甲",
@@ -159,7 +180,8 @@
     "attack": 0,
     "defense": 3,
     "hp": 20,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "看起来不太靠谱，但总比穿着睡衣打怪强。"
   },
   "rotten_gauntlet": {
     "name": "腐尸护手",
@@ -169,7 +191,8 @@
     "attack": 0,
     "defense": 5,
     "hp": 30,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "从僵尸身上扒下来的护手，味道需要适应一下。"
   },
   "rough_iron_armor": {
     "name": "粗糙铁甲",
@@ -179,7 +202,8 @@
     "attack": 0,
     "defense": 7,
     "hp": 40,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "铁匠学徒的作品，粗糙但结实。穿上去像个会走路的冰箱。"
   },
   "knight_chestplate": {
     "name": "骑士胸甲",
@@ -189,7 +213,8 @@
     "attack": 0,
     "defense": 12,
     "hp": 80,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "正统骑士团的制式胸甲，上面的徽记已经模糊，但依然能感受到当年的荣耀。"
   },
   "grave_keeper_heavy_armor": {
     "name": "守墓人重甲",
@@ -199,7 +224,8 @@
     "attack": 0,
     "defense": 24,
     "hp": 160,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "守墓人的专属重甲，厚实得连亡灵都咬不动。附带墓地泥土的清香。"
   },
   "mage_cloak": {
     "name": "法师披风",
@@ -209,7 +235,8 @@
     "attack": 5,
     "defense": 8,
     "hp": 50,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "亡灵法师的披风，穿上后会不自觉地想说'嘎嘎嘎'。"
   },
   "soul_cloth_boots": {
     "name": "灵魂布靴",
@@ -219,7 +246,8 @@
     "attack": 0,
     "defense": 2,
     "hp": 10,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "用灵魂能量编织的布靴，穿上后走路悄无声息。缺点是偶尔会听到鞋子在叹气。"
   },
   "shadow_ring": {
     "name": "暗影戒指",
@@ -229,7 +257,8 @@
     "attack": 4,
     "defense": 0,
     "hp": 0,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "暗影能量凝结的戒指，戴上后手指会变凉，但攻击力会变热。"
   },
   "undead_ring": {
     "name": "亡灵戒指",
@@ -239,25 +268,29 @@
     "attack": 15,
     "defense": 5,
     "hp": 30,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "亡灵之王的遗物，戴上后你会觉得自己很有'死亡气息'。"
   },
   "crystal_shard": {
     "name": "水晶碎片",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "闪闪发光的水晶碎片，看起来很值钱但没人收购。"
   },
   "shadow_essence": {
     "name": "暗影精华",
     "type": "material",
     "stackable": true,
-    "max_stack": 999
+    "max_stack": 999,
+    "description": "浓缩的暗影能量，瓶子里看起来像黑色的果冻。"
   },
   "overlord_core": {
     "name": "霸主核心",
     "type": "material",
     "stackable": true,
-    "max_stack": 99
+    "max_stack": 99,
+    "description": "水晶霸主的核心碎片，散发着'我曾经是国王'的傲气。"
   },
   "crystal_sword": {
     "name": "水晶长剑",
@@ -268,7 +301,8 @@
     "defense": 0,
     "hp": 0,
     "crit_rate": 0.05,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "水晶打造的长剑，锋利且闪亮。缺点是反光会晃到自己的眼睛。"
   },
   "shadow_blade": {
     "name": "暗影之刃",
@@ -279,7 +313,8 @@
     "defense": 0,
     "hp": 0,
     "crit_damage": 0.25,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "暗影能量凝聚的刀刃，砍中敌人后会听到'嘶'的一声——是刀在笑。"
   },
   "crystal_armor": {
     "name": "水晶铠甲",
@@ -289,7 +324,8 @@
     "attack": 0,
     "defense": 18,
     "hp": 120,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "水晶材质的铠甲，防御力高且自带反光效果。穿上去像个会走路的迪斯科球。"
   },
   "crystal_greaves": {
     "name": "水晶护胫",
@@ -299,7 +335,8 @@
     "attack": 0,
     "defense": 8,
     "hp": 50,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "水晶护胫，走路时会发出清脆的叮当声。敌人听到就知道你来了。"
   },
   "crystal_ring": {
     "name": "水晶指环",
@@ -309,7 +346,8 @@
     "attack": 10,
     "defense": 5,
     "hp": 20,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "水晶指环，戴上后手指闪闪发光，适合在黑暗中找钥匙。"
   },
   "overlord_greatsword": {
     "name": "霸主巨剑",
@@ -321,7 +359,8 @@
     "hp": 0,
     "crit_rate": 0.05,
     "crit_damage": 0.3,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "水晶霸主的佩剑，巨大且闪亮。挥舞时会留下水晶残影，非常拉风。"
   },
   "overlord_plate": {
     "name": "霸主重甲",
@@ -331,7 +370,8 @@
     "attack": 0,
     "defense": 32,
     "hp": 220,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "国王的战甲，穿上后你会不自觉地挺胸抬头，感觉自己是全地牢最闪亮的。"
   },
   "iron_boots": {
     "name": "粗铁战靴",
@@ -341,7 +381,8 @@
     "attack": 0,
     "defense": 2,
     "hp": 10,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "粗铁打造的战靴，走路声音很大，但至少不会被自己的脚步声吓到。"
   },
   "knight_greaves": {
     "name": "骑士护胫",
@@ -351,7 +392,8 @@
     "attack": 0,
     "defense": 6,
     "hp": 40,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "骑士团制式护胫，上面有小小的防滑纹路。适合在地牢湿滑的地面上奔跑。"
   },
   "shadow_boots": {
     "name": "暗影长靴",
@@ -362,7 +404,8 @@
     "defense": 10,
     "hp": 60,
     "crit_rate": 0.03,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "暗影长靴，穿上后走路悄无声息。缺点是太安静了，偶尔会吓到队友。"
   },
   "bone_ring": {
     "name": "骸骨指环",
@@ -372,7 +415,8 @@
     "attack": 3,
     "defense": 0,
     "hp": 0,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "骨头做的指环，虽然简陋但有种原始的美感。"
   },
   "guardian_ring": {
     "name": "守护指环",
@@ -382,7 +426,8 @@
     "attack": 0,
     "defense": 8,
     "hp": 40,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "守护者的指环，戴上后会有一种被保护的感觉。可能是心理作用。"
   },
   "overlord_ring": {
     "name": "霸主之戒",
@@ -393,7 +438,8 @@
     "defense": 8,
     "hp": 50,
     "crit_damage": 0.15,
-    "enhanceable": true
+    "enhanceable": true,
+    "description": "国王的戒指，戴上后你会觉得自己很有领导气质。适合指挥队友去前面扛伤害。"
   },
   "defense_potion": {
     "name": "铁壁药水",
@@ -401,7 +447,8 @@
     "effect": "defense_buff",
     "value": 15,
     "stackable": true,
-    "max_stack": 10
+    "max_stack": 10,
+    "description": "喝完感觉自己坚不可摧，虽然过一会儿就恢复原状了。"
   },
   "attack_potion": {
     "name": "力量药水",
@@ -409,6 +456,7 @@
     "effect": "attack_buff",
     "value": 15,
     "stackable": true,
-    "max_stack": 10
+    "max_stack": 10,
+    "description": "喝完力气大增，连骷髅都能一拳打飞。有效期不保证。"
   }
 }
