@@ -1,14 +1,17 @@
 extends Node
 
-const SAVE_PATH = "user://save.json"
+const SLOT_PATH_TEMPLATE = "user://save_slot_%d.json"
+const MIGRATION_SOURCE = "user://save.json"
 
+var active_slot: int = -1
 var _pending_save: Dictionary = {}
 var _save_dirty: bool = false
 var _save_timer: float = 0.0
+var _total_playtime: float = 0.0
 const AUTO_SAVE_DELAY: float = 2.0
 
 func _ready():
-	load_game()
+	_migrate_legacy_save()
 	# Connect auto-save signals
 	var inv = get_node_or_null("/root/InventorySystem")
 	if inv:
@@ -27,11 +30,52 @@ func _ready():
 		talent_sys.talent_learned.connect(_on_talent_learned)
 
 func _process(delta):
+	if active_slot > 0:
+		_total_playtime += delta
 	if _save_dirty:
 		_save_timer -= delta
 		if _save_timer <= 0:
 			_save_dirty = false
 			save_game()
+
+func _slot_path(slot: int) -> String:
+	return SLOT_PATH_TEMPLATE % slot
+
+func _migrate_legacy_save():
+	if FileAccess.file_exists(MIGRATION_SOURCE) and not FileAccess.file_exists(_slot_path(1)):
+		DirAccess.copy_absolute(MIGRATION_SOURCE, _slot_path(1))
+		DirAccess.remove_absolute(MIGRATION_SOURCE)
+
+func set_active_slot(slot: int):
+	active_slot = slot
+
+func has_slot(slot: int) -> bool:
+	return FileAccess.file_exists(_slot_path(slot))
+
+func delete_slot(slot: int):
+	var path = _slot_path(slot)
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+
+func get_slot_metadata(slot: int) -> Dictionary:
+	var path = _slot_path(slot)
+	if not FileAccess.file_exists(path):
+		return {}
+	var file = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return {}
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK:
+		return {}
+	var data = json.data
+	var level_sys = data.get("level_system", {})
+	var result = {
+		"level": level_sys.get("level", 1),
+		"playtime": data.get("playtime", 0.0),
+		"floor": data.get("floor", 1),
+		"timestamp": data.get("timestamp", ""),
+	}
+	return result
 
 func _mark_dirty():
 	_save_dirty = true
@@ -51,13 +95,19 @@ func on_monster_died():
 	_mark_dirty()
 
 func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+	if active_slot < 0:
+		return false
+	return FileAccess.file_exists(_slot_path(active_slot))
 
 func load_game():
-	if not has_save():
+	if active_slot < 0:
 		_pending_save = {}
 		return
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var path = _slot_path(active_slot)
+	if not FileAccess.file_exists(path):
+		_pending_save = {}
+		return
+	var file = FileAccess.open(path, FileAccess.READ)
 	if not file:
 		_pending_save = {}
 		return
@@ -66,8 +116,11 @@ func load_game():
 		_pending_save = {}
 		return
 	_pending_save = json.data
+	_total_playtime = _pending_save.get("playtime", 0.0)
 
 func apply_save_data():
+	if _pending_save.is_empty() and has_save():
+		load_game()
 	if _pending_save.is_empty():
 		return
 
@@ -121,7 +174,6 @@ func apply_save_data():
 		level_sys.load_save_data(_pending_save["level_system"])
 
 	# Restore spawn respawn state
-	var spawn_sys = get_node_or_null("/root/SpawnSystem")
 	if spawn_sys and _pending_save.has("spawn_respawn"):
 		spawn_sys.apply_respawn_state(_pending_save["spawn_respawn"])
 
@@ -151,6 +203,8 @@ func apply_save_data():
 	_pending_save = {}
 
 func save_game():
+	if active_slot < 0:
+		return
 	var players = get_tree().get_nodes_in_group("player")
 	if players.is_empty():
 		return
@@ -164,6 +218,8 @@ func save_game():
 	var data = {
 		"version": 3,
 		"floor": current_floor,
+		"playtime": _total_playtime,
+		"timestamp": Time.get_datetime_string_from_system(),
 		"player": {
 			"hp": player.hp,
 			"max_hp": player.max_hp,
@@ -226,7 +282,7 @@ func save_game():
 	if talent_sys:
 		data["talent_system"] = talent_sys.get_save_data()
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file = FileAccess.open(_slot_path(active_slot), FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
 

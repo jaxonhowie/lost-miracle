@@ -7,6 +7,7 @@ func _ready():
 	layer = 100
 	$Panel.visible = false
 	$Panel/VBox/ContinueBtn.pressed.connect(_on_continue_pressed)
+	$Panel/VBox/SettingsBtn.pressed.connect(_on_settings_pressed)
 	$Panel/VBox/MenuBtn.pressed.connect(_on_menu_pressed)
 	$Panel/VBox/QuitBtn.pressed.connect(_on_quit_pressed)
 
@@ -30,17 +31,27 @@ func _resume():
 	$Panel.visible = false
 
 func _close_all_panels():
-	var panels = ["InventoryPanel", "EquipmentPanel", "EnhancePanel", "ShopPanel", "QuestPanel", "TalentPanel"]
-	for panel_name in panels:
-		var ui_layer = get_node_or_null("../UILayer")
-		if not ui_layer:
-			continue
+	var ui_layer = get_node_or_null("../UILayer")
+	if not ui_layer:
+		return
+	var panel_names = ["InventoryPanel", "EquipmentPanel", "EnhancePanel", "ShopPanel", "QuestPanel", "TalentPanel"]
+	for panel_name in panel_names:
 		var panel = ui_layer.get_node_or_null(panel_name)
 		if panel and panel.has_method("toggle") and panel.is_open:
 			panel.toggle()
+	var settings = ui_layer.get_node_or_null("SettingsPanel")
+	if settings and settings.has_method("toggle") and settings.get_node("Panel").visible:
+		settings.toggle()
 
 func _on_continue_pressed():
 	_resume()
+
+func _on_settings_pressed():
+	var ui_layer = get_node_or_null("../UILayer")
+	if ui_layer:
+		var settings = ui_layer.get_node_or_null("SettingsPanel")
+		if settings and settings.has_method("toggle"):
+			settings.toggle()
 
 func _on_menu_pressed():
 	_resume()

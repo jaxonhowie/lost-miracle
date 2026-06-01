@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/TitleScreen.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SaveSlotSelector.tscn" id="2_save_slot"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SettingsPanel.tscn" id="3_settings"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -60,9 +62,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -100.0
-offset_top = -40.0
+offset_top = -60.0
 offset_right = 100.0
-offset_bottom = 110.0
+offset_bottom = 130.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 15
@@ -74,6 +76,10 @@ text = "继续游戏"
 [node name="NewGameBtn" type="Button" parent="VBox"]
 layout_mode = 2
 text = "新游戏"
+
+[node name="SettingsBtn" type="Button" parent="VBox"]
+layout_mode = 2
+text = "设置"
 
 [node name="QuitBtn" type="Button" parent="VBox"]
 layout_mode = 2
@@ -115,3 +121,8 @@ text = "确定"
 [node name="NoBtn" type="Button" parent="ConfirmPanel/VBox/HBox"]
 layout_mode = 2
 text = "取消"
+
+[node name="SaveSlotSelector" parent="." instance=ExtResource("2_save_slot")]
+visible = false
+
+[node name="SettingsPanel" parent="." instance=ExtResource("3_settings")]

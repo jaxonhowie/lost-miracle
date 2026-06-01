@@ -19,6 +19,8 @@ func _ready():
 	sfx_player.name = "SFXPlayer"
 	add_child(sfx_player)
 
+	_apply_volume_settings()
+
 func _ensure_bus(bus_name: String):
 	if AudioServer.get_bus_index(bus_name) == -1:
 		var idx = AudioServer.bus_count
@@ -85,3 +87,20 @@ func play_sfx_pitched(path: String, pitch: float = 1.0):
 	add_child(player)
 	player.play()
 	player.finished.connect(player.queue_free)
+
+func set_bus_volume(bus_name: String, linear_0_100: float):
+	var idx = AudioServer.get_bus_index(bus_name)
+	if idx < 0:
+		return
+	if linear_0_100 <= 0.0:
+		AudioServer.set_bus_mute(idx, true)
+	else:
+		AudioServer.set_bus_mute(idx, false)
+		AudioServer.set_bus_volume_db(idx, linear_to_db(linear_0_100 / 100.0))
+
+func _apply_volume_settings():
+	var settings = get_node_or_null("/root/SettingsSystem")
+	if settings:
+		set_bus_volume("Master", settings.get_volume("Master"))
+		set_bus_volume("Music", settings.get_volume("Music"))
+		set_bus_volume("SFX", settings.get_volume("SFX"))

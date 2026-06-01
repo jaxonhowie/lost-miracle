@@ -21,6 +21,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 [autoload]
 
 ThemeSystem="*res://scripts/systems/ThemeSystem.gd"
+SettingsSystem="*res://scripts/systems/SettingsSystem.gd"
 AudioManager="*res://scripts/systems/AudioManager.gd"
 VFX="*res://scripts/systems/VFX.gd"
 MonsterDatabase="*res://scripts/data/MonsterDatabase.gd"
