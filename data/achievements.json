@@ -6,7 +6,8 @@
 			"description": "击杀第一只怪物",
 			"icon": "sword",
 			"condition": "total_kills >= 1",
-			"reward_gold": 10
+			"reward_gold": 10,
+			"reward_xp": 20
 		},
 		{
 			"id": "kill_100",
@@ -14,7 +15,9 @@
 			"description": "累计击杀100只怪物",
 			"icon": "sword",
 			"condition": "total_kills >= 100",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 300,
+			"reward_item": { "item_id": "enhance_stone", "count": 3 }
 		},
 		{
 			"id": "kill_500",
@@ -22,7 +25,9 @@
 			"description": "累计击杀500只怪物",
 			"icon": "sword",
 			"condition": "total_kills >= 500",
-			"reward_gold": 500
+			"reward_gold": 500,
+			"reward_xp": 800,
+			"reward_item": { "item_id": "enhance_stone", "count": 5 }
 		},
 		{
 			"id": "first_boss",
@@ -30,7 +35,9 @@
 			"description": "首次击杀Boss",
 			"icon": "skull",
 			"condition": "boss_kills >= 1",
-			"reward_gold": 100
+			"reward_gold": 100,
+			"reward_xp": 200,
+			"reward_item": { "item_id": "soul_crystal", "count": 1 }
 		},
 		{
 			"id": "elite_hunter",
@@ -38,7 +45,8 @@
 			"description": "击杀10只精英怪",
 			"icon": "skull",
 			"condition": "elite_kills >= 10",
-			"reward_gold": 150
+			"reward_gold": 150,
+			"reward_xp": 250
 		},
 		{
 			"id": "first_enhance",
@@ -46,7 +54,9 @@
 			"description": "首次强化装备成功",
 			"icon": "hammer",
 			"condition": "enhance_successes >= 1",
-			"reward_gold": 20
+			"reward_gold": 20,
+			"reward_xp": 30,
+			"reward_item": { "item_id": "enhance_stone", "count": 2 }
 		},
 		{
 			"id": "enhance_master",
@@ -54,7 +64,9 @@
 			"description": "将任意装备强化到+10",
 			"icon": "hammer",
 			"condition": "max_enhance >= 10",
-			"reward_gold": 500
+			"reward_gold": 500,
+			"reward_xp": 1000,
+			"reward_item": { "item_id": "soul_crystal", "count": 3 }
 		},
 		{
 			"id": "enhance_10",
@@ -62,7 +74,9 @@
 			"description": "累计强化10次",
 			"icon": "hammer",
 			"condition": "enhance_attempts >= 10",
-			"reward_gold": 50
+			"reward_gold": 50,
+			"reward_xp": 80,
+			"reward_item": { "item_id": "enhance_stone", "count": 2 }
 		},
 		{
 			"id": "level_5",
@@ -70,7 +84,8 @@
 			"description": "达到5级",
 			"icon": "star",
 			"condition": "max_level >= 5",
-			"reward_gold": 50
+			"reward_gold": 50,
+			"reward_xp": 100
 		},
 		{
 			"id": "level_10",
@@ -78,7 +93,9 @@
 			"description": "达到10级",
 			"icon": "star",
 			"condition": "max_level >= 10",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 500,
+			"reward_item": { "item_id": "soul_crystal", "count": 2 }
 		},
 		{
 			"id": "explore_floor_2",
@@ -86,7 +103,8 @@
 			"description": "到达地牢第二层",
 			"icon": "map",
 			"condition": "floors_explored >= 2",
-			"reward_gold": 30
+			"reward_gold": 30,
+			"reward_xp": 50
 		},
 		{
 			"id": "death_10",
@@ -94,7 +112,8 @@
 			"description": "死亡10次后继续战斗",
 			"icon": "skull",
 			"condition": "total_deaths >= 10",
-			"reward_gold": 50
+			"reward_gold": 50,
+			"reward_xp": 80
 		},
 		{
 			"id": "death_50",
@@ -102,7 +121,8 @@
 			"description": "死亡50次",
 			"icon": "skull",
 			"condition": "total_deaths >= 50",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 300
 		},
 		{
 			"id": "skeleton_slayer",
@@ -110,7 +130,9 @@
 			"description": "击杀50只骷髅兵",
 			"icon": "sword",
 			"condition": "kills_by_type/skeleton_soldier >= 50",
-			"reward_gold": 100
+			"reward_gold": 100,
+			"reward_xp": 150,
+			"reward_item": { "item_id": "knight_medal", "count": 5 }
 		},
 		{
 			"id": "gold_hoarder",
@@ -118,7 +140,8 @@
 			"description": "累计获得1000金币",
 			"icon": "coin",
 			"condition": "total_gold >= 1000",
-			"reward_gold": 100
+			"reward_gold": 100,
+			"reward_xp": 200
 		},
 		{
 			"id": "combo_5",
@@ -126,7 +149,8 @@
 			"description": "达成5连击",
 			"icon": "star",
 			"condition": "max_combo >= 5",
-			"reward_gold": 30
+			"reward_gold": 30,
+			"reward_xp": 50
 		},
 		{
 			"id": "combo_20",
@@ -134,7 +158,9 @@
 			"description": "达成20连击",
 			"icon": "star",
 			"condition": "max_combo >= 20",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 400,
+			"reward_item": { "item_id": "enhance_stone", "count": 5 }
 		},
 		{
 			"id": "kill_1000",
@@ -142,7 +168,9 @@
 			"description": "累计击杀1000只怪物",
 			"icon": "sword",
 			"condition": "total_kills >= 1000",
-			"reward_gold": 1000
+			"reward_gold": 1000,
+			"reward_xp": 2000,
+			"reward_item": { "item_id": "soul_crystal", "count": 5 }
 		},
 		{
 			"id": "gold_5000",
@@ -150,7 +178,8 @@
 			"description": "累计获得5000金币",
 			"icon": "coin",
 			"condition": "total_gold >= 5000",
-			"reward_gold": 500
+			"reward_gold": 500,
+			"reward_xp": 800
 		},
 		{
 			"id": "enhance_50",
@@ -158,7 +187,9 @@
 			"description": "累计强化50次",
 			"icon": "hammer",
 			"condition": "enhance_attempts >= 50",
-			"reward_gold": 300
+			"reward_gold": 300,
+			"reward_xp": 500,
+			"reward_item": { "item_id": "enhance_stone", "count": 10 }
 		},
 		{
 			"id": "consumable_10",
@@ -166,7 +197,8 @@
 			"description": "使用10次消耗品",
 			"icon": "star",
 			"condition": "consumables_used >= 10",
-			"reward_gold": 30
+			"reward_gold": 30,
+			"reward_xp": 50
 		},
 		{
 			"id": "consumable_100",
@@ -174,7 +206,8 @@
 			"description": "使用100次消耗品",
 			"icon": "star",
 			"condition": "consumables_used >= 100",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 300
 		},
 		{
 			"id": "level_15",
@@ -182,7 +215,9 @@
 			"description": "达到15级",
 			"icon": "star",
 			"condition": "max_level >= 15",
-			"reward_gold": 500
+			"reward_gold": 500,
+			"reward_xp": 1000,
+			"reward_item": { "item_id": "soul_crystal", "count": 3 }
 		},
 		{
 			"id": "no_death_boss",
@@ -190,7 +225,9 @@
 			"description": "不死亡击杀Boss",
 			"icon": "skull",
 			"condition": "boss_kills_no_death >= 1",
-			"reward_gold": 1000
+			"reward_gold": 1000,
+			"reward_xp": 1500,
+			"reward_item": { "item_id": "soul_crystal", "count": 5 }
 		},
 		{
 			"id": "all_epic",
@@ -198,7 +235,9 @@
 			"description": "穿戴4件史诗装备",
 			"icon": "star",
 			"condition": "epic_equipped >= 4",
-			"reward_gold": 800
+			"reward_gold": 800,
+			"reward_xp": 2000,
+			"reward_item": { "item_id": "enhance_stone", "count": 10 }
 		}
 	]
 }

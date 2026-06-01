@@ -83,12 +83,27 @@ func _check_achievements():
 		var condition = ach.get("condition", "")
 		if _evaluate_condition(condition):
 			_unlocked.append(ach_id)
-			var reward = ach.get("reward_gold", 0)
-			if reward > 0:
-				var players = get_tree().get_nodes_in_group("player")
-				if not players.is_empty():
-					players[0].add_gold(reward)
+			_give_reward(ach)
 			achievement_unlocked.emit(ach_id)
+
+func _give_reward(ach: Dictionary):
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var player = players[0]
+	var reward_gold = ach.get("reward_gold", 0)
+	if reward_gold > 0:
+		player.add_gold(reward_gold)
+	var reward_xp = ach.get("reward_xp", 0)
+	if reward_xp > 0:
+		var level_sys = get_node_or_null("/root/LevelSystem")
+		if level_sys:
+			level_sys.add_xp(reward_xp)
+	var reward_item = ach.get("reward_item", {})
+	if reward_item.has("item_id"):
+		var inv = get_node_or_null("/root/InventorySystem")
+		if inv:
+			inv.add_item(reward_item["item_id"], reward_item.get("count", 1))
 
 func _evaluate_condition(condition: String) -> bool:
 	if condition.is_empty():

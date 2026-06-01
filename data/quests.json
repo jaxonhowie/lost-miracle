@@ -8,7 +8,8 @@
 			"target_id": "skeleton_soldier",
 			"target_count": 1,
 			"prerequisite": "",
-			"reward_gold": 20
+			"reward_gold": 20,
+			"reward_xp": 30
 		},
 		{
 			"id": "skeleton_hunter",
@@ -18,7 +19,9 @@
 			"target_id": "skeleton_soldier",
 			"target_count": 10,
 			"prerequisite": "first_blood",
-			"reward_gold": 80
+			"reward_gold": 80,
+			"reward_xp": 100,
+			"reward_item": { "item_id": "broken_bone", "count": 5 }
 		},
 		{
 			"id": "clear_floor_1",
@@ -28,7 +31,9 @@
 			"target_id": "",
 			"target_count": 30,
 			"prerequisite": "skeleton_hunter",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 300,
+			"reward_item": { "item_id": "enhance_stone", "count": 3 }
 		},
 		{
 			"id": "elite_slayer",
@@ -38,7 +43,8 @@
 			"target_id": "",
 			"target_count": 1,
 			"prerequisite": "",
-			"reward_gold": 50
+			"reward_gold": 50,
+			"reward_xp": 80
 		},
 		{
 			"id": "boss_hunter",
@@ -48,7 +54,9 @@
 			"target_id": "",
 			"target_count": 1,
 			"prerequisite": "elite_slayer",
-			"reward_gold": 150
+			"reward_gold": 150,
+			"reward_xp": 300,
+			"reward_item": { "item_id": "soul_crystal", "count": 1 }
 		},
 		{
 			"id": "gear_up",
@@ -58,7 +66,9 @@
 			"target_id": "",
 			"target_count": 3,
 			"prerequisite": "",
-			"reward_gold": 30
+			"reward_gold": 30,
+			"reward_xp": 50,
+			"reward_item": { "item_id": "enhance_stone", "count": 2 }
 		},
 		{
 			"id": "power_enhance",
@@ -68,7 +78,9 @@
 			"target_id": "",
 			"target_count": 7,
 			"prerequisite": "gear_up",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 400,
+			"reward_item": { "item_id": "enhance_stone", "count": 5 }
 		},
 		{
 			"id": "reach_level_5",
@@ -78,7 +90,8 @@
 			"target_id": "",
 			"target_count": 5,
 			"prerequisite": "",
-			"reward_gold": 50
+			"reward_gold": 50,
+			"reward_xp": 100
 		},
 		{
 			"id": "ghost_hunter",
@@ -88,7 +101,9 @@
 			"target_id": "ghost",
 			"target_count": 10,
 			"prerequisite": "first_blood",
-			"reward_gold": 60
+			"reward_gold": 60,
+			"reward_xp": 100,
+			"reward_item": { "item_id": "ghost_fragment", "count": 5 }
 		},
 		{
 			"id": "clear_floor_2",
@@ -98,7 +113,9 @@
 			"target_id": "",
 			"target_count": 50,
 			"prerequisite": "clear_floor_1",
-			"reward_gold": 300
+			"reward_gold": 300,
+			"reward_xp": 500,
+			"reward_item": { "item_id": "enhance_stone", "count": 5 }
 		},
 		{
 			"id": "boss_rush",
@@ -108,7 +125,9 @@
 			"target_id": "",
 			"target_count": 3,
 			"prerequisite": "boss_hunter",
-			"reward_gold": 500
+			"reward_gold": 500,
+			"reward_xp": 800,
+			"reward_item": { "item_id": "soul_crystal", "count": 3 }
 		},
 		{
 			"id": "collect_bones",
@@ -118,7 +137,8 @@
 			"target_id": "broken_bone",
 			"target_count": 20,
 			"prerequisite": "first_blood",
-			"reward_gold": 40
+			"reward_gold": 40,
+			"reward_xp": 60
 		},
 		{
 			"id": "collect_crystals",
@@ -128,7 +148,8 @@
 			"target_id": "crystal_shard",
 			"target_count": 15,
 			"prerequisite": "",
-			"reward_gold": 80
+			"reward_gold": 80,
+			"reward_xp": 120
 		},
 		{
 			"id": "enhance_10",
@@ -138,7 +159,9 @@
 			"target_id": "",
 			"target_count": 10,
 			"prerequisite": "power_enhance",
-			"reward_gold": 500
+			"reward_gold": 500,
+			"reward_xp": 1000,
+			"reward_item": { "item_id": "soul_crystal", "count": 3 }
 		},
 		{
 			"id": "reach_level_10",
@@ -148,7 +171,9 @@
 			"target_id": "",
 			"target_count": 10,
 			"prerequisite": "reach_level_5",
-			"reward_gold": 200
+			"reward_gold": 200,
+			"reward_xp": 500,
+			"reward_item": { "item_id": "enhance_stone", "count": 5 }
 		}
 	]
 }

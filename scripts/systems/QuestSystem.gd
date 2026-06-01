@@ -160,13 +160,28 @@ func _complete_quest(quest_id: String):
 	_completed.append(quest_id)
 	_active.erase(quest_id)
 
-	# Award gold reward
 	var quest = _quests[quest_id]
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		quest_completed.emit(quest_id)
+		return
+	var player = players[0]
+
 	var reward_gold = quest.get("reward_gold", 0)
 	if reward_gold > 0:
-		var players = get_tree().get_nodes_in_group("player")
-		if not players.is_empty():
-			players[0].add_gold(reward_gold)
+		player.add_gold(reward_gold)
+
+	var reward_xp = quest.get("reward_xp", 0)
+	if reward_xp > 0:
+		var level_sys = get_node_or_null("/root/LevelSystem")
+		if level_sys:
+			level_sys.add_xp(reward_xp)
+
+	var reward_item = quest.get("reward_item", {})
+	if reward_item.has("item_id"):
+		var inv = get_node_or_null("/root/InventorySystem")
+		if inv:
+			inv.add_item(reward_item["item_id"], reward_item.get("count", 1))
 
 	quest_completed.emit(quest_id)
 
