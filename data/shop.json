@@ -8,7 +8,11 @@
     {"item_id": "attack_potion", "price": 80},
     {"item_id": "enhance_stone", "price": 100},
     {"item_id": "mid_enhance_stone", "price": 300},
-    {"item_id": "high_enhance_stone", "price": 800}
+    {"item_id": "high_enhance_stone", "price": 800},
+    {"item_id": "leather_helmet", "price": 40},
+    {"item_id": "iron_helmet", "price": 120},
+    {"item_id": "bone_amulet", "price": 50},
+    {"item_id": "soul_pendant", "price": 150}
   ],
   "sell_prices": {
     "broken_bone": 5,
@@ -30,6 +34,14 @@
     "guardian_ring": 80,
     "overlord_ring": 250,
     "defense_potion": 30,
-    "attack_potion": 40
+    "attack_potion": 40,
+    "leather_helmet": 12,
+    "iron_helmet": 35,
+    "knight_helmet": 80,
+    "overlord_crown": 250,
+    "bone_amulet": 15,
+    "soul_pendant": 45,
+    "crystal_amulet": 100,
+    "shadow_amulet": 250
   }
 }

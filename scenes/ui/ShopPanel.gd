@@ -208,6 +208,10 @@ func _get_item_detail_text(item_data: Dictionary) -> String:
 
 	if item_type == "equipment":
 		parts.append(_get_slot_name(slot))
+		var quality = item_data.get("quality", "normal")
+		var quality_pct = _get_quality_bonus_pct(quality)
+		if quality_pct > 0:
+			parts.append("品质 +%d%%" % quality_pct)
 		var atk = item_data.get("attack", 0)
 		var def = item_data.get("defense", 0)
 		var hp = item_data.get("hp", 0)
@@ -251,3 +255,10 @@ func _get_slot_name(slot: String) -> String:
 			return "饰品"
 		_:
 			return "装备"
+
+func _get_quality_bonus_pct(quality: String) -> int:
+	match quality:
+		"fine": return 15
+		"rare": return 35
+		"epic": return 60
+		_: return 0

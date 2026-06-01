@@ -8,6 +8,8 @@ var equip_sys: Node
 	"armor": $VBoxContainer/SlotContainer/ArmorSlot/Btn,
 	"boots": $VBoxContainer/SlotContainer/BootsSlot/Btn,
 	"ring": $VBoxContainer/SlotContainer/RingSlot/Btn,
+	"helmet": $VBoxContainer/SlotContainer/HelmetSlot/Btn,
+	"accessory": $VBoxContainer/SlotContainer/AccessorySlot/Btn,
 }
 @onready var stats_label: Label = $VBoxContainer/StatsLabel
 @onready var detail_label: Label = $VBoxContainer/DetailLabel

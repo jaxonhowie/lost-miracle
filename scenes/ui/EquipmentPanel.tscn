@@ -69,6 +69,30 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "空"
 
+[node name="HelmetSlot" type="HBoxContainer" parent="VBoxContainer/SlotContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/SlotContainer/HelmetSlot"]
+layout_mode = 2
+text = "头盔:"
+
+[node name="Btn" type="Button" parent="VBoxContainer/SlotContainer/HelmetSlot"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "空"
+
+[node name="AccessorySlot" type="HBoxContainer" parent="VBoxContainer/SlotContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/SlotContainer/AccessorySlot"]
+layout_mode = 2
+text = "饰品:"
+
+[node name="Btn" type="Button" parent="VBoxContainer/SlotContainer/AccessorySlot"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "空"
+
 [node name="Separator2" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
 

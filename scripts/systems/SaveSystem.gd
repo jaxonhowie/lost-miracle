@@ -165,7 +165,10 @@ func apply_save_data():
 	# Restore equipment
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
 	if equip_sys and _pending_save.has("equipment"):
-		equip_sys.equipped = _pending_save["equipment"]
+		var saved_equip = _pending_save["equipment"]
+		for slot_name in equip_sys.equipped:
+			if saved_equip.has(slot_name):
+				equip_sys.equipped[slot_name] = saved_equip[slot_name]
 		equip_sys.equipment_changed.emit()
 
 	# Restore level system
@@ -240,6 +243,8 @@ func save_game():
 			"armor": null,
 			"boots": null,
 			"ring": null,
+			"helmet": null,
+			"accessory": null,
 		},
 		"spawn_respawn": {},
 		"level_system": {},

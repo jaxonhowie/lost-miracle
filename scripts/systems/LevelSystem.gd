@@ -30,6 +30,16 @@ func _apply_level_up():
 	player.attack += 2
 	player.defense += 1
 	player.max_hp += 15
+	# Random bonus stat (40% chance)
+	var roll = randf()
+	if roll < 0.10:
+		player.attack += 1
+	elif roll < 0.20:
+		player.max_hp += 10
+	elif roll < 0.30:
+		player.crit_rate += 0.005
+	elif roll < 0.40:
+		player.defense += 1
 	player.hp = player.get_total_max_hp()
 	AudioManager.play_sfx("res://assets/audio/sfx_levelup.ogg")
 	# Grant talent point

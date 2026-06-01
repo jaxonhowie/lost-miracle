@@ -48,8 +48,8 @@ const SKILL_COOLDOWNS = {
 	"war_cry": 15.0,
 }
 
-# Buffs
-var _buffs: Dictionary = {}  # buff_id -> { timer, value }
+# Buffs: buff_id -> { timer, value, category }
+var _buffs: Dictionary = {}
 
 # Combo
 var combo_count: int = 0
@@ -131,10 +131,12 @@ func _physics_process(delta):
 				hp = mini(hp + regen_amount, get_total_max_hp())
 				_hp_regen_accumulator -= regen_amount
 
-	# Movement (apply speed buff)
+	# Movement (talent + speed buff)
 	var move_speed = MOVE_SPEED
+	if talent_sys:
+		move_speed *= (1.0 + talent_sys.get_bonus("move_speed"))
 	if _buffs.has("speed"):
-		move_speed *= 1.5
+		move_speed *= _buffs["speed"]["value"]
 	if is_dodging:
 		move_speed = DODGE_SPEED
 
@@ -290,7 +292,9 @@ func get_total_attack() -> int:
 	if talent_sys:
 		base += talent_sys.get_bonus("attack")
 	if _buffs.has("war_cry"):
-		base = int(base * 1.3)
+		base = int(base * (1.0 + _buffs["war_cry"]["value"]))
+	if _buffs.has("attack_buff"):
+		base += int(_buffs["attack_buff"]["value"])
 	return base
 
 func get_total_defense() -> int:
@@ -301,6 +305,8 @@ func get_total_defense() -> int:
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
 		base += talent_sys.get_bonus("defense")
+	if _buffs.has("defense_buff"):
+		base += int(_buffs["defense_buff"]["value"])
 	return base
 
 func get_total_max_hp() -> int:
@@ -346,6 +352,25 @@ func _process_buffs(delta):
 			expired.append(buff_id)
 	for buff_id in expired:
 		_buffs.erase(buff_id)
+
+func add_buff(buff_id: String, timer: float, value: float, category: String = ""):
+	# Same ID: refresh timer
+	if _buffs.has(buff_id):
+		_buffs[buff_id]["timer"] = timer
+		_buffs[buff_id]["value"] = value
+		return
+	# Same category: keep higher value, remove weaker
+	if category != "":
+		for existing_id in _buffs:
+			if _buffs[existing_id].get("category", "") == category:
+				if value >= _buffs[existing_id]["value"]:
+					_buffs.erase(existing_id)
+				else:
+					return  # existing is stronger, skip
+	_buffs[buff_id] = { "timer": timer, "value": value, "category": category }
+
+func has_buff(buff_id: String) -> bool:
+	return _buffs.has(buff_id)
 
 func _try_use_skill(skill_id: String):
 	if _skill_cooldowns.get(skill_id, 0.0) > 0:
@@ -424,7 +449,7 @@ func _skill_war_cry():
 	var heal_amount = int(get_total_max_hp() * 0.3)
 	hp = mini(hp + heal_amount, get_total_max_hp())
 	# Damage buff for 5 seconds
-	_buffs["war_cry"] = { "timer": 5.0, "value": 0.3 }
+	add_buff("war_cry", 5.0, 0.3, "attack")
 	preload("res://scenes/effects/SkillVFX.gd").spawn_war_cry(get_parent(), global_position + Vector2(0, -10))
 	VFX.flash(Color(1, 0.9, 0.2, 1), 0.15)
 	VFX.shake(4.0, 0.2)
@@ -459,7 +484,13 @@ func use_consumable(effect: String, value: int):
 				hp = mini(hp + value, get_total_max_hp())
 			AudioManager.play_sfx("res://assets/audio/sfx_heal.ogg")
 		"speed":
-			_buffs["speed"] = { "timer": float(value), "value": 1.5 }
+			add_buff("speed", 10.0, 1.5, "speed")
+			AudioManager.play_sfx("res://assets/audio/sfx_buff.ogg")
+		"defense_buff":
+			add_buff("defense_buff", 15.0, float(value), "defense")
+			AudioManager.play_sfx("res://assets/audio/sfx_buff.ogg")
+		"attack_buff":
+			add_buff("attack_buff", 15.0, float(value), "attack")
 			AudioManager.play_sfx("res://assets/audio/sfx_buff.ogg")
 
 func _increment_combo():

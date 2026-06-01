@@ -458,5 +458,100 @@
     "stackable": true,
     "max_stack": 10,
     "description": "喝完力气大增，连骷髅都能一拳打飞。有效期不保证。"
+  },
+  "leather_helmet": {
+    "name": "皮革头盔",
+    "type": "equipment",
+    "slot": "helmet",
+    "quality": "normal",
+    "attack": 0,
+    "defense": 3,
+    "hp": 15,
+    "enhanceable": true,
+    "description": "基本的头部防护，至少比什么都没有强。戴久了头上会有股皮革味。"
+  },
+  "iron_helmet": {
+    "name": "铁制头盔",
+    "type": "equipment",
+    "slot": "helmet",
+    "quality": "fine",
+    "attack": 0,
+    "defense": 5,
+    "hp": 25,
+    "enhanceable": true,
+    "description": "铁匠出品的头盔，结实耐用。缺点是戴上后听不太清别人说话。"
+  },
+  "knight_helmet": {
+    "name": "骑士铁盔",
+    "type": "equipment",
+    "slot": "helmet",
+    "quality": "rare",
+    "attack": 0,
+    "defense": 10,
+    "hp": 60,
+    "enhanceable": true,
+    "description": "骑士团的制式头盔，面罩可以打开。前任主人可能是个话痨，因为面罩内侧刻着'记得呼吸'。"
+  },
+  "overlord_crown": {
+    "name": "霸主王冠",
+    "type": "equipment",
+    "slot": "helmet",
+    "quality": "epic",
+    "attack": 5,
+    "defense": 18,
+    "hp": 100,
+    "enhanceable": true,
+    "description": "水晶霸主的王冠，戴上后你会觉得自己很了不起。实际上是真的很了不起。"
+  },
+  "bone_amulet": {
+    "name": "骨片护身符",
+    "type": "equipment",
+    "slot": "accessory",
+    "quality": "normal",
+    "attack": 2,
+    "defense": 0,
+    "hp": 0,
+    "crit_rate": 0.02,
+    "enhanceable": true,
+    "description": "用骨头碎片串成的护身符，看起来不太吉利但确实有点用。"
+  },
+  "soul_pendant": {
+    "name": "灵魂吊坠",
+    "type": "equipment",
+    "slot": "accessory",
+    "quality": "fine",
+    "attack": 3,
+    "defense": 0,
+    "hp": 0,
+    "crit_rate": 0.03,
+    "crit_damage": 0.05,
+    "enhanceable": true,
+    "description": "凝固的灵魂能量制成的吊坠，佩戴时会微微发光。偶尔会听到吊坠在哼歌。"
+  },
+  "crystal_amulet": {
+    "name": "水晶护符",
+    "type": "equipment",
+    "slot": "accessory",
+    "quality": "rare",
+    "attack": 5,
+    "defense": 0,
+    "hp": 0,
+    "crit_rate": 0.05,
+    "crit_damage": 0.10,
+    "enhanceable": true,
+    "description": "水晶守卫的护符，蕴含着精准的水晶能量。戴上后瞄准能力大幅提升——至少说明书是这么说的。"
+  },
+  "shadow_amulet": {
+    "name": "暗影秘符",
+    "type": "equipment",
+    "slot": "accessory",
+    "quality": "epic",
+    "attack": 8,
+    "defense": 0,
+    "hp": 0,
+    "crit_rate": 0.05,
+    "crit_damage": 0.20,
+    "enhanceable": true,
+    "description": "暗影领主的秘符，蕴含致命的暗影能量。戴上后你会觉得自己是刺客——虽然你可能只是个拿着剑的普通人。"
   }
 }

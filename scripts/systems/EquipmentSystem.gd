@@ -8,6 +8,8 @@ var equipped: Dictionary = {
 	"armor": null,
 	"boots": null,
 	"ring": null,
+	"helmet": null,
+	"accessory": null,
 }
 
 func equip(uid: String) -> bool:
@@ -98,10 +100,17 @@ func get_total_stats() -> Dictionary:
 			base_defense = int(base_defense * (1.0 + enhance_level * 0.06))
 			base_hp = int(base_hp * (1.0 + enhance_level * 0.04))
 
-		stats["attack"] += base_attack
-		stats["defense"] += base_defense
-		stats["hp"] += base_hp
-		stats["crit_rate"] += item_data.get("crit_rate", 0.0)
-		stats["crit_damage"] += item_data.get("crit_damage", 0.0)
+		# Quality multiplier
+		var quality_mult = 1.0
+		match item_data.get("quality", "normal"):
+			"fine": quality_mult = 1.15
+			"rare": quality_mult = 1.35
+			"epic": quality_mult = 1.60
+
+		stats["attack"] += int(base_attack * quality_mult)
+		stats["defense"] += int(base_defense * quality_mult)
+		stats["hp"] += int(base_hp * quality_mult)
+		stats["crit_rate"] += item_data.get("crit_rate", 0.0) * quality_mult
+		stats["crit_damage"] += item_data.get("crit_damage", 0.0) * quality_mult
 
 	return stats
