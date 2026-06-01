@@ -145,9 +145,12 @@ func _update_combo():
 	if not _combo_label or not player:
 		return
 	if player.combo_count > 0:
-		_combo_label.text = "x%d" % player.combo_count
+		var mult = player.get_combo_multiplier()
+		_combo_label.text = "x%d (+%d%%)" % [player.combo_count, int((mult - 1.0) * 100)]
 		_combo_label.visible = true
-		if player.combo_count >= 5:
+		if player.combo_count >= 10:
+			_combo_label.modulate = Color(1, 0.3, 0.3, 1.0)
+		elif player.combo_count >= 5:
 			_combo_label.modulate = Color(1, 0.85, 0.0, 1.0)
 		else:
 			_combo_label.modulate = Color(1, 1, 1, 1.0)

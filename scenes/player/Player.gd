@@ -374,7 +374,7 @@ func _skill_whirlwind():
 			var dist = global_position.distance_to(monster.global_position)
 			if dist <= 80.0:
 				var is_crit = randf() < get_total_crit_rate()
-				var final_dmg = dmg
+				var final_dmg = int(dmg * get_combo_multiplier())
 				if is_crit:
 					final_dmg = int(final_dmg * get_total_crit_damage())
 				monster.take_damage(final_dmg, global_position, is_crit)
@@ -407,7 +407,7 @@ func _skill_charge():
 				var dist = global_position.distance_to(monster.global_position)
 				if dist <= 60.0:
 					var is_crit = randf() < get_total_crit_rate()
-					var final_dmg = dmg
+					var final_dmg = int(dmg * get_combo_multiplier())
 					if is_crit:
 						final_dmg = int(final_dmg * get_total_crit_damage())
 					monster.take_damage(final_dmg, global_position, is_crit)
@@ -468,6 +468,13 @@ func _increment_combo():
 		combo_count = 0
 	combo_count += 1
 	combo_last_hit_ms = now
+	# Track max combo for achievements
+	var ach_sys = get_node_or_null("/root/AchievementSystem")
+	if ach_sys:
+		ach_sys.set_stat("max_combo", combo_count)
+
+func get_combo_multiplier() -> float:
+	return 1.0 + combo_count * 0.05
 
 func _spawn_floating_damage(damage: int, is_crit: bool = false):
 	var fd = Label.new()
@@ -482,7 +489,7 @@ func _on_hitbox_area_entered(area: Area2D):
 		var total_crit_rate = get_total_crit_rate()
 		var total_crit_damage = get_total_crit_damage()
 		var is_crit = randf() < total_crit_rate
-		var dmg = total_attack
+		var dmg = int(total_attack * get_combo_multiplier())
 		if is_crit:
 			dmg = int(dmg * total_crit_damage)
 		area.get_parent().take_damage(dmg, global_position, is_crit)
