@@ -5,13 +5,14 @@ const MOVE_SPEED = 180.0
 const JUMP_VELOCITY = -360.0
 const GRAVITY = 980.0
 
-# Stats
+# Attributes
+var class_id: String = "warrior"
+var STR: int = 10
+var AGI: int = 5
+var INT: int = 5
+
+# Runtime state
 var hp: int = 100
-var max_hp: int = 100
-var attack: int = 12
-var defense: int = 3
-var crit_rate: float = 0.05
-var crit_damage: float = 1.5
 var gold: int = 0
 
 # Attack
@@ -75,6 +76,9 @@ func _ready():
 	_anim = preload("res://scripts/systems/ProceduralAnimator.gd").new()
 	add_child(_anim)
 	_anim.setup(sprite)
+	# Init HP from derived stats
+	await get_tree().process_frame
+	hp = get_total_max_hp()
 
 func _setup_consumable_listener():
 	var inv = get_node_or_null("/root/InventorySystem")
@@ -283,11 +287,20 @@ func _die():
 func add_gold(amount: int):
 	gold += amount
 
-func get_total_attack() -> int:
+func _get_equip_stats() -> Dictionary:
 	var equip_sys = get_node_or_null("/root/EquipmentSystem")
-	var base = attack
 	if equip_sys:
-		base += equip_sys.get_total_stats()["attack"]
+		return equip_sys.get_total_stats()
+	return {}
+
+func _get_derived_stats() -> Dictionary:
+	var class_sys = get_node_or_null("/root/ClassSystem")
+	if class_sys:
+		return class_sys.compute_derived_stats(STR, AGI, INT, _get_equip_stats(), class_id)
+	return { "attack": 0, "max_hp": 100, "defense": 0, "crit_rate": 0.05, "crit_damage": 1.5 }
+
+func get_total_attack() -> int:
+	var base = _get_derived_stats()["attack"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
 		base += talent_sys.get_bonus("attack")
@@ -298,10 +311,7 @@ func get_total_attack() -> int:
 	return base
 
 func get_total_defense() -> int:
-	var equip_sys = get_node_or_null("/root/EquipmentSystem")
-	var base = defense
-	if equip_sys:
-		base += equip_sys.get_total_stats()["defense"]
+	var base = _get_derived_stats()["defense"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
 		base += talent_sys.get_bonus("defense")
@@ -310,30 +320,21 @@ func get_total_defense() -> int:
 	return base
 
 func get_total_max_hp() -> int:
-	var equip_sys = get_node_or_null("/root/EquipmentSystem")
-	var base = max_hp
-	if equip_sys:
-		base += equip_sys.get_total_stats()["hp"]
+	var base = _get_derived_stats()["max_hp"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
 		base += talent_sys.get_bonus("max_hp")
 	return base
 
 func get_total_crit_rate() -> float:
-	var equip_sys = get_node_or_null("/root/EquipmentSystem")
-	var base = crit_rate
-	if equip_sys:
-		base += equip_sys.get_total_stats()["crit_rate"]
+	var base = _get_derived_stats()["crit_rate"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
 		base += talent_sys.get_bonus("crit_rate")
 	return base
 
 func get_total_crit_damage() -> float:
-	var equip_sys = get_node_or_null("/root/EquipmentSystem")
-	var base = crit_damage
-	if equip_sys:
-		base += equip_sys.get_total_stats()["crit_damage"]
+	var base = _get_derived_stats()["crit_damage"]
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys:
 		base += talent_sys.get_bonus("crit_damage")

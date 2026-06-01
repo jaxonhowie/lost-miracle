@@ -69,8 +69,15 @@ func get_slot_metadata(slot: int) -> Dictionary:
 		return {}
 	var data = json.data
 	var level_sys = data.get("level_system", {})
+	var player_data = data.get("player", {})
+	var class_id = player_data.get("class_id", "warrior")
+	var class_name = "战士"
+	var class_sys = get_node_or_null("/root/ClassSystem")
+	if class_sys:
+		class_name = class_sys.get_class_data(class_id).get("name", "战士")
 	var result = {
 		"level": level_sys.get("level", 1),
+		"class_name": class_name,
 		"playtime": data.get("playtime", 0.0),
 		"floor": data.get("floor", 1),
 		"timestamp": data.get("timestamp", ""),
@@ -137,18 +144,14 @@ func apply_save_data():
 
 	# Restore player stats
 	var pd = _pending_save.get("player", {})
-	if pd.has("hp"):
-		player.hp = pd["hp"]
-	if pd.has("max_hp"):
-		player.max_hp = pd["max_hp"]
-	if pd.has("attack"):
-		player.attack = pd["attack"]
-	if pd.has("defense"):
-		player.defense = pd["defense"]
-	if pd.has("crit_rate"):
-		player.crit_rate = pd["crit_rate"]
-	if pd.has("crit_damage"):
-		player.crit_damage = pd["crit_damage"]
+	if pd.has("class_id"):
+		player.class_id = pd["class_id"]
+	# Backward compat: old saves have flat stats, new saves have attributes
+	if pd.has("STR"):
+		player.STR = pd["STR"]
+		player.AGI = pd["AGI"]
+		player.INT = pd["INT"]
+	# hp restored after attributes (derived max_hp needed)
 	if pd.has("gold"):
 		player.gold = pd["gold"]
 	if pd.has("position"):
@@ -170,6 +173,10 @@ func apply_save_data():
 			if saved_equip.has(slot_name):
 				equip_sys.equipped[slot_name] = saved_equip[slot_name]
 		equip_sys.equipment_changed.emit()
+
+	# Restore HP (after equipment loaded so max_hp is correct)
+	if pd.has("hp"):
+		player.hp = mini(pd["hp"], player.get_total_max_hp())
 
 	# Restore level system
 	var level_sys = get_node_or_null("/root/LevelSystem")
@@ -219,17 +226,16 @@ func save_game():
 		current_floor = spawn_sys.current_floor
 
 	var data = {
-		"version": 3,
+		"version": 4,
 		"floor": current_floor,
 		"playtime": _total_playtime,
 		"timestamp": Time.get_datetime_string_from_system(),
 		"player": {
+			"class_id": player.class_id,
+			"STR": player.STR,
+			"AGI": player.AGI,
+			"INT": player.INT,
 			"hp": player.hp,
-			"max_hp": player.max_hp,
-			"attack": player.attack,
-			"defense": player.defense,
-			"crit_rate": player.crit_rate,
-			"crit_damage": player.crit_damage,
 			"gold": player.gold,
 			"position": {
 				"x": player.global_position.x,

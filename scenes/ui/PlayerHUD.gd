@@ -88,10 +88,16 @@ func _update_display():
 	var def = player.get_total_defense()
 	stat_label.text = "攻:%d 防:%d" % [atk, def]
 
-	# Level & XP
+	# Class + Level
+	var class_sys = get_node_or_null("/root/ClassSystem")
 	var level_sys = get_node_or_null("/root/LevelSystem")
 	if level_sys:
-		level_label.text = "Lv.%d" % level_sys.level
+		var class_name = ""
+		if class_sys:
+			class_name = class_sys.get_class_data(player.class_id).get("name", "")
+		level_label.text = "%s Lv.%d" % [class_name, level_sys.level]
+	if name_label:
+		name_label.text = "STR:%d AGI:%d INT:%d" % [player.STR, player.AGI, player.INT]
 		xp_bar.max_value = level_sys.xp_to_next_level()
 		xp_bar.value = level_sys.xp
 

@@ -63,23 +63,29 @@ func _update_stats_display():
 	if not equip_sys:
 		return
 
-	var stats = equip_sys.get_total_stats()
+	var players = get_tree().get_nodes_in_group("player")
 	var lines = []
+	if not players.is_empty():
+		var p = players[0]
+		lines.append("STR:%d AGI:%d INT:%d" % [p.STR, p.AGI, p.INT])
+		lines.append("攻击:%d 防御:%d HP:%d" % [p.get_total_attack(), p.get_total_defense(), p.get_total_max_hp()])
+		lines.append("暴击率:%d%% 暴伤:%d%%" % [int(p.get_total_crit_rate() * 100), int(p.get_total_crit_damage() * 100)])
+
+	var stats = equip_sys.get_total_stats()
+	var equip_parts = []
 	if stats["attack"] > 0:
-		lines.append("攻击: +" + str(stats["attack"]))
+		equip_parts.append("攻+" + str(stats["attack"]))
 	if stats["defense"] > 0:
-		lines.append("防御: +" + str(stats["defense"]))
+		equip_parts.append("防+" + str(stats["defense"]))
 	if stats["hp"] > 0:
-		lines.append("生命: +" + str(stats["hp"]))
-	if stats["crit_rate"] > 0:
-		lines.append("暴击率: +" + str(int(stats["crit_rate"] * 100)) + "%")
-	if stats["crit_damage"] > 0:
-		lines.append("暴击伤害: +" + str(int(stats["crit_damage"] * 100)) + "%")
+		equip_parts.append("HP+" + str(stats["hp"]))
+	if not equip_parts.is_empty():
+		lines.append("装备: " + " ".join(equip_parts))
 
 	if lines.is_empty():
-		stats_label.text = "装备加成: 无"
+		stats_label.text = "无数据"
 	else:
-		stats_label.text = "装备加成:\n" + "\n".join(lines)
+		stats_label.text = "\n".join(lines)
 
 func _on_slot_pressed(slot_name: String):
 	if not equip_sys:
