@@ -41,3 +41,9 @@ func _spawn_drop_item(item_id: String, count: int, position: Vector2):
 	var target_y = position.y - randf_range(30, 80)
 	drop_item.pop_toward(Vector2(target_x, target_y))
 	item_dropped.emit(item_id, count, position)
+
+func spawn_drop(item_id: String, position: Vector2, count: int = 1):
+	_spawn_drop_item(item_id, count, position)
+
+func get_drops_for_monster(monster_id: String) -> Array:
+	return DropTableDatabase.roll_drops(monster_id)

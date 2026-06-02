@@ -1,0 +1,86 @@
+[
+  {
+    "spawn_id": "mob_a_forest_spider_1",
+    "monster_id": "forest_spider",
+    "position": [600, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_forest_spider_2",
+    "monster_id": "forest_spider",
+    "position": [800, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_treant_1",
+    "monster_id": "treant",
+    "position": [1000, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_treant_2",
+    "monster_id": "treant",
+    "position": [1200, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "fork_wolf_1",
+    "monster_id": "shadow_wolf",
+    "position": [1400, 400],
+    "respawn_seconds": 60,
+    "zone": "fork_platforms"
+  },
+  {
+    "spawn_id": "fork_wolf_2",
+    "monster_id": "shadow_wolf",
+    "position": [1600, 350],
+    "respawn_seconds": 60,
+    "zone": "fork_platforms"
+  },
+  {
+    "spawn_id": "elite_1",
+    "monster_id": "elite_forest_guardian",
+    "position": [2050, 550],
+    "respawn_seconds": 600,
+    "zone": "elite_area_1"
+  },
+  {
+    "spawn_id": "mob_b_spider_1",
+    "monster_id": "forest_spider",
+    "position": [2400, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "mob_b_treant_1",
+    "monster_id": "treant",
+    "position": [2700, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "mob_b_wolf_1",
+    "monster_id": "shadow_wolf",
+    "position": [2900, 400],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "elite_2",
+    "monster_id": "elite_dryad",
+    "position": [3750, 550],
+    "respawn_seconds": 600,
+    "zone": "elite_area_2"
+  },
+  {
+    "spawn_id": "boss_1",
+    "monster_id": "ancient_treant_boss",
+    "position": [4650, 500],
+    "respawn_seconds": 1800,
+    "zone": "boss_room"
+  }
+]

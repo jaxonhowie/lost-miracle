@@ -114,3 +114,26 @@ func get_total_stats() -> Dictionary:
 		stats["crit_damage"] += item_data.get("crit_damage", 0.0) * quality_mult
 
 	return stats
+
+func get_max_enhance_level() -> int:
+	var max_level = 0
+	for slot_name in equipped:
+		var equip_data = equipped[slot_name]
+		if equip_data == null:
+			continue
+		var level = equip_data.get("enhance_level", 0)
+		if level > max_level:
+			max_level = level
+	return max_level
+
+func get_enhance_glow_color() -> Color:
+	var max_level = get_max_enhance_level()
+	if max_level >= 8:
+		return Color(1.0, 0.85, 0.1, 0.5)  # gold
+	elif max_level >= 7:
+		return Color(1.0, 0.15, 0.15, 0.4)  # red
+	elif max_level >= 6:
+		return Color(0.2, 0.4, 1.0, 0.35)  # blue
+	elif max_level >= 5:
+		return Color(0.2, 1.0, 0.3, 0.3)  # green
+	return Color(1, 1, 1, 0)  # no glow

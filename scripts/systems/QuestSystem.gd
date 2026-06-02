@@ -183,6 +183,12 @@ func _complete_quest(quest_id: String):
 		if inv:
 			inv.add_item(reward_item["item_id"], reward_item.get("count", 1))
 
+	# Honor reward for quest completion
+	var honor_sys = get_node_or_null("/root/HonorSystem")
+	if honor_sys:
+		var honor_reward = quest.get("reward_honor", 50)
+		honor_sys.add_honor(honor_reward, "完成任务: " + quest.get("name", quest_id))
+
 	quest_completed.emit(quest_id)
 
 func get_save_data() -> Dictionary:

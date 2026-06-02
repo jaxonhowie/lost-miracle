@@ -11,6 +11,8 @@ var selected_uid: String = ""
 @onready var rate_label: Label = $VBoxContainer/RateLabel
 @onready var materials_label: Label = $VBoxContainer/MaterialsLabel
 @onready var core_check: CheckBox = $VBoxContainer/CoreCheck
+@onready var blessed_check: CheckBox = $VBoxContainer/BlessedCheck
+@onready var destroy_warning: Label = $VBoxContainer/DestroyWarning
 @onready var enhance_btn: Button = $VBoxContainer/EnhanceButton
 @onready var result_label: Label = $VBoxContainer/ResultLabel
 
@@ -26,7 +28,8 @@ func _ready():
 
 	equip_option.item_selected.connect(_on_equip_selected)
 	enhance_btn.pressed.connect(_on_enhance_pressed)
-	core_check.toggled.connect(_on_core_toggled)
+	core_check.toggled.connect(_on_option_toggled)
+	blessed_check.toggled.connect(_on_option_toggled)
 
 func _input(event):
 	if event.is_action_pressed("enhance"):
@@ -48,12 +51,12 @@ func _refresh_equips():
 	var equips = inv.get_all_equipment()
 	for equip in equips:
 		var item_data = ItemDatabase.get_item(equip["item_id"])
-		var name = item_data.get("name", "?")
+		var item_name = item_data.get("name", "?")
 		var level = equip.get("enhance_level", 0)
-		var display = name
+		var display = item_name
 		if level > 0:
 			display += " +" + str(level)
-		if level >= 10:
+		if level >= 9:
 			display += " (MAX)"
 		equip_option.add_item(display, equip_option.item_count)
 		equip_option.set_item_metadata(equip_option.item_count - 1, equip["uid"])
@@ -69,7 +72,7 @@ func _on_equip_selected(index: int):
 	selected_uid = equip_option.get_item_metadata(index)
 	_update_enhance_info()
 
-func _on_core_toggled(_pressed: bool):
+func _on_option_toggled(_pressed: bool):
 	_update_enhance_info()
 
 func _update_enhance_info():
@@ -81,6 +84,7 @@ func _update_enhance_info():
 		info_label.text = "已达到最大强化等级"
 		rate_label.text = ""
 		materials_label.text = ""
+		destroy_warning.text = ""
 		enhance_btn.disabled = true
 		return
 
@@ -98,12 +102,27 @@ func _update_enhance_info():
 	var gold_ok = " ✓" if info["has_gold"] else " ✗"
 	materials_label.text = "需要: " + stone_text + stone_ok + "  金币: %d" % info["gold_cost"] + gold_ok
 
-	# Core
+	# Core checkbox
 	core_check.disabled = not info["use_core"]
 	if info["use_core"]:
-		core_check.text = "使用Boss强化核心 (+20%%) ✓"
+		core_check.text = "使用Boss强化核心 (+10%%) ✓"
 	else:
 		core_check.text = "使用Boss强化核心 (无)"
+
+	# Blessed stone checkbox
+	blessed_check.disabled = not info["use_blessed"]
+	if info["use_blessed"]:
+		blessed_check.text = "使用祝福石 (+5%%) ✓"
+	else:
+		blessed_check.text = "使用祝福石 (无)"
+
+	# Destruction warning for +5 and above
+	if info["can_destroy"]:
+		destroy_warning.text = "⚠ 失败将销毁装备!"
+		destroy_warning.modulate = Color(1, 0.3, 0.3, 1)
+	else:
+		destroy_warning.text = ""
+		destroy_warning.modulate = Color.WHITE
 
 	enhance_btn.disabled = not info["has_stone"] or not info["has_gold"]
 	result_label.text = ""
@@ -113,7 +132,8 @@ func _on_enhance_pressed():
 		return
 
 	var use_core = core_check.button_pressed and not core_check.disabled
-	var result = enhance_sys.try_enhance(selected_uid, use_core)
+	var use_blessed = blessed_check.button_pressed and not blessed_check.disabled
+	var result = enhance_sys.try_enhance(selected_uid, use_core, use_blessed)
 
 	if not result["success"] and result.has("error"):
 		match result["error"]:
@@ -124,18 +144,20 @@ func _on_enhance_pressed():
 			"max_level":
 				result_label.text = "已达最大等级!"
 
-func _on_enhance_result(uid: String, success: bool, new_level: int):
-	if success:
+func _on_enhance_result(uid: String, success: bool, new_level: int, destroyed: bool):
+	if destroyed:
+		AudioManager.play_sfx("res://assets/audio/sfx_enhance_fail.ogg")
+		result_label.text = "强化失败... 装备被销毁!"
+		result_label.modulate = Color(1, 0.1, 0.1, 1)
+		VFX.shake(6.0, 0.3)
+		VFX.flash(Color(1, 0.2, 0.2, 0.5), 0.2)
+	elif success:
 		AudioManager.play_sfx("res://assets/audio/sfx_enhance_success.ogg")
 		result_label.text = "强化成功! +" + str(new_level)
 		result_label.modulate = Color.GREEN
 	else:
 		AudioManager.play_sfx("res://assets/audio/sfx_enhance_fail.ogg")
-		var old_level = new_level + 1
-		if new_level < old_level:
-			result_label.text = "强化失败... 降至 +" + str(new_level)
-		else:
-			result_label.text = "强化失败"
+		result_label.text = "强化失败"
 		result_label.modulate = Color.RED
 
 	# Reset color after delay

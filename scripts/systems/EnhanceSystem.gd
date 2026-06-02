@@ -1,22 +1,21 @@
 extends Node
 
-signal enhance_result(uid: String, success: bool, new_level: int)
+signal enhance_result(uid: String, success: bool, new_level: int, destroyed: bool)
 
-# Success rates per level
+# Success rates per level (+0 -> +1, ..., +8 -> +9)
 const SUCCESS_RATES: Array[float] = [
 	1.0,   # +0 -> +1
-	0.95,  # +1 -> +2
-	0.90,  # +2 -> +3
-	0.80,  # +3 -> +4
-	0.70,  # +4 -> +5
-	0.60,  # +5 -> +6
-	0.50,  # +6 -> +7
-	0.40,  # +7 -> +8
-	0.30,  # +8 -> +9
-	0.20,  # +9 -> +10
+	0.90,  # +1 -> +2
+	0.80,  # +2 -> +3
+	0.70,  # +3 -> +4
+	0.60,  # +4 -> +5
+	0.50,  # +5 -> +6
+	0.40,  # +6 -> +7
+	0.30,  # +7 -> +8
+	0.20,  # +8 -> +9
 ]
 
-const MAX_LEVEL: int = 10
+const MAX_LEVEL: int = 9
 
 const GOLD_COSTS: Array[int] = [
 	20,    # +0 -> +1
@@ -28,10 +27,9 @@ const GOLD_COSTS: Array[int] = [
 	650,   # +6 -> +7
 	900,   # +7 -> +8
 	1300,  # +8 -> +9
-	1800,  # +9 -> +10
 ]
 
-# Returns { success_rate, stone_id, stone_count, use_core, core_count }
+# Returns { success_rate, stone_id, stone_count, use_core, core_count, can_destroy }
 func get_enhance_info(uid: String) -> Dictionary:
 	var inv = get_node_or_null("/root/InventorySystem")
 	if not inv:
@@ -61,13 +59,20 @@ func get_enhance_info(uid: String) -> Dictionary:
 
 	var has_stone = inv.get_item_count(stone_id) >= stone_count
 	var has_core = inv.get_item_count("boss_enhance_core") >= 1
+	var has_blessed = inv.get_item_count("blessed_stone") >= 1
 	var rate = SUCCESS_RATES[current_level]
 	var gold_cost = GOLD_COSTS[current_level]
 
-	# Boss core adds 20% success rate
+	# Boss core adds +10% success rate
 	var bonus_rate = 0.0
 	if has_core:
-		bonus_rate = 0.2
+		bonus_rate += 0.10
+	# Blessed stone adds +5% success rate
+	if has_blessed:
+		bonus_rate += 0.05
+
+	# +5 and above: failure destroys equipment
+	var can_destroy = current_level >= 5
 
 	# Check gold via player node
 	var players = get_tree().get_nodes_in_group("player")
@@ -86,11 +91,14 @@ func get_enhance_info(uid: String) -> Dictionary:
 		"has_stone": has_stone,
 		"use_core": has_core,
 		"core_count": 1,
+		"use_blessed": has_blessed,
+		"blessed_count": 1,
+		"can_destroy": can_destroy,
 		"gold_cost": gold_cost,
 		"has_gold": has_gold,
 	}
 
-func try_enhance(uid: String, use_core: bool = false) -> Dictionary:
+func try_enhance(uid: String, use_core: bool = false, use_blessed: bool = false) -> Dictionary:
 	var inv = get_node_or_null("/root/InventorySystem")
 	if not inv:
 		return { "success": false, "error": "no_inventory" }
@@ -119,29 +127,36 @@ func try_enhance(uid: String, use_core: bool = false) -> Dictionary:
 		inv.remove_item("boss_enhance_core", 1)
 		core_used = true
 
+	# Consume blessed stone if used
+	var blessed_used = false
+	if use_blessed and info.get("use_blessed", false):
+		inv.remove_item("blessed_stone", 1)
+		blessed_used = true
+
 	# Roll success
 	var rate = info["success_rate"]
 	if core_used:
-		rate = minf(rate + info["bonus_rate"], 1.0)
+		rate = minf(rate + 0.10, 1.0)
+	if blessed_used:
+		rate = minf(rate + 0.05, 1.0)
 
 	var roll = randf()
 	var success = roll < rate
 
 	var current_level = info["current_level"]
 	var new_level = current_level
+	var destroyed = false
 
 	if success:
 		new_level = current_level + 1
-		# Update equipment level in inventory
 		_update_equipment_level(uid, new_level)
 	else:
-		# Failure: downgrade rules
-		if current_level >= 6:
-			# +6 to +10: downgrade by 1
-			new_level = current_level - 1
-			_update_equipment_level(uid, new_level)
+		# +5~+9: failure destroys the equipment
+		if current_level >= 5:
+			destroyed = true
+			_remove_equipment(uid)
 
-	enhance_result.emit(uid, success, new_level)
+	enhance_result.emit(uid, success, new_level, destroyed)
 
 	return {
 		"success": success,
@@ -149,6 +164,8 @@ func try_enhance(uid: String, use_core: bool = false) -> Dictionary:
 		"new_level": new_level,
 		"rate": rate,
 		"core_used": core_used,
+		"blessed_used": blessed_used,
+		"destroyed": destroyed,
 	}
 
 func _update_equipment_level(uid: String, level: int):
@@ -169,5 +186,21 @@ func _update_equipment_level(uid: String, level: int):
 			var equip_data = equip_sys.equipped[slot_name]
 			if equip_data and equip_data.get("uid", "") == uid:
 				equip_data["enhance_level"] = level
+				equip_sys.equipment_changed.emit()
+				break
+
+func _remove_equipment(uid: String):
+	# Remove from inventory
+	var inv = get_node_or_null("/root/InventorySystem")
+	if inv:
+		inv.remove_by_uid(uid)
+
+	# Also unequip if currently worn
+	var equip_sys = get_node_or_null("/root/EquipmentSystem")
+	if equip_sys:
+		for slot_name in equip_sys.equipped:
+			var equip_data = equip_sys.equipped[slot_name]
+			if equip_data and equip_data.get("uid", "") == uid:
+				equip_sys.equipped[slot_name] = null
 				equip_sys.equipment_changed.emit()
 				break

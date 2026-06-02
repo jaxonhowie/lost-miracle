@@ -7,7 +7,7 @@ const CLASSES: Dictionary = {
 		"base": { "STR": 10, "AGI": 5, "INT": 5 },
 		"secondaries": ["AGI", "INT"],  # alternating: lv2→AGI, lv3→INT, lv4→AGI...
 		"attack_type": "melee_physical",
-		"description": "近战物理输出，高生命高防御"
+		"description": "近战物理 | 高生命高防御"
 	},
 	"ranger": {
 		"name": "弓箭手",
@@ -15,7 +15,7 @@ const CLASSES: Dictionary = {
 		"base": { "STR": 5, "AGI": 10, "INT": 5 },
 		"secondaries": ["INT", "STR"],
 		"attack_type": "ranged_physical",
-		"description": "远程物理输出，高暴击"
+		"description": "远程物理 | 高暴击高攻速"
 	},
 	"assassin": {
 		"name": "刺客",
@@ -23,7 +23,7 @@ const CLASSES: Dictionary = {
 		"base": { "STR": 5, "AGI": 10, "INT": 5 },
 		"secondaries": ["STR", "INT"],
 		"attack_type": "melee_physical",
-		"description": "近战物理输出，高暴击高速度"
+		"description": "近战物理 | 高暴击高闪避"
 	},
 	"mage": {
 		"name": "法师",
@@ -31,7 +31,15 @@ const CLASSES: Dictionary = {
 		"base": { "STR": 5, "AGI": 5, "INT": 10 },
 		"secondaries": ["STR", "AGI"],
 		"attack_type": "spell",
-		"description": "法术输出，高技能伤害"
+		"description": "法术输出 | 高技能伤害"
+	},
+	"elven": {
+		"name": "精灵召唤师",
+		"primary": "INT",
+		"base": { "STR": 5, "AGI": 6, "INT": 10 },
+		"secondaries": ["AGI", "STR"],
+		"attack_type": "ranged_spell",
+		"description": "召唤协战 | 精灵增益"
 	}
 }
 
@@ -64,6 +72,9 @@ func compute_derived_stats(str_val: int, agi_val: int, int_val: int, equip: Dict
 		"crit_rate": 0.05 + agi_val * 0.005 + equip_crit_rate,
 		"crit_damage": 1.5 + equip_crit_damage,
 		"attack_type": class_data["attack_type"],
+		"hit_rate": 0.8 + agi_val * 0.005,
+		"dodge_rate": 0.05 + agi_val * 0.003,
+		"weight_capacity": 500 + str_val * 50,
 	}
 
 func apply_level_up(player: Node, class_id: String):
@@ -89,3 +100,9 @@ func apply_level_up(player: Node, class_id: String):
 func get_init_stats(class_id: String) -> Dictionary:
 	var class_data = get_class_data(class_id)
 	return class_data["base"].duplicate()
+
+func calc_hit_rate(attacker_agi: int, defender_agi: int) -> float:
+	return clampf(0.8 + (attacker_agi - defender_agi) * 0.01, 0.1, 0.99)
+
+func calc_dodge_rate(defender_agi: int) -> float:
+	return clampf(0.05 + defender_agi * 0.003, 0.0, 0.5)

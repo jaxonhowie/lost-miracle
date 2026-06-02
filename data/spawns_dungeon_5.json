@@ -1,0 +1,86 @@
+[
+  {
+    "spawn_id": "mob_a_fire_slime_1",
+    "monster_id": "fire_slime",
+    "position": [600, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_fire_slime_2",
+    "monster_id": "fire_slime",
+    "position": [800, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_lava_golem_1",
+    "monster_id": "lava_golem",
+    "position": [1000, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_lava_golem_2",
+    "monster_id": "lava_golem",
+    "position": [1200, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "fork_fire_imp_1",
+    "monster_id": "fire_imp",
+    "position": [1400, 400],
+    "respawn_seconds": 60,
+    "zone": "fork_platforms"
+  },
+  {
+    "spawn_id": "fork_fire_imp_2",
+    "monster_id": "fire_imp",
+    "position": [1600, 350],
+    "respawn_seconds": 60,
+    "zone": "fork_platforms"
+  },
+  {
+    "spawn_id": "elite_1",
+    "monster_id": "elite_forge_master",
+    "position": [2050, 550],
+    "respawn_seconds": 600,
+    "zone": "elite_area_1"
+  },
+  {
+    "spawn_id": "mob_b_slime_1",
+    "monster_id": "fire_slime",
+    "position": [2400, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "mob_b_golem_1",
+    "monster_id": "lava_golem",
+    "position": [2700, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "mob_b_imp_1",
+    "monster_id": "fire_imp",
+    "position": [2900, 400],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "elite_2",
+    "monster_id": "elite_magma_elemental",
+    "position": [3750, 550],
+    "respawn_seconds": 600,
+    "zone": "elite_area_2"
+  },
+  {
+    "spawn_id": "boss_1",
+    "monster_id": "inferno_lord_boss",
+    "position": [4650, 500],
+    "respawn_seconds": 1800,
+    "zone": "boss_room"
+  }
+]

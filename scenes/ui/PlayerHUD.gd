@@ -3,6 +3,7 @@ extends Control
 @onready var name_label: Label = $HBoxContainer/InfoContainer/NameLevel/NameLabel
 @onready var level_label: Label = $HBoxContainer/InfoContainer/NameLevel/LevelLabel
 @onready var hp_bar: ProgressBar = $HBoxContainer/InfoContainer/HPBar
+@onready var mp_bar: ProgressBar = $HBoxContainer/InfoContainer/MPBar
 @onready var xp_bar: ProgressBar = $HBoxContainer/InfoContainer/XPBar
 @onready var gold_label: Label = $HBoxContainer/InfoContainer/StatsRow/GoldLabel
 @onready var stat_label: Label = $HBoxContainer/InfoContainer/StatsRow/StatLabel
@@ -21,6 +22,10 @@ func _ready():
 	# Style HP bar
 	hp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.8, 0.2, 0.2)))
 	hp_bar.add_theme_stylebox_override("background", _create_bar_style(Color(0.2, 0.2, 0.2)))
+
+	# Style MP bar
+	mp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.2, 0.4, 0.9)))
+	mp_bar.add_theme_stylebox_override("background", _create_bar_style(Color(0.15, 0.15, 0.3)))
 
 	# Style XP bar
 	xp_bar.add_theme_stylebox_override("fill", _create_bar_style(Color(0.2, 0.6, 0.9)))
@@ -80,13 +85,21 @@ func _update_display():
 	hp_bar.max_value = player.get_total_max_hp()
 	hp_bar.value = player.hp
 
+	# MP
+	mp_bar.max_value = player.get_total_max_mp()
+	mp_bar.value = player.mp
+
 	# Gold
 	gold_label.text = str(player.gold)
 
 	# Stats
 	var atk = player.get_total_attack()
 	var def = player.get_total_defense()
-	stat_label.text = "攻:%d 防:%d" % [atk, def]
+	var weight_text = ""
+	if player.is_overweight():
+		weight_text = " [超重!]"
+	var auto_text = " [自动]" if player.auto_attack else ""
+	stat_label.text = "攻:%d 防:%d%s%s" % [atk, def, weight_text, auto_text]
 
 	# Class + Level
 	var class_sys = get_node_or_null("/root/ClassSystem")
@@ -96,10 +109,10 @@ func _update_display():
 		if class_sys:
 			class_name = class_sys.get_class_data(player.class_id).get("name", "")
 		level_label.text = "%s Lv.%d" % [class_name, level_sys.level]
-	if name_label:
-		name_label.text = "STR:%d AGI:%d INT:%d" % [player.STR, player.AGI, player.INT]
 		xp_bar.max_value = level_sys.xp_to_next_level()
 		xp_bar.value = level_sys.xp
+	if name_label:
+		name_label.text = "STR:%d AGI:%d INT:%d" % [player.STR, player.AGI, player.INT]
 
 	# Skill cooldowns
 	_update_skill_cooldowns()
@@ -135,13 +148,22 @@ func _update_skill_cooldowns():
 		var skill_key = SKILL_KEYS[i]
 		var cd = player._skill_cooldowns.get(skill_key, 0.0)
 		var max_cd = player.SKILL_COOLDOWNS.get(skill_key, 1.0)
+		var mp_cost = player.SKILL_MP_COSTS.get(skill_key, 0)
 		var node_data = _skill_nodes[i]
 		if cd > 0:
 			node_data["overlay"].visible = true
+			node_data["overlay"].color = Color(0, 0, 0, 0.6)
 			node_data["cd_label"].visible = true
 			node_data["cd_label"].text = "%.1f" % cd
 			var ratio = cd / max_cd
 			node_data["overlay"].size.y = 35 * ratio
+			node_data["overlay"].position.y = 0
+		elif player.mp < mp_cost:
+			node_data["overlay"].visible = true
+			node_data["overlay"].color = Color(0, 0, 0.5, 0.6)
+			node_data["cd_label"].visible = true
+			node_data["cd_label"].text = "%dMP" % mp_cost
+			node_data["overlay"].size.y = 35
 			node_data["overlay"].position.y = 0
 		else:
 			node_data["overlay"].visible = false

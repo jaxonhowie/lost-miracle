@@ -1,0 +1,86 @@
+[
+  {
+    "spawn_id": "mob_a_void_horror_1",
+    "monster_id": "void_horror",
+    "position": [600, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_void_horror_2",
+    "monster_id": "void_horror",
+    "position": [800, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_dimensional_rift_1",
+    "monster_id": "dimensional_rift",
+    "position": [1000, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "mob_a_dimensional_rift_2",
+    "monster_id": "dimensional_rift",
+    "position": [1200, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_a"
+  },
+  {
+    "spawn_id": "fork_entropy_1",
+    "monster_id": "entropy_elemental",
+    "position": [1400, 400],
+    "respawn_seconds": 60,
+    "zone": "fork_platforms"
+  },
+  {
+    "spawn_id": "fork_entropy_2",
+    "monster_id": "entropy_elemental",
+    "position": [1600, 350],
+    "respawn_seconds": 60,
+    "zone": "fork_platforms"
+  },
+  {
+    "spawn_id": "elite_1",
+    "monster_id": "elite_void_lord",
+    "position": [2050, 550],
+    "respawn_seconds": 600,
+    "zone": "elite_area_1"
+  },
+  {
+    "spawn_id": "mob_b_horror_1",
+    "monster_id": "void_horror",
+    "position": [2400, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "mob_b_rift_1",
+    "monster_id": "dimensional_rift",
+    "position": [2700, 550],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "mob_b_entropy_1",
+    "monster_id": "entropy_elemental",
+    "position": [2900, 400],
+    "respawn_seconds": 60,
+    "zone": "mob_area_b"
+  },
+  {
+    "spawn_id": "elite_2",
+    "monster_id": "elite_chaos_guardian",
+    "position": [3750, 550],
+    "respawn_seconds": 600,
+    "zone": "elite_area_2"
+  },
+  {
+    "spawn_id": "boss_1",
+    "monster_id": "void_overlord_boss",
+    "position": [4650, 500],
+    "respawn_seconds": 1800,
+    "zone": "boss_room"
+  }
+]

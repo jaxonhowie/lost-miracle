@@ -43,7 +43,16 @@ text = ""
 
 [node name="CoreCheck" type="CheckBox" parent="VBoxContainer"]
 layout_mode = 2
-text = "使用Boss强化核心 (+20%)"
+text = "使用Boss强化核心 (+10%)"
+
+[node name="BlessedCheck" type="CheckBox" parent="VBoxContainer"]
+layout_mode = 2
+text = "使用祝福石 (+5%)"
+
+[node name="DestroyWarning" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
 
 [node name="EnhanceButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2

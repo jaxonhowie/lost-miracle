@@ -42,3 +42,7 @@ text = "刺客 - 近战物理输出，高暴击高速度"
 [node name="Btn_mage" type="Button" parent="VBox"]
 layout_mode = 2
 text = "法师 - 法术输出，高技能伤害"
+
+[node name="Btn_elven" type="Button" parent="VBox"]
+layout_mode = 2
+text = "精灵召唤师 - 召唤协战，精灵增益"

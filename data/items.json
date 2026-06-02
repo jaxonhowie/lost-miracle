@@ -90,6 +90,13 @@
     "max_stack": 99,
     "description": "Boss身上掉出来的核心，散发着'我很贵'的气息。"
   },
+  "blessed_stone": {
+    "name": "祝福石",
+    "type": "material",
+    "stackable": true,
+    "max_stack": 99,
+    "description": "蕴含祝福之力的神秘石头，能提升强化成功率。"
+  },
   "health_potion": {
     "name": "生命药水",
     "type": "consumable",
@@ -134,6 +141,7 @@
     "attack": 6,
     "defense": 0,
     "hp": 0,
+    "weight": 30,
     "enhanceable": true,
     "description": "你的第一把武器，虽然锈迹斑斑但胜在……便宜？"
   },
@@ -146,6 +154,7 @@
     "defense": 0,
     "hp": 0,
     "crit_rate": 0.03,
+    "weight": 55,
     "enhanceable": true,
     "description": "骑士生前的佩剑，现在被你继承了。剑柄上刻着'小心使用，勿对队友'。"
   },
@@ -158,6 +167,7 @@
     "defense": 0,
     "hp": 0,
     "crit_damage": 0.2,
+    "weight": 90,
     "enhanceable": true,
     "description": "守墓人的看家武器，专门用来……修剪墓地的杂草。对，修剪杂草。"
   },
@@ -169,6 +179,7 @@
     "attack": 28,
     "defense": 0,
     "hp": 0,
+    "weight": 40,
     "enhanceable": true,
     "description": "法师的法杖，顶端的骷髅头会在你挥砍时发出'哎呀'的声音。"
   },
@@ -180,6 +191,7 @@
     "attack": 0,
     "defense": 3,
     "hp": 20,
+    "weight": 50,
     "enhanceable": true,
     "description": "看起来不太靠谱，但总比穿着睡衣打怪强。"
   },
@@ -191,6 +203,7 @@
     "attack": 0,
     "defense": 5,
     "hp": 30,
+    "weight": 60,
     "enhanceable": true,
     "description": "从僵尸身上扒下来的护手，味道需要适应一下。"
   },
@@ -202,6 +215,7 @@
     "attack": 0,
     "defense": 7,
     "hp": 40,
+    "weight": 80,
     "enhanceable": true,
     "description": "铁匠学徒的作品，粗糙但结实。穿上去像个会走路的冰箱。"
   },
@@ -213,6 +227,7 @@
     "attack": 0,
     "defense": 12,
     "hp": 80,
+    "weight": 100,
     "enhanceable": true,
     "description": "正统骑士团的制式胸甲，上面的徽记已经模糊，但依然能感受到当年的荣耀。"
   },
@@ -224,6 +239,7 @@
     "attack": 0,
     "defense": 24,
     "hp": 160,
+    "weight": 140,
     "enhanceable": true,
     "description": "守墓人的专属重甲，厚实得连亡灵都咬不动。附带墓地泥土的清香。"
   },
@@ -235,6 +251,7 @@
     "attack": 5,
     "defense": 8,
     "hp": 50,
+    "weight": 35,
     "enhanceable": true,
     "description": "亡灵法师的披风，穿上后会不自觉地想说'嘎嘎嘎'。"
   },
@@ -246,6 +263,7 @@
     "attack": 0,
     "defense": 2,
     "hp": 10,
+    "weight": 15,
     "enhanceable": true,
     "description": "用灵魂能量编织的布靴，穿上后走路悄无声息。缺点是偶尔会听到鞋子在叹气。"
   },
@@ -257,6 +275,7 @@
     "attack": 4,
     "defense": 0,
     "hp": 0,
+    "weight": 8,
     "enhanceable": true,
     "description": "暗影能量凝结的戒指，戴上后手指会变凉，但攻击力会变热。"
   },
@@ -268,6 +287,7 @@
     "attack": 15,
     "defense": 5,
     "hp": 30,
+    "weight": 12,
     "enhanceable": true,
     "description": "亡灵之王的遗物，戴上后你会觉得自己很有'死亡气息'。"
   },
@@ -301,6 +321,7 @@
     "defense": 0,
     "hp": 0,
     "crit_rate": 0.05,
+    "weight": 50,
     "enhanceable": true,
     "description": "水晶打造的长剑，锋利且闪亮。缺点是反光会晃到自己的眼睛。"
   },
@@ -313,6 +334,7 @@
     "defense": 0,
     "hp": 0,
     "crit_damage": 0.25,
+    "weight": 45,
     "enhanceable": true,
     "description": "暗影能量凝聚的刀刃，砍中敌人后会听到'嘶'的一声——是刀在笑。"
   },
@@ -324,6 +346,7 @@
     "attack": 0,
     "defense": 18,
     "hp": 120,
+    "weight": 90,
     "enhanceable": true,
     "description": "水晶材质的铠甲，防御力高且自带反光效果。穿上去像个会走路的迪斯科球。"
   },
@@ -335,6 +358,7 @@
     "attack": 0,
     "defense": 8,
     "hp": 50,
+    "weight": 30,
     "enhanceable": true,
     "description": "水晶护胫，走路时会发出清脆的叮当声。敌人听到就知道你来了。"
   },
@@ -346,6 +370,7 @@
     "attack": 10,
     "defense": 5,
     "hp": 20,
+    "weight": 10,
     "enhanceable": true,
     "description": "水晶指环，戴上后手指闪闪发光，适合在黑暗中找钥匙。"
   },
@@ -359,6 +384,7 @@
     "hp": 0,
     "crit_rate": 0.05,
     "crit_damage": 0.3,
+    "weight": 100,
     "enhanceable": true,
     "description": "水晶霸主的佩剑，巨大且闪亮。挥舞时会留下水晶残影，非常拉风。"
   },
@@ -370,6 +396,7 @@
     "attack": 0,
     "defense": 32,
     "hp": 220,
+    "weight": 150,
     "enhanceable": true,
     "description": "国王的战甲，穿上后你会不自觉地挺胸抬头，感觉自己是全地牢最闪亮的。"
   },
@@ -381,6 +408,7 @@
     "attack": 0,
     "defense": 2,
     "hp": 10,
+    "weight": 25,
     "enhanceable": true,
     "description": "粗铁打造的战靴，走路声音很大，但至少不会被自己的脚步声吓到。"
   },
@@ -392,6 +420,7 @@
     "attack": 0,
     "defense": 6,
     "hp": 40,
+    "weight": 35,
     "enhanceable": true,
     "description": "骑士团制式护胫，上面有小小的防滑纹路。适合在地牢湿滑的地面上奔跑。"
   },
@@ -404,6 +433,7 @@
     "defense": 10,
     "hp": 60,
     "crit_rate": 0.03,
+    "weight": 20,
     "enhanceable": true,
     "description": "暗影长靴，穿上后走路悄无声息。缺点是太安静了，偶尔会吓到队友。"
   },
@@ -415,6 +445,7 @@
     "attack": 3,
     "defense": 0,
     "hp": 0,
+    "weight": 5,
     "enhanceable": true,
     "description": "骨头做的指环，虽然简陋但有种原始的美感。"
   },
@@ -426,6 +457,7 @@
     "attack": 0,
     "defense": 8,
     "hp": 40,
+    "weight": 10,
     "enhanceable": true,
     "description": "守护者的指环，戴上后会有一种被保护的感觉。可能是心理作用。"
   },
@@ -438,6 +470,7 @@
     "defense": 8,
     "hp": 50,
     "crit_damage": 0.15,
+    "weight": 15,
     "enhanceable": true,
     "description": "国王的戒指，戴上后你会觉得自己很有领导气质。适合指挥队友去前面扛伤害。"
   },
@@ -467,6 +500,7 @@
     "attack": 0,
     "defense": 3,
     "hp": 15,
+    "weight": 20,
     "enhanceable": true,
     "description": "基本的头部防护，至少比什么都没有强。戴久了头上会有股皮革味。"
   },
@@ -478,6 +512,7 @@
     "attack": 0,
     "defense": 5,
     "hp": 25,
+    "weight": 35,
     "enhanceable": true,
     "description": "铁匠出品的头盔，结实耐用。缺点是戴上后听不太清别人说话。"
   },
@@ -489,6 +524,7 @@
     "attack": 0,
     "defense": 10,
     "hp": 60,
+    "weight": 50,
     "enhanceable": true,
     "description": "骑士团的制式头盔，面罩可以打开。前任主人可能是个话痨，因为面罩内侧刻着'记得呼吸'。"
   },
@@ -500,6 +536,7 @@
     "attack": 5,
     "defense": 18,
     "hp": 100,
+    "weight": 40,
     "enhanceable": true,
     "description": "水晶霸主的王冠，戴上后你会觉得自己很了不起。实际上是真的很了不起。"
   },
@@ -512,6 +549,7 @@
     "defense": 0,
     "hp": 0,
     "crit_rate": 0.02,
+    "weight": 5,
     "enhanceable": true,
     "description": "用骨头碎片串成的护身符，看起来不太吉利但确实有点用。"
   },
@@ -525,6 +563,7 @@
     "hp": 0,
     "crit_rate": 0.03,
     "crit_damage": 0.05,
+    "weight": 8,
     "enhanceable": true,
     "description": "凝固的灵魂能量制成的吊坠，佩戴时会微微发光。偶尔会听到吊坠在哼歌。"
   },
@@ -538,6 +577,7 @@
     "hp": 0,
     "crit_rate": 0.05,
     "crit_damage": 0.10,
+    "weight": 10,
     "enhanceable": true,
     "description": "水晶守卫的护符，蕴含着精准的水晶能量。戴上后瞄准能力大幅提升——至少说明书是这么说的。"
   },
@@ -551,6 +591,7 @@
     "hp": 0,
     "crit_rate": 0.05,
     "crit_damage": 0.20,
+    "weight": 12,
     "enhanceable": true,
     "description": "暗影领主的秘符，蕴含致命的暗影能量。戴上后你会觉得自己是刺客——虽然你可能只是个拿着剑的普通人。"
   }

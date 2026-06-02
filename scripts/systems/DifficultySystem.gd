@@ -15,11 +15,11 @@ const MAX_LEVEL_BONUS: float = 0.48  # cap at 6 steps
 const DROP_BONUS_PER_STEP: float = 0.025
 const MAX_DROP_BONUS: float = 0.15
 
-func get_stats(base_hp: int, base_attack: int, base_defense: int, base_xp: int) -> Dictionary:
+func get_stats(base_hp: int, base_attack: int, base_defense: int, base_xp: int, base_agi: int = 5) -> Dictionary:
 	var spawn_sys = get_node_or_null("/root/SpawnSystem")
 	var level_sys = get_node_or_null("/root/LevelSystem")
 	if not spawn_sys or not level_sys:
-		return { "hp": base_hp, "attack": base_attack, "defense": base_defense, "xp": base_xp }
+		return { "hp": base_hp, "attack": base_attack, "defense": base_defense, "xp": base_xp, "agi": base_agi }
 
 	var floor_num: int = spawn_sys.current_floor
 	var floor_info: Dictionary = FLOOR_DATA.get(floor_num, FLOOR_DATA[1])
@@ -38,6 +38,7 @@ func get_stats(base_hp: int, base_attack: int, base_defense: int, base_xp: int) 
 		"attack": int(base_attack * total_mult),
 		"defense": int(base_defense * total_mult),
 		"xp": int(base_xp * total_mult),
+		"agi": int(base_agi * total_mult),
 	}
 
 func get_drop_bonus() -> float:

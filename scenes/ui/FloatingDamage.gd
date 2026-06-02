@@ -12,14 +12,20 @@ func setup(damage: int, is_crit: bool = false):
 	else:
 		modulate = Color(1.0, 0.3, 0.3)
 		add_theme_font_size_override("font_size", 16)
-	horizontal_alignment = HORIZONTAL_ALIGNMENT.CENTER
-	# Random horizontal offset
+	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	velocity = Vector2(randf_range(-30, 30), -80)
+
+func setup_text(txt: String, color: Color):
+	text = txt
+	modulate = color
+	add_theme_font_size_override("font_size", 14)
+	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	velocity = Vector2(randf_range(-30, 30), -80)
 
 func _process(delta):
 	elapsed += delta
 	position += velocity * delta
-	velocity.y += 40 * delta  # slight gravity
+	velocity.y += 40 * delta
 	modulate.a = 1.0 - (elapsed / lifetime)
 	if elapsed >= lifetime:
 		queue_free()

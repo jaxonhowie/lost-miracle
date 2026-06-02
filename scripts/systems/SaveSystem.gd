@@ -146,11 +146,26 @@ func apply_save_data():
 	var pd = _pending_save.get("player", {})
 	if pd.has("class_id"):
 		player.class_id = pd["class_id"]
-	# Backward compat: old saves have flat stats, new saves have attributes
 	if pd.has("STR"):
 		player.STR = pd["STR"]
 		player.AGI = pd["AGI"]
 		player.INT = pd["INT"]
+	else:
+		# v3 migration: estimate attributes from level
+		var level_data = _pending_save.get("level_system", {})
+		var saved_level = level_data.get("level", 1)
+		var class_sys = get_node_or_null("/root/ClassSystem")
+		if class_sys:
+			var init = class_sys.get_init_stats(player.class_id)
+			player.STR = init["STR"]
+			player.AGI = init["AGI"]
+			player.INT = init["INT"]
+			for lv in range(2, saved_level + 1):
+				class_sys.apply_level_up(player, player.class_id)
+			# Restore level system to correct level
+			var level_sys = get_node_or_null("/root/LevelSystem")
+			if level_sys:
+				level_sys.level = saved_level
 	# hp restored after attributes (derived max_hp needed)
 	if pd.has("gold"):
 		player.gold = pd["gold"]
@@ -177,6 +192,10 @@ func apply_save_data():
 	# Restore HP (after equipment loaded so max_hp is correct)
 	if pd.has("hp"):
 		player.hp = mini(pd["hp"], player.get_total_max_hp())
+	if pd.has("mp"):
+		player.mp = mini(pd["mp"], player.get_total_max_mp())
+	if pd.has("auto_attack"):
+		player.auto_attack = pd["auto_attack"]
 
 	# Restore level system
 	var level_sys = get_node_or_null("/root/LevelSystem")
@@ -201,6 +220,16 @@ func apply_save_data():
 	var talent_sys = get_node_or_null("/root/TalentSystem")
 	if talent_sys and _pending_save.has("talent_system"):
 		talent_sys.load_save_data(_pending_save["talent_system"])
+
+	# Restore skill tree system
+	var skill_tree_sys = get_node_or_null("/root/SkillTreeSystem")
+	if skill_tree_sys and _pending_save.has("skill_tree"):
+		skill_tree_sys.load_save_data(_pending_save["skill_tree"])
+
+	# Restore honor system
+	var honor_sys = get_node_or_null("/root/HonorSystem")
+	if honor_sys and _pending_save.has("honor"):
+		honor_sys.load_save_data(_pending_save["honor"])
 
 	# Restore tutorial
 	var tutorial_sys = get_tree().current_scene.get_node_or_null("TutorialSystem")
@@ -236,7 +265,9 @@ func save_game():
 			"AGI": player.AGI,
 			"INT": player.INT,
 			"hp": player.hp,
+			"mp": player.mp,
 			"gold": player.gold,
+			"auto_attack": player.auto_attack,
 			"position": {
 				"x": player.global_position.x,
 				"y": player.global_position.y,
@@ -293,9 +324,22 @@ func save_game():
 	if talent_sys:
 		data["talent_system"] = talent_sys.get_save_data()
 
+	# Save skill tree system
+	var skill_tree_sys = get_node_or_null("/root/SkillTreeSystem")
+	if skill_tree_sys:
+		data["skill_tree"] = skill_tree_sys.get_save_data()
+
+	# Save honor system
+	var honor_sys = get_node_or_null("/root/HonorSystem")
+	if honor_sys:
+		data["honor"] = honor_sys.get_save_data()
+
 	var file = FileAccess.open(_slot_path(active_slot), FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
+
+	# Cloud sync (if logged in)
+	_sync_to_cloud(data)
 
 func respawn_player():
 	var players = get_tree().get_nodes_in_group("player")
@@ -325,3 +369,28 @@ func respawn_player():
 	player.velocity = Vector2.ZERO
 
 	_pending_save = {}
+
+# --- Cloud Sync ---
+
+func _sync_to_cloud(local_data: Dictionary):
+	var auth = get_node_or_null("/root/AuthManager")
+	var api = get_node_or_null("/root/APIClient")
+	if not auth or not api or not auth.is_logged_in:
+		return
+	# Send save data to cloud
+	var cloud_data = local_data.duplicate(true)
+	cloud_data["username"] = auth.username
+	api.update_player(auth.username, cloud_data)
+
+func _try_load_from_cloud() -> Dictionary:
+	var auth = get_node_or_null("/root/AuthManager")
+	var api = get_node_or_null("/root/APIClient")
+	if not auth or not api or not auth.is_logged_in:
+		return {}
+	# Cloud load is async - for now return empty
+	# In production, this would wait for the response
+	return {}
+
+func has_cloud_data() -> bool:
+	var auth = get_node_or_null("/root/AuthManager")
+	return auth != null and auth.is_logged_in

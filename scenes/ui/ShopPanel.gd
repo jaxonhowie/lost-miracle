@@ -44,12 +44,12 @@ func _refresh_buy_tab():
 	if not shop_sys:
 		return
 
-	for entry in shop_sys.buy_items:
+	var available_items = shop_sys.get_available_items()
+	for entry in available_items:
 		var item_id = entry["item_id"]
-		var price = entry["price"]
+		var price = shop_sys.get_buy_price(item_id)
 		var item_data = ItemDatabase.get_item(item_id)
 		var item_name = item_data.get("name", item_id)
-		var item_type = item_data.get("type", "")
 
 		var vbox = VBoxContainer.new()
 
@@ -66,6 +66,14 @@ func _refresh_buy_tab():
 		price_label.text = "%d G" % price
 		price_label.modulate = Color(1.0, 0.85, 0.2)
 		hbox.add_child(price_label)
+
+		# Show stock for limited items
+		var stock = shop_sys.get_stock_remaining(item_id)
+		if stock >= 0:
+			var stock_label = Label.new()
+			stock_label.text = "x%d" % stock
+			stock_label.modulate = Color(0.8, 0.6, 0.3) if stock > 0 else Color(0.5, 0.5, 0.5)
+			hbox.add_child(stock_label)
 
 		var buy_btn = Button.new()
 		buy_btn.text = "购买"

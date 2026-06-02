@@ -8,6 +8,7 @@ var hp: int = 60
 var max_hp: int = 60
 var attack_power: int = 8
 var defense: int = 1
+var agi: int = 5
 var move_speed: float = 80.0
 var attack_interval: float = 1.2
 var experience: int = 5
@@ -40,6 +41,19 @@ const KNOCKBACK_FRICTION: float = 800.0
 
 # Skill system
 var skills: Array = []
+
+# Boss system
+var is_boss: bool = false
+var boss_phase: int = 1
+var boss_phase_timer: float = 0.0
+var boss_aoe_cooldown: float = 0.0
+var boss_charge_cooldown: float = 0.0
+var boss_summon_cooldown: float = 0.0
+const BOSS_AOE_INTERVAL: float = 8.0
+const BOSS_CHARGE_INTERVAL: float = 12.0
+const BOSS_SUMMON_INTERVAL: float = 20.0
+const BOSS_AOE_RANGE: float = 120.0
+const BOSS_CHARGE_SPEED: float = 400.0
 
 @onready var sprite: ColorRect = $SpritePlaceholder
 @onready var detection_area: Area2D = $DetectionArea
@@ -95,18 +109,26 @@ func _setup_stats():
 	max_hp = data.get("hp", max_hp)
 	attack_power = data.get("attack_power", attack_power)
 	defense = data.get("defense", defense)
+	agi = data.get("agi", agi)
 	move_speed = data.get("move_speed", move_speed)
 	attack_interval = data.get("attack_interval", attack_interval)
 	experience = data.get("experience", experience)
 	# Apply difficulty scaling
 	var diff_sys = get_node_or_null("/root/DifficultySystem")
 	if diff_sys:
-		var scaled = diff_sys.get_stats(hp, attack_power, defense, experience)
+		var scaled = diff_sys.get_stats(hp, attack_power, defense, experience, agi)
 		hp = scaled["hp"]
 		max_hp = scaled["hp"]
 		attack_power = scaled["attack"]
 		defense = scaled["defense"]
 		experience = scaled["xp"]
+		agi = scaled["agi"]
+	# Boss init
+	is_boss = monster_id.ends_with("_boss")
+	if is_boss:
+		boss_aoe_cooldown = BOSS_AOE_INTERVAL
+		boss_charge_cooldown = BOSS_CHARGE_INTERVAL
+		boss_summon_cooldown = BOSS_SUMMON_INTERVAL
 
 func _on_ready_extra():
 	pass
@@ -115,7 +137,8 @@ func _on_damage_taken(_raw_damage: int, final_damage: int) -> int:
 	return final_damage
 
 func _on_hp_changed(_new_hp: int, _max_hp_val: int):
-	pass
+	if is_boss and boss_phase == 1 and _new_hp <= _max_hp_val / 2:
+		_boss_enter_phase2()
 
 func _on_state_entered(_new_state: State):
 	pass
@@ -243,6 +266,9 @@ func _process_attack(delta):
 	velocity.x = 0
 	attack_cooldown -= delta
 
+	if is_boss:
+		_process_boss_skills(delta)
+
 	if attack_cooldown <= 0:
 		if not _try_use_skill():
 			_perform_attack()
@@ -268,7 +294,7 @@ func _perform_attack():
 	# Check bodies already overlapping
 	for body in attack_area.get_overlapping_bodies():
 		if body.is_in_group("player") and body.has_method("take_damage"):
-			body.take_damage(attack_power, global_position)
+			body.take_damage(attack_power, global_position, agi)
 	await get_tree().create_timer(0.15).timeout
 	attack_area.monitoring = false
 
@@ -369,16 +395,26 @@ func _die():
 	# Trigger drop system (skip for summoned monsters)
 	if monster_id != "" and not get("is_summoned"):
 		DropSystem.on_monster_died(monster_id, global_position)
+	# Boss guaranteed drops: epic equipment + enhance core
+	if is_boss:
+		_boss_guaranteed_drops()
 	# Award XP
 	if experience > 0:
 		var level_sys = get_node_or_null("/root/LevelSystem")
 		if level_sys:
 			level_sys.add_xp(experience)
-	# Boss kill: grant talent points
+	# Boss kill: grant talent points and skill points and honor
 	if monster_id.begins_with("elite_") or monster_id.ends_with("_boss"):
 		var talent_sys = get_node_or_null("/root/TalentSystem")
 		if talent_sys:
 			talent_sys.add_talent_points(2)
+		var skill_tree_sys = get_node_or_null("/root/SkillTreeSystem")
+		if skill_tree_sys:
+			skill_tree_sys.add_skill_points(2)
+		var honor_sys = get_node_or_null("/root/HonorSystem")
+		if honor_sys:
+			var honor_amount = 100 if monster_id.ends_with("_boss") else 50
+			honor_sys.add_honor(honor_amount, "击杀" + ("Boss" if monster_id.ends_with("_boss") else "精英"))
 	# Trigger auto-save
 	var save_sys = get_node_or_null("/root/SaveSystem")
 	if save_sys:
@@ -409,4 +445,142 @@ func _on_attack_area_body_entered(body):
 	if body.is_in_group("player") and body.has_method("take_damage"):
 		var is_crit = randf() < 0.0
 		var dmg = attack_power
-		body.take_damage(dmg, global_position)
+		body.take_damage(dmg, global_position, agi)
+
+# --- Boss System ---
+
+func _process_boss_skills(delta: float):
+	boss_aoe_cooldown -= delta
+	boss_charge_cooldown -= delta
+	boss_summon_cooldown -= delta
+
+	# Phase 2: faster cooldowns
+	var cd_mult = 0.6 if boss_phase == 2 else 1.0
+
+	if boss_aoe_cooldown <= 0:
+		_boss_aoe_attack()
+		boss_aoe_cooldown = BOSS_AOE_INTERVAL * cd_mult
+	elif boss_charge_cooldown <= 0 and is_instance_valid(player_ref):
+		_boss_charge_attack()
+		boss_charge_cooldown = BOSS_CHARGE_INTERVAL * cd_mult
+	elif boss_summon_cooldown <= 0 and boss_phase == 2:
+		_boss_summon_minions()
+		boss_summon_cooldown = BOSS_SUMMON_INTERVAL * cd_mult
+
+func _boss_enter_phase2():
+	boss_phase = 2
+	boss_phase_timer = 1.5
+	# Visual feedback: flash red, grow slightly
+	var tween = create_tween()
+	tween.tween_property(sprite, "color", Color(1.0, 0.2, 0.2, 1.0), 0.3)
+	tween.tween_property(sprite, "color", Color(0.8, 0.1, 0.1, 1.0), 0.3)
+	tween.set_loops(3)
+	# Increase stats for phase 2
+	attack_power = int(attack_power * 1.3)
+	move_speed *= 1.2
+	# Announce
+	_spawn_boss_text("Phase 2!", Color(1, 0.3, 0.1))
+
+func _boss_aoe_attack():
+	# AOE: damage all players within range
+	var players = get_tree().get_nodes_in_group("player")
+	for p in players:
+		if is_instance_valid(p) and p.has_method("take_damage"):
+			var dist = global_position.distance_to(p.global_position)
+			if dist <= BOSS_AOE_RANGE:
+				p.take_damage(int(attack_power * 1.5), global_position, agi)
+	# Visual: expanding circle
+	_spawn_aoe_visual()
+	AudioManager.play_sfx("res://assets/audio/sfx_hit.ogg")
+
+func _boss_charge_attack():
+	if not is_instance_valid(player_ref):
+		return
+	# Charge toward player position
+	var target = player_ref.global_position
+	var dir = (target - global_position).normalized()
+	velocity = dir * BOSS_CHARGE_SPEED
+	# Damage on contact
+	for body in attack_area.get_overlapping_bodies():
+		if body.is_in_group("player") and body.has_method("take_damage"):
+			body.take_damage(int(attack_power * 2.0), global_position, agi)
+	_spawn_boss_text("Charge!", Color(1, 0.8, 0.1))
+
+func _boss_summon_minions():
+	# Summon 2 weak minions
+	var spawn_sys = get_node_or_null("/root/SpawnSystem")
+	if not spawn_sys:
+		return
+	for i in 2:
+		var offset = Vector2(randf_range(-80, 80), 0)
+		var minion_pos = global_position + offset
+		# Use a generic mob from the same floor
+		var minion_id = _get_minion_id()
+		if minion_id.is_empty():
+			continue
+		var data = MonsterDatabase.get_monster(minion_id)
+		if data.is_empty():
+			continue
+		_spawn_boss_text("Minions!", Color(0.5, 0.3, 0.8))
+
+func _get_minion_id() -> String:
+	# Return a weak minion type based on boss floor
+	var floor_id = monster_id.replace("_boss", "")
+	# Map boss themes to minion types
+	var minion_map = {
+		"ancient_treant": "forest_spider",
+		"lich_king": "skeleton_archer",
+		"inferno_lord": "fire_slime",
+		"crystal_dragon": "crystal_bat",
+		"shadow_emperor": "shadow_wraith",
+		"void_overlord": "void_horror"
+	}
+	return minion_map.get(floor_id, "")
+
+func _spawn_aoe_visual():
+	# Create expanding circle effect
+	var circle = ColorRect.new()
+	circle.size = Vector2(10, 10)
+	circle.position = Vector2(-5, -5)
+	circle.color = Color(1, 0.3, 0.1, 0.6)
+	circle.z_index = 5
+	add_child(circle)
+	var tween = create_tween()
+	tween.tween_property(circle, "size", Vector2(BOSS_AOE_RANGE * 2, BOSS_AOE_RANGE * 2), 0.4)
+	tween.parallel().tween_property(circle, "position", Vector2(-BOSS_AOE_RANGE, -BOSS_AOE_RANGE), 0.4)
+	tween.parallel().tween_property(circle, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(circle.queue_free)
+
+func _spawn_boss_text(txt: String, color: Color):
+	var label = Label.new()
+	label.text = txt
+	label.add_theme_font_size_override("font_size", 20)
+	label.position = Vector2(-40, -70)
+	label.modulate = color
+	label.z_index = 15
+	add_child(label)
+	var tween = create_tween()
+	tween.tween_property(label, "position:y", label.position.y - 30, 0.8)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(label.queue_free)
+
+func _boss_guaranteed_drops():
+	# Drop an epic equipment item appropriate to the boss level
+	var drop_sys = get_node_or_null("/root/DropSystem")
+	if not drop_sys:
+		return
+	# Find epic items from the drop table for this boss
+	var table = DropTableDatabase.roll_drops(monster_id)
+	var epic_items: Array = []
+	for entry in table:
+		var item_data = ItemDatabase.get_item(entry.get("item_id", ""))
+		if not item_data.is_empty() and item_data.get("quality", "") == "epic":
+			epic_items.append(entry)
+	# Drop one guaranteed epic if found in table
+	if not epic_items.is_empty():
+		var chosen = epic_items[randi() % epic_items.size()]
+		var item_id = chosen.get("item_id", "")
+		if not item_id.is_empty():
+			drop_sys.spawn_drop(item_id, global_position + Vector2(randf_range(-30, 30), -20))
+	# Also drop enhance core
+	drop_sys.spawn_drop("boss_enhance_core", global_position + Vector2(randf_range(-20, 20), -10))

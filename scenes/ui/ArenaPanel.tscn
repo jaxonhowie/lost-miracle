@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/ArenaPanel.gd" id="1"]
+
+[node name="ArenaPanel" type="PanelContainer"]
+offset_left = 350.0
+offset_right = 650.0
+offset_bottom = 400.0
+script = ExtResource("1")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "PvP 竞技场"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "准备就绪"
+horizontal_alignment = 1
+
+[node name="OpponentPanel" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="OppNameLabel" type="Label" parent="VBoxContainer/OpponentPanel"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
+[node name="OppInfoLabel" type="Label" parent="VBoxContainer/OpponentPanel"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
+[node name="MatchButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "开始匹配"
+
+[node name="FightButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "开始战斗"
+disabled = true
+
+[node name="ResultLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
