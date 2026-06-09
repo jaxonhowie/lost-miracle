@@ -1,0 +1,163 @@
+{
+  "effects": {
+    "damage_reduce_on_low_hp": {
+      "id": "damage_reduce_on_low_hp",
+      "name": "绝境守护",
+      "description": "HP低于30%时受到伤害降低20%",
+      "type": "passive",
+      "trigger": "on_take_damage",
+      "unlock_level": 5,
+      "condition": {
+        "hp_below": 0.30
+      },
+      "effect": {
+        "damage_reduce": 0.20
+      }
+    },
+    "thorns": {
+      "id": "thorns",
+      "name": "荆棘反甲",
+      "description": "受到近战攻击时反弹15%伤害给攻击者",
+      "type": "passive",
+      "trigger": "on_take_damage",
+      "unlock_level": 5,
+      "condition": {
+        "damage_type": "melee"
+      },
+      "effect": {
+        "reflect_percent": 0.15
+      }
+    },
+    "heal_on_low_hp": {
+      "id": "heal_on_low_hp",
+      "name": "濒死复苏",
+      "description": "HP首次低于20%时回复最大生命值15%",
+      "type": "passive",
+      "trigger": "on_hp_threshold",
+      "unlock_level": 5,
+      "condition": {
+        "hp_below": 0.20,
+        "once_per_battle": true
+      },
+      "effect": {
+        "heal_max_hp_percent": 0.15
+      }
+    },
+    "block_chance": {
+      "id": "block_chance",
+      "name": "铁壁",
+      "description": "受到攻击时有20%几率完全格挡，伤害归零",
+      "type": "passive",
+      "trigger": "on_take_damage",
+      "unlock_level": 7,
+      "condition": {
+        "chance": 0.20
+      },
+      "effect": {
+        "block": true
+      }
+    },
+    "heal_amplify": {
+      "id": "heal_amplify",
+      "name": "生命共鸣",
+      "description": "所有回复效果提升30%",
+      "type": "passive",
+      "trigger": "on_heal",
+      "unlock_level": 7,
+      "effect": {
+        "heal_amplify": 0.30
+      }
+    },
+    "def_boost_on_hit": {
+      "id": "def_boost_on_hit",
+      "name": "坚韧体魄",
+      "description": "受到攻击后防御力提升10%，持续2回合，最多叠加3层",
+      "type": "passive",
+      "trigger": "on_take_damage",
+      "unlock_level": 7,
+      "effect": {
+        "buff": {
+          "def_percent": 0.10,
+          "duration": 2,
+          "max_stacks": 3
+        }
+      }
+    },
+    "death_save": {
+      "id": "death_save",
+      "name": "不灭意志",
+      "description": "受到致命伤害时保留1点HP，每场战斗触发一次",
+      "type": "passive",
+      "trigger": "on_lethal_damage",
+      "unlock_level": 8,
+      "condition": {
+        "once_per_battle": true
+      },
+      "effect": {
+        "survive_with_hp": 1
+      }
+    },
+    "shield_on_low_hp": {
+      "id": "shield_on_low_hp",
+      "name": "血之壁垒",
+      "description": "HP低于40%时获得最大生命值25%的护盾，每场战斗一次",
+      "type": "passive",
+      "trigger": "on_hp_threshold",
+      "unlock_level": 8,
+      "condition": {
+        "hp_below": 0.40,
+        "once_per_battle": true
+      },
+      "effect": {
+        "shield_max_hp_percent": 0.25
+      }
+    },
+    "damage_reduce_per_stack": {
+      "id": "damage_reduce_per_stack",
+      "name": "累积坚韧",
+      "description": "每次受伤获得1层坚韧，每层降低2%受到伤害，最多5层，回合开始时层数减半",
+      "type": "passive",
+      "trigger": "on_take_damage",
+      "unlock_level": 8,
+      "effect": {
+        "stackable_buff": {
+          "stat": "damage_reduce",
+          "per_stack": 0.02,
+          "max_stacks": 5,
+          "decay": "halve_on_turn_start"
+        }
+      }
+    }
+  },
+  "slot_assignments": {
+    "armor": [
+      "damage_reduce_on_low_hp",
+      "thorns",
+      "block_chance",
+      "heal_amplify",
+      "death_save",
+      "shield_on_low_hp",
+      "damage_reduce_per_stack"
+    ],
+    "helmet": [
+      "heal_on_low_hp",
+      "block_chance",
+      "heal_amplify",
+      "def_boost_on_hit"
+    ],
+    "gloves": [
+      "thorns",
+      "def_boost_on_hit"
+    ],
+    "necklace": [
+      "heal_on_low_hp",
+      "heal_amplify",
+      "shield_on_low_hp",
+      "death_save"
+    ],
+    "ring": [
+      "thorns",
+      "shield_on_low_hp"
+    ]
+  }
+}

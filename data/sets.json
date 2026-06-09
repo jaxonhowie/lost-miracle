@@ -1,0 +1,32 @@
+{
+  "undead_hunter": {
+    "id": "undead_hunter",
+    "name": "亡灵猎手套装",
+    "description": "刷亡灵怪专用",
+    "bonuses": [
+      {"pieces": 2, "effects": [{"stat": "undead_damage", "value": 0.10}]},
+      {"pieces": 4, "effects": [{"stat": "undead_kill_heal", "value": 0.05}]},
+      {"pieces": 6, "effects": [{"stat": "boss_damage", "value": 0.15}]}
+    ]
+  },
+  "black_iron": {
+    "id": "black_iron",
+    "name": "黑铁守卫套装",
+    "description": "高防御生存",
+    "bonuses": [
+      {"pieces": 2, "effects": [{"stat": "def", "value": 0.10, "percent": true}]},
+      {"pieces": 4, "effects": [{"stat": "max_hp", "value": 0.15, "percent": true}]},
+      {"pieces": 6, "effects": [{"stat": "damage_reduce", "value": 0.12}]}
+    ]
+  },
+  "blood_oath": {
+    "id": "blood_oath",
+    "name": "血誓狂战套装",
+    "description": "暴击吸血流",
+    "bonuses": [
+      {"pieces": 2, "effects": [{"stat": "crit_rate", "value": 0.08}]},
+      {"pieces": 4, "effects": [{"stat": "lifesteal", "value": 0.05}]},
+      {"pieces": 6, "effects": [{"stat": "low_hp_atk_boost", "value": 0.30}]}
+    ]
+  }
+}

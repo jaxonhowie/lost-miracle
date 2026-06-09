@@ -1,0 +1,257 @@
+{
+  "iron_sword": {
+    "id": "iron_sword",
+    "type": "weapon",
+    "name": "铁剑",
+    "name_en": "Iron Sword",
+    "slot": "weapon",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"atk": 20},
+    "set_id": "",
+    "effects": {
+      "tier1": {"atk": 3},
+      "tier2": {"crit_rate": 0.03},
+      "tier3": {"damage_boost_on_kill": 0.10}
+    },
+    "description": "朴素但坚固的铁剑，适合初出茅庐的冒险者"
+  },
+  "bone_axe": {
+    "id": "bone_axe",
+    "type": "weapon",
+    "name": "骸骨战斧",
+    "name_en": "Bone Axe",
+    "slot": "weapon",
+    "class_req": "warrior",
+    "dual_wield": false,
+    "base_stats": {"atk": 35},
+    "set_id": "undead_hunter",
+    "effects": {
+      "tier1": {"atk": 5},
+      "tier2": {"undead_damage": 0.08},
+      "tier3": {"crit_guarantee_after_kill": true}
+    },
+    "description": "以亡灵骸骨锻造的战斧，对亡灵生物有额外的震慑力"
+  },
+  "shadow_blade": {
+    "id": "shadow_blade",
+    "type": "weapon",
+    "name": "暗影之刃",
+    "name_en": "Shadow Blade",
+    "slot": "weapon",
+    "class_req": "ranger",
+    "dual_wield": true,
+    "base_stats": {"atk": 45, "crit_rate": 0.05},
+    "set_id": "blood_oath",
+    "effects": {
+      "tier1": {"crit_rate": 0.05},
+      "tier2": {"crit_guarantee_after_crit": true},
+      "tier3": {"execute_below_20hp": true}
+    },
+    "description": "暗影之力凝聚而成的双刃，致命且迅捷"
+  },
+  "bone_helmet": {
+    "id": "bone_helmet",
+    "type": "armor",
+    "name": "骸骨头盔",
+    "name_en": "Bone Helmet",
+    "slot": "helmet",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"def": 12, "max_hp": 80},
+    "set_id": "",
+    "effects": {
+      "tier1": {"max_hp": 30},
+      "tier2": {"def": 5},
+      "tier3": {"damage_reduce": 0.05}
+    },
+    "description": "用骸骨碎片拼接而成的头盔，散发着淡淡的亡灵气息"
+  },
+  "iron_helmet": {
+    "id": "iron_helmet",
+    "type": "armor",
+    "name": "黑铁头盔",
+    "name_en": "Black Iron Helmet",
+    "slot": "helmet",
+    "class_req": "warrior",
+    "dual_wield": false,
+    "base_stats": {"def": 18, "max_hp": 120},
+    "set_id": "black_iron",
+    "effects": {
+      "tier1": {"def": 4},
+      "tier2": {"max_hp": 50},
+      "tier3": {"thorns_percent": 0.08}
+    },
+    "description": "黑铁铸造的重盔，坚固异常"
+  },
+  "leather_armor": {
+    "id": "leather_armor",
+    "type": "armor",
+    "name": "皮革胸甲",
+    "name_en": "Leather Armor",
+    "slot": "armor",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"def": 15, "max_hp": 100},
+    "set_id": "",
+    "effects": {
+      "tier1": {"def": 3},
+      "tier2": {"dodge": 0.03},
+      "tier3": {"damage_reduce": 0.05}
+    },
+    "description": "轻便的皮革护甲，提供基本的防护"
+  },
+  "bone_armor": {
+    "id": "bone_armor",
+    "type": "armor",
+    "name": "骸骨铠甲",
+    "name_en": "Bone Armor",
+    "slot": "armor",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"def": 22, "max_hp": 150},
+    "set_id": "undead_hunter",
+    "effects": {
+      "tier1": {"max_hp": 40},
+      "tier2": {"def": 6},
+      "tier3": {"undead_damage_reduce": 0.10}
+    },
+    "description": "由亡灵骨骼拼接而成的铠甲，对亡灵攻击有天然的抗性"
+  },
+  "black_iron_armor": {
+    "id": "black_iron_armor",
+    "type": "armor",
+    "name": "黑铁重甲",
+    "name_en": "Black Iron Armor",
+    "slot": "armor",
+    "class_req": "warrior",
+    "dual_wield": false,
+    "base_stats": {"def": 30, "max_hp": 200},
+    "set_id": "black_iron",
+    "effects": {
+      "tier1": {"def": 5},
+      "tier2": {"max_hp": 60},
+      "tier3": {"thorns_percent": 0.10}
+    },
+    "description": "黑铁锻造的重甲，穿戴者如同移动的堡垒"
+  },
+  "cloth_gloves": {
+    "id": "cloth_gloves",
+    "type": "accessory",
+    "name": "布制护手",
+    "name_en": "Cloth Gloves",
+    "slot": "gloves",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"def": 5, "atk": 8},
+    "set_id": "",
+    "effects": {
+      "tier1": {"atk": 2},
+      "tier2": {"spd": 2},
+      "tier3": {"skill_damage": 0.08}
+    },
+    "description": "轻薄的布制护手，不影响手指灵活度"
+  },
+  "bone_gloves": {
+    "id": "bone_gloves",
+    "type": "accessory",
+    "name": "骸骨护手",
+    "name_en": "Bone Gloves",
+    "slot": "gloves",
+    "class_req": "ranger",
+    "dual_wield": false,
+    "base_stats": {"def": 10, "atk": 12},
+    "set_id": "blood_oath",
+    "effects": {
+      "tier1": {"crit_rate": 0.03},
+      "tier2": {"atk": 4},
+      "tier3": {"lifesteal": 0.05}
+    },
+    "description": "骸骨碎片编织的护手，赋予穿戴者嗜血的本能"
+  },
+  "copper_ring": {
+    "id": "copper_ring",
+    "type": "accessory",
+    "name": "铜戒指",
+    "name_en": "Copper Ring",
+    "slot": "ring",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"atk": 10},
+    "set_id": "",
+    "effects": {
+      "tier1": {"atk": 2},
+      "tier2": {"crit_rate": 0.02},
+      "tier3": {"crit_dmg": 0.15}
+    },
+    "description": "铜质的朴素戒指，蕴含微弱的力量"
+  },
+  "blood_ring": {
+    "id": "blood_ring",
+    "type": "accessory",
+    "name": "血誓指环",
+    "name_en": "Blood Oath Ring",
+    "slot": "ring",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"atk": 18, "crit_rate": 0.03},
+    "set_id": "blood_oath",
+    "effects": {
+      "tier1": {"crit_rate": 0.03},
+      "tier2": {"lifesteal": 0.04},
+      "tier3": {"blood_rage_below_30hp": 0.25}
+    },
+    "description": "以血为誓锻造的指环，低血量时激发狂暴之力"
+  },
+  "bone_necklace": {
+    "id": "bone_necklace",
+    "type": "accessory",
+    "name": "骸骨项链",
+    "name_en": "Bone Necklace",
+    "slot": "necklace",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"max_hp": 60, "def": 5},
+    "set_id": "",
+    "effects": {
+      "tier1": {"max_hp": 25},
+      "tier2": {"def": 3},
+      "tier3": {"damage_reduce": 0.04}
+    },
+    "description": "由细小骸骨串成的项链，佩戴时感到一丝安宁"
+  },
+  "undead_pendant": {
+    "id": "undead_pendant",
+    "type": "accessory",
+    "name": "亡灵吊坠",
+    "name_en": "Undead Pendant",
+    "slot": "necklace",
+    "class_req": null,
+    "dual_wield": false,
+    "base_stats": {"max_hp": 100, "atk": 10},
+    "set_id": "undead_hunter",
+    "effects": {
+      "tier1": {"atk": 3},
+      "tier2": {"undead_damage": 0.06},
+      "tier3": {"undead_lifesteal": 0.08}
+    },
+    "description": "蕴含亡灵之力的吊坠，对抗亡灵时吸收其生命精华"
+  },
+  "iron_shield_gloves": {
+    "id": "iron_shield_gloves",
+    "type": "accessory",
+    "name": "铁盾护手",
+    "name_en": "Iron Shield Gloves",
+    "slot": "gloves",
+    "class_req": "warrior",
+    "dual_wield": false,
+    "base_stats": {"def": 15, "max_hp": 50},
+    "set_id": "black_iron",
+    "effects": {
+      "tier1": {"def": 4},
+      "tier2": {"max_hp": 40},
+      "tier3": {"block_chance": 0.10}
+    },
+    "description": "厚重的铁盾护手，能格挡致命一击"
+  }
+}

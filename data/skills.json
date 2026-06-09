@@ -1,252 +1,91 @@
 {
-  "whirlwind": {
-    "name": "旋风斩",
-    "class": "warrior",
-    "mp_cost": 15,
-    "cooldown": 6.0,
-    "damage_mult": 1.0,
-    "effect": "aoe_80",
-    "unlock_level": 1,
-    "description": "挥舞武器旋转攻击，对周围敌人造成伤害"
-  },
-  "charge": {
-    "name": "冲锋",
-    "class": "warrior",
+  "heavy_strike": {
+    "id": "heavy_strike",
+    "name": "重击",
+    "type": "active",
     "mp_cost": 20,
-    "cooldown": 8.0,
-    "damage_mult": 1.3,
-    "effect": "dash",
-    "unlock_level": 3,
-    "description": "向前冲锋，对路径上的敌人造成伤害"
+    "cooldown": 2,
+    "damage_multiplier": 1.5,
+    "target": "enemy",
+    "description": "造成150%攻击伤害"
   },
-  "war_cry": {
+  "battle_roar": {
+    "id": "battle_roar",
     "name": "战吼",
-    "class": "warrior",
-    "mp_cost": 25,
-    "cooldown": 15.0,
-    "damage_mult": 0,
-    "effect": "heal_and_buff",
-    "unlock_level": 5,
-    "description": "恢复30%最大生命值，攻击力提升30%持续5秒"
-  },
-  "shield_bash": {
-    "name": "盾击",
-    "class": "warrior",
-    "mp_cost": 18,
-    "cooldown": 10.0,
-    "damage_mult": 0.8,
-    "effect": "stun",
-    "unlock_level": 8,
-    "description": "用盾牌猛击敌人，造成伤害并眩晕1秒"
-  },
-  "berserker": {
-    "name": "狂暴",
-    "class": "warrior",
-    "mp_cost": 35,
-    "cooldown": 20.0,
-    "damage_mult": 0,
-    "effect": "berserk_buff",
-    "unlock_level": 12,
-    "description": "进入狂暴状态，攻击力+50%但防御力-30%，持续8秒"
-  },
-  "multi_shot": {
-    "name": "多重射击",
-    "class": "ranger",
-    "mp_cost": 12,
-    "cooldown": 5.0,
-    "damage_mult": 0.7,
-    "effect": "multi_projectile",
-    "unlock_level": 1,
-    "description": "同时射出3支箭矢，每支造成70%伤害"
-  },
-  "rapid_fire": {
-    "name": "急速射击",
-    "class": "ranger",
-    "mp_cost": 18,
-    "cooldown": 8.0,
-    "damage_mult": 0.5,
-    "effect": "rapid_hits",
-    "unlock_level": 3,
-    "description": "快速射击5次，每次造成50%伤害"
-  },
-  "eagle_eye": {
-    "name": "鹰眼",
-    "class": "ranger",
-    "mp_cost": 20,
-    "cooldown": 12.0,
-    "damage_mult": 0,
-    "effect": "crit_buff",
-    "unlock_level": 5,
-    "description": "暴击率+20%，暴击伤害+50%，持续10秒"
-  },
-  "trap": {
-    "name": "陷阱",
-    "class": "ranger",
-    "mp_cost": 15,
-    "cooldown": 10.0,
-    "damage_mult": 1.2,
-    "effect": "trap_slow",
-    "unlock_level": 8,
-    "description": "放置陷阱，敌人踩中后受到伤害并减速50%"
-  },
-  "arrow_rain": {
-    "name": "箭雨",
-    "class": "ranger",
-    "mp_cost": 35,
-    "cooldown": 18.0,
-    "damage_mult": 2.0,
-    "effect": "aoe_120",
-    "unlock_level": 12,
-    "description": "向天空射出大量箭矢，对大范围敌人造成伤害"
-  },
-  "backstab": {
-    "name": "背刺",
-    "class": "assassin",
-    "mp_cost": 15,
-    "cooldown": 6.0,
-    "damage_mult": 1.5,
-    "effect": "single_high",
-    "unlock_level": 1,
-    "description": "对单个敌人造成150%伤害，暴击率+30%"
-  },
-  "smoke_bomb": {
-    "name": "烟雾弹",
-    "class": "assassin",
-    "mp_cost": 20,
-    "cooldown": 10.0,
-    "damage_mult": 0,
-    "effect": "dodge_buff",
-    "unlock_level": 3,
-    "description": "闪避率+50%，持续5秒"
-  },
-  "poison_blade": {
-    "name": "淬毒",
-    "class": "assassin",
-    "mp_cost": 18,
-    "cooldown": 8.0,
-    "damage_mult": 0.8,
-    "effect": "poison_dot",
-    "unlock_level": 5,
-    "description": "攻击附带毒素，每秒造成攻击力30%的伤害，持续5秒"
-  },
-  "shadow_step": {
-    "name": "暗影步",
-    "class": "assassin",
-    "mp_cost": 25,
-    "cooldown": 12.0,
-    "damage_mult": 2.0,
-    "effect": "teleport_strike",
-    "unlock_level": 8,
-    "description": "瞬移到目标背后，造成200%伤害"
-  },
-  "death_mark": {
-    "name": "死亡印记",
-    "class": "assassin",
-    "mp_cost": 40,
-    "cooldown": 20.0,
-    "damage_mult": 3.0,
-    "effect": "execute",
-    "unlock_level": 12,
-    "description": "标记目标，5秒后引爆造成300%伤害，目标血量低于30%时直接击杀"
-  },
-  "fireball": {
-    "name": "火球术",
-    "class": "mage",
-    "mp_cost": 12,
-    "cooldown": 4.0,
-    "damage_mult": 1.2,
-    "effect": "projectile",
-    "unlock_level": 1,
-    "description": "发射火球，造成120%法术伤害"
-  },
-  "ice_shard": {
-    "name": "冰刺",
-    "class": "mage",
-    "mp_cost": 15,
-    "cooldown": 6.0,
-    "damage_mult": 1.0,
-    "effect": "slow_damage",
-    "unlock_level": 3,
-    "description": "发射冰刺，造成伤害并减速30%"
-  },
-  "lightning": {
-    "name": "闪电链",
-    "class": "mage",
-    "mp_cost": 22,
-    "cooldown": 8.0,
-    "damage_mult": 0.9,
-    "effect": "chain_damage",
-    "unlock_level": 5,
-    "description": "释放闪电链，对3个目标各造成90%伤害"
-  },
-  "meteor": {
-    "name": "陨石",
-    "class": "mage",
-    "mp_cost": 35,
-    "cooldown": 15.0,
-    "damage_mult": 2.5,
-    "effect": "aoe_100",
-    "unlock_level": 8,
-    "description": "召唤陨石轰击地面，对大范围敌人造成250%伤害"
-  },
-  "arcane_shield": {
-    "name": "奥术护盾",
-    "class": "mage",
+    "type": "active",
     "mp_cost": 30,
-    "cooldown": 18.0,
-    "damage_mult": 0,
-    "effect": "shield",
-    "unlock_level": 12,
-    "description": "生成护盾，吸收等于最大生命值50%的伤害，持续10秒"
+    "cooldown": 5,
+    "target": "self",
+    "buff": {
+      "atk_percent": 0.2,
+      "duration": 3
+    },
+    "description": "攻击力提升20%，持续3回合"
   },
-  "summon_water": {
-    "name": "召唤水精灵",
-    "class": "elven",
-    "mp_cost": 20,
-    "cooldown": 15.0,
-    "damage_mult": 0,
-    "effect": "summon_heal",
-    "unlock_level": 1,
-    "description": "召唤水精灵，每秒恢复2%最大生命值，持续10秒"
-  },
-  "summon_fire": {
-    "name": "召唤火精灵",
-    "class": "elven",
+  "blood_slash": {
+    "id": "blood_slash",
+    "name": "血性斩击",
+    "type": "active",
     "mp_cost": 25,
-    "cooldown": 15.0,
-    "damage_mult": 0.8,
-    "effect": "summon_attack",
-    "unlock_level": 3,
-    "description": "召唤火精灵，自动攻击周围敌人，持续10秒"
+    "cooldown": 4,
+    "damage_multiplier": 1.2,
+    "lifesteal_percent": 0.1,
+    "target": "enemy",
+    "description": "造成120%伤害，恢复伤害值10%生命"
   },
-  "nature_blessing": {
-    "name": "自然祝福",
-    "class": "elven",
-    "mp_cost": 30,
-    "cooldown": 12.0,
-    "damage_mult": 0,
-    "effect": "party_buff",
-    "unlock_level": 5,
-    "description": "全属性+15%，持续10秒"
+  "warrior_physique": {
+    "id": "warrior_physique",
+    "name": "战士体魄",
+    "type": "passive",
+    "effect": {"max_hp_percent": 0.10},
+    "description": "最大生命值+10%"
   },
-  "entangle": {
-    "name": "缠绕",
-    "class": "elven",
-    "mp_cost": 22,
-    "cooldown": 10.0,
-    "damage_mult": 0.6,
-    "effect": "root_damage",
-    "unlock_level": 8,
-    "description": "藤蔓缠绕敌人，造成伤害并定身2秒"
+  "weapon_mastery": {
+    "id": "weapon_mastery",
+    "name": "武器精通",
+    "type": "passive",
+    "effect": {"atk_percent": 0.08},
+    "description": "攻击力+8%"
   },
-  "spirit_storm": {
-    "name": "精灵风暴",
-    "class": "elven",
-    "mp_cost": 40,
-    "cooldown": 20.0,
-    "damage_mult": 2.0,
-    "effect": "aoe_summon",
-    "unlock_level": 12,
-    "description": "召唤精灵风暴，对大范围敌人持续造成伤害并治疗自身"
+  "bone_slam": {
+    "id": "bone_slam",
+    "name": "骸骨重击",
+    "type": "monster",
+    "damage_multiplier": 1.8,
+    "cooldown": 3,
+    "description": "对玩家造成180%攻击伤害"
+  },
+  "undead_shield": {
+    "id": "undead_shield",
+    "name": "亡灵护盾",
+    "type": "monster",
+    "cooldown": 6,
+    "buff": {"def_percent": 0.5, "duration": 3},
+    "description": "3回合内防御提升50%"
+  },
+  "death_gaze": {
+    "id": "death_gaze",
+    "name": "死亡凝视",
+    "type": "monster",
+    "cooldown": 5,
+    "debuff": {"atk_percent": -0.2, "duration": 3},
+    "description": "降低玩家20%攻击，持续3回合"
+  },
+  "final_slash": {
+    "id": "final_slash",
+    "name": "终焉斩击",
+    "type": "monster",
+    "damage_multiplier": 2.5,
+    "cooldown": 4,
+    "hp_threshold": 0.3,
+    "description": "血量低于30%后释放，高伤害技能"
+  },
+  "shadow_strike": {
+    "id": "shadow_strike",
+    "name": "暗影突袭",
+    "type": "monster",
+    "damage_multiplier": 1.6,
+    "cooldown": 3,
+    "description": "快速突袭，造成160%伤害"
   }
 }

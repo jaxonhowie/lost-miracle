@@ -4,14 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**失落奇迹 (Lost Miracle)** — a 2D side-scrolling dungeon crawler / loot RPG. MVP scope: one dungeon floor, three enemy tiers (mob/elite/boss), loot drops, equipment, and gear enhancement.
+**失落奇迹：亡灵地牢 (Lost Miracle: Undead Dungeon)** — 静态图暗黑刷装 RPG + 半挂机回合制战斗。玩家在地牢中点击探索，遭遇怪物进行回合制战斗，收集装备，强化装备，挑战 Boss 通关。
 
 ## Tech Stack
 
 - **Engine**: Godot 4.6.2 stable
-- **Language**: GDScript (no C# in MVP)
-- **Resolution**: 1280x720, side-view, TileMapLayer-based maps
-- **Combat**: Real-time collision, melee attacks, simple skill system
+- **Language**: GDScript
+- **Resolution**: 1280x720
+- **Combat**: 回合制自动战斗 + 手动技能释放
+- **表现**: 静态 TextureRect/ColorRect + Tween 动画
 
 ## Architecture
 
@@ -20,107 +21,101 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 res://
   scenes/
-    player/          — Player.tscn, Player.gd
-    monsters/        — BaseMonster.tscn/gd + per-monster scenes
-    maps/            — DungeonFloor1.tscn/gd
-    items/           — DropItem.tscn/gd
-    npcs/            — QuestNPC.gd
-    ui/              — HUD, Inventory, Equipment, Enhance, Talent, Quest panels
+    main/              — Main.tscn 主菜单
+    dungeon/           — DungeonScene.tscn 地牢探索
+    battle/            — BattleScene.tscn 战斗界面
+    inventory/         — InventoryScene.tscn 背包
+    enhance/           — EnhanceScene.tscn 强化
   scripts/
-    systems/         — Drop, Spawn, Inventory, Equipment, Enhance, Save, Achievement, Quest, Talent systems
-    data/            — Database autoloads (Item, Monster, DropTable)
-  data/              — JSON data files (items, monsters, drops, spawns, talents, achievements, quests)
+    autoload/          — Game, PlayerData, DataManager, SaveManager
+    battle/            — BattleManager, BattleUnit, DamageCalculator, Skill
+    dungeon/           — DungeonManager, DungeonEvent
+    item/              — Equipment, ItemGenerator, LootManager
+    ui/                — UIHelper
+  data/                — JSON 数据文件
 ```
 
 ### Core Systems
 
-- **Data-driven design**: All item/monster/drop definitions live in JSON files under `data/`, not hardcoded in scripts.
-- **Systems as autoloads**: Game systems should be autoload singletons. Current autoloads: `ThemeSystem`, `AudioManager`, `VFX`, `MonsterDatabase`, `LevelSystem`, `ItemDatabase`, `DropTableDatabase`, `DropSystem`, `InventorySystem`, `EquipmentSystem`, `EnhanceSystem`, `SpawnSystem`, `DifficultySystem`, `SaveSystem`, `ShopSystem`, `AchievementSystem`, `QuestSystem`, `TalentSystem`.
-- **Monsters use inheritance**: BaseMonster provides the state machine (Idle/Patrol/Chase/Attack/Hit/Dead); individual monsters extend it.
-- **Equipment instances**: Equipped items have a unique UID and enhance level — they are NOT just item_id references.
+- **Data-driven**: 所有怪物/技能/装备/词条定义在 `data/` JSON 文件中
+- **4 个 Autoload**: `Game`(全局状态), `PlayerData`(玩家数据), `DataManager`(JSON加载), `SaveManager`(存档)
+- **装备实例**: 每件装备有唯一 UID、品质、词条、强化等级
+- **回合制战斗**: 按速度决定行动顺序，自动普攻 + 手动技能
 
 ### Key Data Schemas
 
-- **Item**: `{ name, type (equipment|material), slot, quality, attack, defense, hp, enhanceable }`
-- **Equipment instance**: `{ uid, item_id, enhance_level, locked }`
-- **Drop table entry**: `{ item_id, min, max, rate }` grouped by monster_id
-- **Spawn point**: `{ spawn_id, monster_id, position, respawn_seconds, max_alive }`
+- **Equipment instance**: `{ uid, base_id, name, slot, quality, enhance_level, base_stats, affixes, set_id }`
+- **Monster**: `{ id, name, type, level, hp, atk, def, spd, crit_rate, crit_dmg, skills }`
+- **Skill**: `{ id, name, type(active/passive/monster), mp_cost, cooldown, damage_multiplier, buff/debuff }`
+- **Affix**: `{ id, name, stat, min, max }`
 
 ### Damage Formula
 
 ```
-final_damage = max(1, attacker_attack - defender_defense)
-if crit: final_damage *= crit_damage
+最终伤害 = max(1, 攻击方ATK - 防御方DEF * 0.5)
+暴击伤害 = 最终伤害 * 暴击伤害倍率
+吸血恢复 = 伤害值 * 吸血率
 ```
 
 ### Enhancement Rules
 
-- +1 to +5: failure does NOT downgrade
-- +6 to +8: failure downgrades by 1
-- +9 to +10: failure downgrades by 1, no gear destruction
-- Weapon: +7% attack per level; Armor: +6% defense, +4% HP per level
-- Gold cost per level: [20, 40, 80, 150, 250, 400, 650, 900, 1300, 1800]
+- +0 到 +9，消耗金币 + 强化石（普通或受祝福）
+- 失败不降级，只消耗材料
+- 两种强化石：普通强化石、受祝福强化石（受祝福成功率更高）
+- 成功率（普通/受祝福）: +0→+1=100%/100%, +1→+2=100%/100%, +2→+3=100%/100%, +3→+4=30%/100%, +4→+5=28%/33%, +5→+6=20%/25%, +6→+7=18%/23%, +7→+8=15%/20%, +8→+9=13%/18%
+- Weapon: +1~+4 ATK+1/级, +5 ATK+2, +6~+8 ATK+3/级
+- Armor/Helmet: +1~+5 DEF+1/级, +6~+7 DEF+2/级, +8 DEF+3
+- 特效解锁: +5=初级特效, +7=二级特效, +8=终极特效
 
-### Refresh Timers
+### Dungeon Events
 
-| Type   | Respawn  | Persisted in save? |
-|--------|----------|--------------------|
-| Mob    | 60s      | No                 |
-| Elite  | 10min    | Yes                |
-| Boss   | 30min    | Yes                |
+| 事件类型 | 概率 | 说明 |
+|---------|------|------|
+| 普通怪 | 55% | 主要刷装备来源 |
+| 精英怪 | 15% | 掉落更好装备 |
+| 宝箱 | 10% | 金币、强化石 |
+| 祭坛 | 10% | 临时增益 |
+| 陷阱 | 5% | 扣血 |
+| Boss入口 | 5% | 需满足条件 |
 
-Mobs must not respawn if player is within 300px of spawn point. Max 6 mobs per area.
+Boss 入口条件: 击败 ≥15 普通怪, ≥3 精英怪, 等级 ≥5
 
-### Talent System
+### Equipment Quality
 
-- 4 categories (力量/坚韧/技巧/幸运), 10 talents, 44 total ranks
-- Talent points: +1 per level-up, +2 per boss kill
-- Respec costs 500 gold, refunds all points
-- Stat computation chain: `base + equipment + talent + buff(war_cry)`
-- HP regen uses float accumulator for fractional regen values
-- `data/talents.json` defines all talent data
+| 品质 | 颜色 | 词条数 |
+|------|------|--------|
+| 普通 normal | 白色 | 1 |
+| 精良 fine | 绿色 | 2 |
+| 稀有 rare | 蓝色 | 3 |
+| 史诗 epic | 紫色 | 4 |
+| 传说 legendary | 橙色 | 5 |
 
-## Development Order
+### Sets (3 sets)
 
-1. Player movement, jumping, attack
-2. Map collision (TileMapLayer)
-3. Mob combat
-4. Drop system
-5. Inventory system
-6. Equipment system
-7. Enhancement system
-8. Elite mobs
-9. Boss
-10. Spawn/refresh system
-11. Save system
-12. UI polish
+- **亡灵猎手**: 2件=亡灵伤害+10%, 4件=击杀回血5%, 6件=Boss伤害+15%
+- **黑铁守卫**: 2件=防御+10%, 4件=生命+15%, 6件=受伤降低12%
+- **血誓狂战**: 2件=暴击+8%, 4件=吸血+5%, 6件=低血量攻击+30%
 
-Do NOT start with Boss or enhancement UI. Get "kill mob → loot → equip → get stronger" loop working first.
+### Save System
+
+- 路径: `user://save.json`
+- 保存: 等级、经验、金币、强化石、背包、装备、地牢进度
 
 ## Controls
 
 | Action | Key |
 |--------|-----|
-| Move | A / D |
-| Jump | Space |
-| Dodge | Shift |
-| Attack | Left Mouse Button |
-| Skills 1/2/3 | 1 / 2 / 3 |
-| Quick Item 1 | F1 |
-| Inventory | Tab |
-| Equipment / Shop | E |
-| Enhance | R |
-| Quest Panel | Q |
-| Talent Panel | T |
-| Pause | Escape |
+| 技能 1/2/3 | 1 / 2 / 3 |
+| 背包 | Tab |
+| 强化 | R |
+| 探索 | 鼠标点击按钮 |
 
-## Art Specs
+## Development Order
 
-| Entity | Sprite Size |
-|--------|-------------|
-| Player | 48x64 or 64x64 |
-| Mobs   | 48x48 / 64x64 |
-| Elites | 80x80 |
-| Boss   | 128x128 or 160x160 |
-
-Equipment quality colors: normal=white, fine=green, rare=blue, epic=purple. No legendaries in MVP.
+1. 项目骨架 + Autoload
+2. JSON 数据文件
+3. 回合制战斗系统
+4. 掉落 + 背包 + 装备穿戴
+5. 强化系统
+6. 地牢探索 + Boss
+7. 主菜单 + 存档 + UI 收尾

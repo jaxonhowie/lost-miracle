@@ -1,0 +1,134 @@
+{
+  "effects": {
+    "bloodthirst_strike": {
+      "id": "bloodthirst_strike",
+      "name": "嗜血斩",
+      "description": "普通攻击时有15%几率造成150%伤害并回复伤害值20%的生命",
+      "type": "passive",
+      "trigger": "on_attack",
+      "unlock_level": 5,
+      "condition": {
+        "chance": 0.15
+      },
+      "effect": {
+        "damage_multiplier": 1.5,
+        "lifesteal": 0.20
+      }
+    },
+    "armor_pierce": {
+      "id": "armor_pierce",
+      "name": "破甲",
+      "description": "攻击时无视目标15%防御",
+      "type": "passive",
+      "trigger": "on_attack",
+      "unlock_level": 5,
+      "effect": {
+        "def_penetration": 0.15
+      }
+    },
+    "crit_guarantee_after_crit": {
+      "id": "crit_guarantee_after_crit",
+      "name": "暴击连锁",
+      "description": "触发暴击后下一次攻击必定暴击",
+      "type": "passive",
+      "trigger": "on_crit",
+      "unlock_level": 7,
+      "effect": {
+        "next_crit_guarantee": true
+      }
+    },
+    "bleed_on_crit": {
+      "id": "bleed_on_crit",
+      "name": "撕裂伤口",
+      "description": "暴击时使目标流血，每回合损失攻击力30%的生命值，持续2回合",
+      "type": "passive",
+      "trigger": "on_crit",
+      "unlock_level": 7,
+      "effect": {
+        "dot": {
+          "type": "bleed",
+          "multiplier": 0.30,
+          "duration": 2
+        }
+      }
+    },
+    "double_strike": {
+      "id": "double_strike",
+      "name": "双重打击",
+      "description": "攻击时有10%几率追加一次50%攻击力的额外攻击",
+      "type": "passive",
+      "trigger": "on_attack",
+      "unlock_level": 7,
+      "condition": {
+        "chance": 0.10
+      },
+      "effect": {
+        "bonus_attack": {
+          "damage_multiplier": 0.5
+        }
+      }
+    },
+    "execute_below_20hp": {
+      "id": "execute_below_20hp",
+      "name": "斩杀",
+      "description": "暴击时如果目标HP低于20%直接斩杀",
+      "type": "passive",
+      "trigger": "on_crit",
+      "unlock_level": 8,
+      "condition": {
+        "target_hp_below": 0.20
+      },
+      "effect": {
+        "execute": true
+      }
+    },
+    "vampiric_crit": {
+      "id": "vampiric_crit",
+      "name": "血族之力",
+      "description": "暴击时回复已损失生命值的10%",
+      "type": "passive",
+      "trigger": "on_crit",
+      "unlock_level": 8,
+      "effect": {
+        "heal_missing_hp_percent": 0.10
+      }
+    },
+    "attack_boost_on_kill": {
+      "id": "attack_boost_on_kill",
+      "name": "杀意涌动",
+      "description": "击杀敌人后攻击力提升25%，持续3回合，可叠加",
+      "type": "passive",
+      "trigger": "on_kill",
+      "unlock_level": 8,
+      "effect": {
+        "buff": {
+          "atk_percent": 0.25,
+          "duration": 3,
+          "stackable": true
+        }
+      }
+    }
+  },
+  "slot_assignments": {
+    "weapon": [
+      "bloodthirst_strike",
+      "armor_pierce",
+      "crit_guarantee_after_crit",
+      "bleed_on_crit",
+      "double_strike",
+      "execute_below_20hp",
+      "vampiric_crit",
+      "attack_boost_on_kill"
+    ],
+    "gloves": [
+      "armor_pierce",
+      "double_strike",
+      "attack_boost_on_kill"
+    ],
+    "ring": [
+      "bloodthirst_strike",
+      "crit_guarantee_after_crit",
+      "execute_below_20hp"
+    ]
+  }
+}

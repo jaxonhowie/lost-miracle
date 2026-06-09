@@ -1,0 +1,134 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/battle/BattleScene.gd" id="1"]
+
+[node name="BattleScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.05, 0.05, 1)
+
+[node name="BattleArea" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 50.0
+offset_bottom = -200.0
+theme_override_constants/separation = 100
+
+[node name="PlayerView" type="VBoxContainer" parent="BattleArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Sprite" type="ColorRect" parent="BattleArea/PlayerView"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 200)
+color = Color(0.2, 0.4, 0.8, 1)
+
+[node name="NameLabel" type="Label" parent="BattleArea/PlayerView"]
+layout_mode = 2
+text = "战士"
+horizontal_alignment = 1
+
+[node name="HPBar" type="ProgressBar" parent="BattleArea/PlayerView"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 20)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="HPText" type="Label" parent="BattleArea/PlayerView"]
+layout_mode = 2
+text = "HP: 1000/1000"
+horizontal_alignment = 1
+
+[node name="MPText" type="Label" parent="BattleArea/PlayerView"]
+layout_mode = 2
+text = "MP: 200/200"
+horizontal_alignment = 1
+
+[node name="VS" type="Label" parent="BattleArea"]
+layout_mode = 2
+text = "⚔"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MonsterView" type="VBoxContainer" parent="BattleArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Sprite" type="ColorRect" parent="BattleArea/MonsterView"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 200)
+color = Color(0.6, 0.2, 0.2, 1)
+
+[node name="NameLabel" type="Label" parent="BattleArea/MonsterView"]
+layout_mode = 2
+text = "怪物"
+horizontal_alignment = 1
+
+[node name="HPBar" type="ProgressBar" parent="BattleArea/MonsterView"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 20)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="HPText" type="Label" parent="BattleArea/MonsterView"]
+layout_mode = 2
+text = "HP: 300/300"
+horizontal_alignment = 1
+
+[node name="StatusText" type="Label" parent="BattleArea/MonsterView"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
+[node name="SkillBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -140.0
+offset_bottom = -80.0
+theme_override_constants/separation = 10
+
+[node name="Skill1" type="Button" parent="SkillBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 50)
+text = "重击 [1]"
+
+[node name="Skill2" type="Button" parent="SkillBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 50)
+text = "战吼 [2]"
+
+[node name="Skill3" type="Button" parent="SkillBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 50)
+text = "血性斩击 [3]"
+
+[node name="AutoBtn" type="Button" parent="SkillBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 50)
+text = "自动战斗"
+
+[node name="BattleLog" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -75.0
+bbcode_enabled = true
+text = "战斗日志..."
+scroll_following = true
