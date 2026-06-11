@@ -45,6 +45,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 text = "背包"
+clip_text = true
 
 [node name="CloseBtn" type="Button" parent="Panel/Margin/VBox/Header"]
 layout_mode = 2
@@ -81,6 +82,25 @@ text = "物品栏"
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="Pagination" type="HBoxContainer" parent="Panel/Margin/VBox/Content/InventoryPanel"]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="PrevBtn" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/Pagination"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 30)
+text = "◀"
+
+[node name="PageLabel" type="Label" parent="Panel/Margin/VBox/Content/InventoryPanel/Pagination"]
+layout_mode = 2
+text = "1 / 1"
+
+[node name="NextBtn" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/Pagination"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 30)
+text = "▶"
+
 [node name="DetailPanel" type="VBoxContainer" parent="Panel/Margin/VBox/Content"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -109,10 +129,46 @@ layout_mode = 2
 custom_minimum_size = Vector2(80, 35)
 text = "卸下"
 
+[node name="EnhanceBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/ActionButtons"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 35)
+text = "强化"
+
 [node name="DiscardBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/ActionButtons"]
 layout_mode = 2
 custom_minimum_size = Vector2(80, 35)
 text = "丢弃"
+
+[node name="EnhancePanel" type="VBoxContainer" parent="Panel/Margin/VBox/Content/DetailPanel"]
+visible = false
+layout_mode = 2
+
+[node name="StoneSelect" type="HBoxContainer" parent="Panel/Margin/VBox/Content/DetailPanel/EnhancePanel"]
+layout_mode = 2
+
+[node name="StoneLabel" type="Label" parent="Panel/Margin/VBox/Content/DetailPanel/EnhancePanel/StoneSelect"]
+layout_mode = 2
+text = "强化石:"
+
+[node name="StoneOption" type="OptionButton" parent="Panel/Margin/VBox/Content/DetailPanel/EnhancePanel/StoneSelect"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 30)
+
+[node name="EnhanceInfo" type="RichTextLabel" parent="Panel/Margin/VBox/Content/DetailPanel/EnhancePanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+bbcode_enabled = true
+text = ""
+
+[node name="ConfirmEnhanceBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/EnhancePanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 35)
+text = "确认强化"
+
+[node name="CancelEnhanceBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/EnhancePanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 35)
+text = "取消"
 
 [node name="StatsPanel" type="VBoxContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2

@@ -19,21 +19,17 @@ func _on_continue() -> void:
 	_go_to_dungeon()
 
 func _on_new_game() -> void:
-	# 重置玩家数据
-	PlayerData.level = 1
-	PlayerData.exp = 0
-	PlayerData.gold = 500
-	PlayerData.enhance_stone = 5
-	PlayerData.blessed_enhance_stone = 0
-	PlayerData.init_default_primary_stats()
-	PlayerData.equipped = {"weapon": "", "helmet": "", "armor": "", "gloves": "", "ring": "", "necklace": ""}
-	PlayerData.inventory = []
+	PlayerData.reset_for_new_game()
+	Game.player_class = "warrior"
+	Game.auto_battle = false
+	Game.current_dungeon_id = "bone_crypt"
+	Game.cleared_dungeons = []
 	Game.reset_dungeon()
 	SaveManager.save_game()
 	_go_to_dungeon()
 
 func _go_to_dungeon() -> void:
-	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
+	get_tree().change_scene_to_file("res://scenes/map/MapSelectScene.tscn")
 
 func _on_quit() -> void:
 	get_tree().quit()

@@ -2,23 +2,6 @@ extends Control
 
 ## 强化场景
 
-# 强化成功率（+0→+1 到 +8→+9）：[普通强化石, 受祝福强化石]
-const ENHANCE_RATES := [
-	[1.00, 1.00],  # +0→+1
-	[1.00, 1.00],  # +1→+2
-	[1.00, 1.00],  # +2→+3
-	[0.30, 1.00],  # +3→+4
-	[0.28, 0.33],  # +4→+5
-	[0.20, 0.25],  # +5→+6
-	[0.18, 0.23],  # +6→+7
-	[0.15, 0.20],  # +7→+8
-	[0.13, 0.18],  # +8→+9
-]
-# 强化金币消耗
-const ENHANCE_COSTS := [20, 40, 80, 150, 250, 400, 650, 900, 1300]
-# 最高强化等级
-const MAX_ENHANCE_LEVEL := 9
-
 var selected_uid: String = ""
 var use_blessed: bool = false
 
@@ -69,30 +52,55 @@ func _update_detail() -> void:
 	if eq.is_empty():
 		return
 	var level = eq.get("enhance_level", 0)
-	var quality = eq.get("quality", "normal")
+	var quality = Equipment.get_quality_by_enhance(level)
+	var quality_name = Equipment.get_quality_name(quality)
 	var text = "[color=#%s]%s[/color]\n" % [Equipment.QUALITY_COLORS.get(quality, Color.WHITE).to_html(false), eq.get("name", "")]
-	text += "当前强化: +%d\n" % level
-	text += "\n基础属性:\n"
+	text += "品质: %s  强化: +%d\n" % [quality_name, level]
+	text += "\n属性:\n"
 	for key in eq.get("base_stats", {}):
-		text += "  %s: +%s\n" % [_stat_name(key), str(eq["base_stats"][key])]
+		var base_val = eq["base_stats"][key]
+		var current_val = Equipment.calc_effective_stat_value(eq, key)
+		if current_val == null:
+			current_val = base_val
+		if current_val != base_val:
+			text += "  %s: +%s (基础 +%s)\n" % [_stat_name(key), str(current_val), str(base_val)]
+		else:
+			text += "  %s: +%s\n" % [_stat_name(key), str(current_val)]
+	var active_effects = Equipment.get_active_effects(eq)
+	if not active_effects.is_empty():
+		text += "\n特效:\n"
+		for effect_key in active_effects:
+			var effect_val = active_effects[effect_key]
+			if effect_val is bool:
+				continue
+			text += "  %s: +%s\n" % [_stat_name(effect_key), str(effect_val)]
 	# 显示强化后属性
-	if level < MAX_ENHANCE_LEVEL:
+	if level < Equipment.MAX_ENHANCE_LEVEL:
 		text += "\n[color=yellow]+%d 后:[/color]\n" % (level + 1)
 		for key in eq.get("base_stats", {}):
-			var base_val = eq["base_stats"][key]
-			var current_val = _calc_enhanced_value(key, base_val, level, eq.get("slot", ""))
-			var next_val = _calc_enhanced_value(key, base_val, level + 1, eq.get("slot", ""))
+			var current_val = Equipment.calc_effective_stat_value(eq, key, level)
+			var next_val = Equipment.calc_effective_stat_value(eq, key, level + 1)
+			if current_val == null or next_val == null:
+				continue
 			var gain = next_val - current_val
 			if gain > 0:
-				text += "  %s: %d → %d (+%d)\n" % [_stat_name(key), current_val, next_val, gain]
+				text += "  %s: %s → %s (+%s)\n" % [_stat_name(key), str(current_val), str(next_val), str(gain)]
+		# 品质变化提示
+		var next_quality = Equipment.get_quality_by_enhance(level + 1)
+		if next_quality != quality:
+			var next_quality_name = Equipment.get_quality_name(next_quality)
+			text += "\n[color=#%s]品质提升: %s → %s[/color]\n" % [
+				Equipment.QUALITY_COLORS.get(next_quality, Color.WHITE).to_html(false),
+				quality_name, next_quality_name
+			]
 	$Panel/VBox/DetailLabel.text = text
-	if level >= MAX_ENHANCE_LEVEL:
+	if level >= Equipment.MAX_ENHANCE_LEVEL:
 		$Panel/VBox/InfoLabel.text = "已达到最高强化等级！"
 		$Panel/VBox/EnhanceBtn.disabled = true
 	else:
-		var rates = ENHANCE_RATES[level]
+		var rates = Equipment.ENHANCE_RATES[level]
 		var rate = rates[1] if use_blessed else rates[0]
-		var cost = ENHANCE_COSTS[level]
+		var cost = Equipment.ENHANCE_COSTS[level]
 		var stone_count = PlayerData.blessed_enhance_stone if use_blessed else PlayerData.enhance_stone
 		var stone_name = "受祝福强化石" if use_blessed else "普通强化石"
 		var can_afford = PlayerData.gold >= cost and stone_count >= 1
@@ -110,12 +118,9 @@ func _on_enhance() -> void:
 	if eq.is_empty():
 		return
 	var level = eq.get("enhance_level", 0)
-	if level >= MAX_ENHANCE_LEVEL:
+	if level >= Equipment.MAX_ENHANCE_LEVEL:
 		return
-	var cost = ENHANCE_COSTS[level]
-	var rates = ENHANCE_RATES[level]
-	var rate = rates[1] if use_blessed else rates[0]
-	# 检查并扣除材料
+	var cost = Equipment.ENHANCE_COSTS[level]
 	if use_blessed:
 		if PlayerData.blessed_enhance_stone < 1:
 			return
@@ -125,75 +130,21 @@ func _on_enhance() -> void:
 			return
 		PlayerData.enhance_stone -= 1
 	PlayerData.gold -= cost
-	if randf() < rate:
-		# 成功
-		eq["enhance_level"] = level + 1
-		$Panel/VBox/ResultLabel.text = "强化成功！+%d" % (level + 1)
+	var result = Equipment.roll_enhance(eq, use_blessed)
+	$Panel/VBox/ResultLabel.text = result.get("message", "")
+	if result.get("broken", false):
+		PlayerData.destroy_equipment(selected_uid)
+		selected_uid = ""
+		$Panel/VBox/ResultLabel.modulate = Color(1.0, 0.3, 0.1)
+	elif result.get("success", false):
 		$Panel/VBox/ResultLabel.modulate = Color.GREEN
 	else:
-		# 失败（不降级）
-		$Panel/VBox/ResultLabel.text = "强化失败...材料已消耗"
 		$Panel/VBox/ResultLabel.modulate = Color.RED
 	SaveManager.save_game()
-	_update_detail()
+	_refresh_list()
 
 func _on_close() -> void:
 	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
-
-func _calc_enhanced_value(stat: String, base_val: int, level: int, slot: String) -> int:
-	if level == 0:
-		return base_val
-	var bonus := 0
-	match slot:
-		"weapon":
-			if stat == "atk":
-				# +1~+4: +1/级, +5: +2, +6: +3, +7: +3, +8: +3
-				for i in range(1, level + 1):
-					if i <= 4:
-						bonus += 1
-					elif i == 5:
-						bonus += 2
-					else:  # +6, +7, +8
-						bonus += 3
-		"armor", "helmet":
-			if stat == "def":
-				# +1~+4: +1/级, +5: +1, +6: +2, +7: +2, +8: +3
-				for i in range(1, level + 1):
-					if i <= 5:
-						bonus += 1
-					elif i <= 7:
-						bonus += 2
-					else:  # +8
-						bonus += 3
-			elif stat == "max_hp":
-				# 防具生命值: +1~+4: +1/级, +5: +1, +6: +2, +7: +2, +8: +3
-				for i in range(1, level + 1):
-					if i <= 5:
-						bonus += 1
-					elif i <= 7:
-						bonus += 2
-					else:  # +8
-						bonus += 3
-	return base_val + bonus
-
-## 获取当前强化特效等级（0=无, 1=初级, 2=二级, 3=终极）
-static func get_enhance_effect_level(level: int) -> int:
-	if level >= 8:
-		return 3  # 终极特效
-	elif level >= 7:
-		return 2  # 二级特效
-	elif level >= 5:
-		return 1  # 初级特效
-	return 0
-
-## 获取特效描述文本
-static func get_enhance_effect_name(level: int) -> String:
-	var effect_lv = get_enhance_effect_level(level)
-	match effect_lv:
-		1: return "初级特效"
-		2: return "二级特效"
-		3: return "终极特效"
-	return ""
 
 func _stat_name(stat: String) -> String:
 	match stat:

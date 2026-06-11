@@ -79,13 +79,23 @@ horizontal_alignment = 1
 
 [node name="ProgressInfo" type="Label" parent="CenterPanel"]
 layout_mode = 2
-text = "击杀: 普通 0/15  精英 0/3"
+text = "累计击杀: 0（普通 0 / 精英 0）"
 horizontal_alignment = 1
 
 [node name="ExploreBtn" type="Button" parent="CenterPanel"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 50)
 text = "继续探索"
+
+[node name="EliteBtn" type="Button" parent="CenterPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 50)
+text = "挑战精英"
+
+[node name="BossBtn" type="Button" parent="CenterPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 50)
+text = "挑战Boss"
 
 [node name="BottomButtons" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -99,12 +109,7 @@ theme_override_constants/separation = 10
 [node name="InventoryBtn" type="Button" parent="BottomButtons"]
 layout_mode = 2
 custom_minimum_size = Vector2(100, 45)
-text = "背包 (Tab)"
-
-[node name="EnhanceBtn" type="Button" parent="BottomButtons"]
-layout_mode = 2
-custom_minimum_size = Vector2(100, 45)
-text = "强化 (R)"
+text = "背包 (Tab/R强化)"
 
 [node name="SaveBtn" type="Button" parent="BottomButtons"]
 layout_mode = 2
@@ -145,3 +150,16 @@ autowrap_mode = 2
 layout_mode = 2
 custom_minimum_size = Vector2(120, 40)
 text = "确定"
+
+[node name="BattleLog" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -150.0
+offset_right = 400.0
+offset_bottom = -70.0
+bbcode_enabled = true
+text = ""
+scroll_following = true

@@ -1,32 +1,32 @@
 {
-  "undead_hunter": {
-    "id": "undead_hunter",
-    "name": "亡灵猎手套装",
-    "description": "刷亡灵怪专用",
+  "vine_warrior": {
+    "id": "vine_warrior",
+    "name": "紫藤战甲",
+    "description": "轻便藤甲，提升物理攻击速度",
     "bonuses": [
-      {"pieces": 2, "effects": [{"stat": "undead_damage", "value": 0.10}]},
-      {"pieces": 4, "effects": [{"stat": "undead_kill_heal", "value": 0.05}]},
-      {"pieces": 6, "effects": [{"stat": "boss_damage", "value": 0.15}]}
+      {"pieces": 2, "effects": [{"stat": "atk_spd", "value": 0.06}]},
+      {"pieces": 4, "effects": [{"stat": "atk_spd", "value": 0.04}]}
     ]
   },
-  "black_iron": {
-    "id": "black_iron",
-    "name": "黑铁守卫套装",
-    "description": "高防御生存",
+  "chain_warrior": {
+    "id": "chain_warrior",
+    "name": "锁链战甲",
+    "description": "锁链中甲，提升闪避",
     "bonuses": [
-      {"pieces": 2, "effects": [{"stat": "def", "value": 0.10, "percent": true}]},
-      {"pieces": 4, "effects": [{"stat": "max_hp", "value": 0.15, "percent": true}]},
-      {"pieces": 6, "effects": [{"stat": "damage_reduce", "value": 0.12}]}
+      {"pieces": 2, "effects": [{"stat": "dodge", "value": 0.04}]},
+      {"pieces": 4, "effects": [{"stat": "dodge", "value": 0.04}]}
     ]
   },
-  "blood_oath": {
-    "id": "blood_oath",
-    "name": "血誓狂战套装",
-    "description": "暴击吸血流",
+  "plate_warrior": {
+    "id": "plate_warrior",
+    "name": "锻钢重甲",
+    "description": "重型板甲，大幅提升防御",
     "bonuses": [
-      {"pieces": 2, "effects": [{"stat": "crit_rate", "value": 0.08}]},
-      {"pieces": 4, "effects": [{"stat": "lifesteal", "value": 0.05}]},
-      {"pieces": 6, "effects": [{"stat": "low_hp_atk_boost", "value": 0.30}]}
+      {"pieces": 2, "effects": [{"stat": "def", "value": 0.08, "percent": true}]},
+      {"pieces": 4, "effects": [
+        {"stat": "def", "value": 0.04, "percent": true},
+        {"stat": "damage_reduce", "value": 0.05}
+      ]}
     ]
   }
 }

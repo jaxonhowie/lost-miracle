@@ -1,15 +1,9 @@
 {
   "events": {
-    "normal_monster": {"probability": 0.55, "description": "普通怪物"},
-    "elite_monster": {"probability": 0.15, "description": "精英怪物"},
+    "normal_monster": {"probability": 0.75, "description": "普通怪物"},
     "chest": {"probability": 0.10, "description": "宝箱"},
     "altar": {"probability": 0.10, "description": "祭坛"},
-    "trap": {"probability": 0.05, "description": "陷阱"},
-    "boss_entrance": {"probability": 0.05, "description": "Boss入口"}
+    "trap": {"probability": 0.05, "description": "陷阱"}
   },
-  "boss_requirements": {
-    "normal_kill_count": 15,
-    "elite_kill_count": 3,
-    "min_level": 5
-  }
+  "elite_auto_challenge_chance": 0.25
 }

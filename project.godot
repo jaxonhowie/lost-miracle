@@ -20,9 +20,14 @@ Game="*res://scripts/autoload/Game.gd"
 DataManager="*res://scripts/autoload/DataManager.gd"
 PlayerData="*res://scripts/autoload/PlayerData.gd"
 SaveManager="*res://scripts/autoload/SaveManager.gd"
+MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")

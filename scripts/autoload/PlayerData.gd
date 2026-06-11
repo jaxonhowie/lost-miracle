@@ -7,40 +7,39 @@ var exp: int = 0
 var gold: int = 500
 var enhance_stone: int = 5
 var blessed_enhance_stone: int = 0
+var health_potion: int = 0
 
 # 基础属性（STR/AGI/INT）— 属性系统核心
 var primary_stats := {
 	"STR": 10,
-	"AGI": 10,
-	"INT": 10,
+	"AGI": 3,
+	"INT": 3,
 }
-
-# 未分配属性点（升级获得）
-var unallocated_points: int = 0
 
 # 向后兼容：由 _derive_primary_stats 计算，不再直接使用
 var base_stats := {
-	"max_hp": 1000,
-	"max_mp": 200,
-	"atk": 80,
-	"def": 30,
+	"max_hp": 150,
+	"max_mp": 80,
+	"atk": 13,
+	"def": 1,
 	"spd": 10,
 	"crit_rate": 0.05,
 	"crit_dmg": 1.5,
 	"lifesteal": 0.0,
-	"dodge": 0.0,
+	"dodge": 0.05,
 	"hit": 1.0,
 }
 
 # 当前战斗 HP/MP（不持久化，每次战斗开始重置）
-var current_hp: int = 1000
-var current_mp: int = 200
+var current_hp: int = 150
+var current_mp: int = 80
 
 # 装备栏 slot -> equipment_uid
 var equipped := {
 	"weapon": "",
 	"helmet": "",
 	"armor": "",
+	"legs": "",
 	"gloves": "",
 	"ring": "",
 	"necklace": "",
@@ -48,6 +47,9 @@ var equipped := {
 
 # 背包：装备实例数组
 var inventory: Array = []
+
+# 祭坛临时增益 [{stat, value, battles_remaining}]
+var altar_buffs: Array = []
 
 # 经验需求
 func exp_required() -> int:
@@ -64,25 +66,40 @@ func add_exp(amount: int) -> bool:
 	return leveled
 
 func _on_level_up() -> void:
-	# 升级获得2点可分配属性点
-	unallocated_points += 2
-	# 每级自动+1全基础属性
-	primary_stats["STR"] += 1
-	primary_stats["AGI"] += 1
-	primary_stats["INT"] += 1
+	# 根据职业自动分配属性
+	var player_class = Game.get_player_class()
+	# 获取职业对应的属性映射
+	var class_stats = _get_class_stats(player_class)
+	var main_stat = class_stats["main"]
+	var sub_a = class_stats["sub_a"]
+	var sub_b = class_stats["sub_b"]
+	# 每级 +1 主属性
+	primary_stats[main_stat] += 1
+	# 每3级循环：副A → 副B → 主
+	# (level-1) % 3: 0=副A, 1=副B, 2=主
+	var cycle = (level - 1) % 3
+	match cycle:
+		0: primary_stats[sub_a] += 1
+		1: primary_stats[sub_b] += 1
+		2: primary_stats[main_stat] += 1
 	# 同步 base_stats
 	_sync_base_stats()
+	# 升级回复满血满蓝
+	current_hp = get_final_stats()["max_hp"]
+	current_mp = get_final_stats()["max_mp"]
 
-## 分配属性点
-func allocate_point(stat: String) -> bool:
-	if unallocated_points <= 0:
-		return false
-	if not primary_stats.has(stat):
-		return false
-	primary_stats[stat] += 1
-	unallocated_points -= 1
-	_sync_base_stats()
-	return true
+## 获取职业属性映射
+func _get_class_stats(player_class: String) -> Dictionary:
+	match player_class:
+		"warrior":
+			return {"main": "STR", "sub_a": "AGI", "sub_b": "INT"}
+		"ranger", "assassin":
+			return {"main": "AGI", "sub_a": "STR", "sub_b": "INT"}
+		"elven":
+			return {"main": "INT", "sub_a": "STR", "sub_b": "AGI"}
+		_:
+			# 默认战士
+			return {"main": "STR", "sub_a": "AGI", "sub_b": "INT"}
 
 ## 同步 base_stats（向后兼容）
 func _sync_base_stats() -> void:
@@ -151,6 +168,9 @@ func get_final_stats() -> Dictionary:
 	# 套装加成
 	_apply_set_bonuses(stats)
 
+	# 祭坛临时增益
+	_apply_altar_buffs(stats)
+
 	# 同步 atk 和 spd
 	stats["atk"] = stats["melee_atk"]
 	stats["spd"] = int(stats["atk_spd"] * 10)
@@ -162,81 +182,65 @@ func get_final_stats() -> Dictionary:
 	stats["range_atk"] = maxi(1, stats["range_atk"])
 	stats["magic_atk"] = maxi(1, stats["magic_atk"])
 	stats["atk"] = maxi(1, stats["atk"])
+	
+	# 属性上限 clamp
+	stats["crit_rate"] = clampf(stats["crit_rate"], 0.05, 0.75)
+	stats["crit_dmg"] = clampf(stats["crit_dmg"], 1.0, 3.0)
+	stats["dodge"] = clampf(stats["dodge"], 0.05, 0.60)
+	stats["atk_spd"] = clampf(stats["atk_spd"], 0.5, 3.0)
+	stats["lifesteal"] = clampf(stats.get("lifesteal", 0.0), 0.0, 0.30)
+	stats["damage_reduce"] = clampf(stats.get("damage_reduce", 0.0), 0.0, 0.30)
 
 	return stats
 
 func _apply_equipment_stats(stats: Dictionary, eq: Dictionary) -> void:
 	# 装备基础属性
 	var eq_base = eq.get("base_stats", {})
+	var enhance_level = int(eq.get("enhance_level", 0))
+	var quality = Equipment.get_quality_by_enhance(enhance_level)
+	var quality_mult = Equipment.get_quality_multiplier(quality)
+	var grade_mult = Equipment.get_grade_multiplier(eq.get("grade", "normal"))
+	var stat_mult = quality_mult * grade_mult
+	
+	# 品质+品阶倍率作用于该装备的基础属性
 	for key in eq_base:
 		if stats.has(key):
-			stats[key] += eq_base[key]
+			var value = int(eq_base[key] * stat_mult)
+			stats[key] += value
 	# 兼容：武器ATK加成同时加到三系攻击
 	var weapon_atk = eq_base.get("atk", 0)
 	if weapon_atk > 0:
 		for atk_key in ["melee_atk", "range_atk", "magic_atk"]:
 			if not eq_base.has(atk_key):
-				stats[atk_key] += weapon_atk
-
-	# 词条
-	for affix in eq.get("affixes", []):
-		var stat = affix.get("stat", "")
-		var value = affix.get("value", 0)
-		if stats.has(stat):
-			stats[stat] += value
+				stats[atk_key] += int(weapon_atk * stat_mult)
 
 	# 强化加成（扁平加值，按等级递增）
-	var enhance_level = eq.get("enhance_level", 0)
 	if enhance_level > 0:
 		var slot = eq.get("slot", "")
 		if slot == "weapon":
-			var atk_bonus = _calc_enhance_bonus("atk", enhance_level, slot)
+			var atk_bonus = Equipment.calc_enhance_bonus("atk", enhance_level, slot)
 			for atk_key in ["melee_atk", "range_atk", "magic_atk", "atk"]:
 				stats[atk_key] += atk_bonus
-		elif slot in ["armor", "helmet"]:
-			stats["def"] += _calc_enhance_bonus("def", enhance_level, slot)
-			stats["max_hp"] += _calc_enhance_bonus("max_hp", enhance_level, slot)
+		elif slot in ["armor", "helmet", "legs"]:
+			stats["def"] += Equipment.calc_enhance_bonus("def", enhance_level, slot)
+			stats["max_hp"] += Equipment.calc_enhance_bonus("max_hp", enhance_level, slot)
+		elif slot in ["gloves", "ring", "necklace"]:
+			var atk_bonus = Equipment.calc_enhance_bonus("atk", enhance_level, slot)
+			if atk_bonus > 0:
+				for atk_key in ["melee_atk", "range_atk", "magic_atk", "atk"]:
+					stats[atk_key] += atk_bonus
+			var def_bonus = Equipment.calc_enhance_bonus("def", enhance_level, slot)
+			if def_bonus > 0:
+				stats["def"] += def_bonus
+			var hp_bonus = Equipment.calc_enhance_bonus("max_hp", enhance_level, slot)
+			if hp_bonus > 0:
+				stats["max_hp"] += hp_bonus
 
-	# 品质倍率
-	var quality_mult = _get_quality_multiplier(eq.get("quality", "normal"))
-	if quality_mult > 1.0:
-		for key in ["melee_atk", "range_atk", "magic_atk", "atk", "def", "max_hp"]:
-			stats[key] = int(stats[key] * quality_mult)
+	# 随机词条
+	Equipment.apply_affixes_to_stats(stats, eq)
 
 	# 特效加成（根据强化等级解锁）
 	Equipment.apply_effects_to_stats(stats, eq)
-
-func _get_quality_multiplier(quality: String) -> float:
-	match quality:
-		"fine": return 1.15
-		"rare": return 1.35
-		"epic": return 1.60
-		"legendary": return 1.85
-		_: return 1.0
-
-## 计算强化扁平加值
-func _calc_enhance_bonus(stat: String, level: int, slot: String) -> int:
-	var bonus := 0
-	match slot:
-		"weapon":
-			if stat == "atk":
-				for i in range(1, level + 1):
-					if i <= 4:
-						bonus += 1
-					elif i == 5:
-						bonus += 2
-					else:
-						bonus += 3
-		"armor", "helmet":
-			if stat == "def" or stat == "max_hp":
-				for i in range(1, level + 1):
-					if i <= 5:
-						bonus += 1
-					elif i <= 7:
-						bonus += 2
-					else:
-						bonus += 3
-	return bonus
 
 func _apply_set_bonuses(stats: Dictionary) -> void:
 	var set_counts := {}
@@ -260,7 +264,12 @@ func _apply_set_bonuses(stats: Dictionary) -> void:
 				for effect in bonus.get("effects", []):
 					var stat = effect.get("stat", "")
 					var value = effect.get("value", 0)
-					if stats.has(stat):
+					# 特殊属性处理
+					if stat in ["undead_damage", "boss_damage", "damage_reduce",
+								"lifesteal", "crit_rate", "crit_dmg", "low_hp_atk_boost",
+								"undead_kill_heal", "atk_spd", "dodge", "hit", "skill_damage"]:
+						stats[stat] = stats.get(stat, 0.0) + float(value)
+					elif stats.has(stat):
 						if effect.get("percent", false):
 							stats[stat] = int(stats[stat] * (1.0 + value))
 						else:
@@ -272,6 +281,12 @@ func add_to_inventory(item: Dictionary) -> void:
 
 func remove_from_inventory(uid: String) -> void:
 	inventory = inventory.filter(func(e): return e.get("uid", "") != uid)
+
+func destroy_equipment(uid: String) -> void:
+	for slot in equipped:
+		if equipped[slot] == uid:
+			equipped[slot] = ""
+	remove_from_inventory(uid)
 
 func get_equipment_by_uid(uid: String) -> Dictionary:
 	for eq in inventory:
@@ -301,38 +316,79 @@ func unequip(slot: String) -> bool:
 	var uid = equipped[slot]
 	if uid.is_empty():
 		return false
-	# 将卸下的装备放回背包
-	var eq = get_equipment_by_uid(uid)
-	if not eq.is_empty():
-		# 装备已在背包中（不应该发生），但为安全起见
-		pass
 	equipped[slot] = ""
-	print("[Unequip] %s from slot=%s" % [uid, slot])
 	return true
 
-func get_equipped_stats() -> Dictionary:
-	var total := {"atk": 0, "def": 0, "max_hp": 0}
-	for slot in equipped:
-		var uid = equipped[slot]
-		if uid.is_empty():
-			continue
-		var eq = get_equipment_by_uid(uid)
-		if eq.is_empty():
-			continue
-		for key in total:
-			total[key] += eq.get("base_stats", {}).get(key, 0)
-	return total
-
 func reset_for_battle() -> void:
+	var stats = get_final_stats()
+	if current_hp <= 0:
+		current_hp = stats["max_hp"]
+	else:
+		current_hp = clampi(current_hp, 1, stats["max_hp"])
+	if current_mp <= 0:
+		current_mp = stats["max_mp"]
+	else:
+		current_mp = clampi(current_mp, 0, stats["max_mp"])
+
+func add_altar_buff(buff_type: String, buff_value: float, duration: int) -> void:
+	altar_buffs.append({
+		"stat": buff_type,
+		"value": buff_value,
+		"battles_remaining": duration,
+	})
+
+func tick_altar_buffs() -> void:
+	var remaining := []
+	for buff in altar_buffs:
+		buff["battles_remaining"] = int(buff.get("battles_remaining", 0)) - 1
+		if buff["battles_remaining"] > 0:
+			remaining.append(buff)
+	altar_buffs = remaining
+
+func _apply_altar_buffs(stats: Dictionary) -> void:
+	for buff in altar_buffs:
+		var stat = buff.get("stat", "")
+		var value = buff.get("value", 0.0)
+		match stat:
+			"atk":
+				for key in ["melee_atk", "range_atk", "magic_atk", "atk"]:
+					stats[key] = int(stats[key] * (1.0 + value))
+			"def":
+				stats["def"] = int(stats["def"] * (1.0 + value))
+			"max_hp":
+				stats["max_hp"] = int(stats["max_hp"] * (1.0 + value))
+
+## 初始化默认基础属性（新游戏或兼容旧存档）
+func init_default_primary_stats() -> void:
+	primary_stats = {"STR": 10, "AGI": 3, "INT": 3}
+	_sync_base_stats()
+
+func reset_for_new_game() -> void:
+	level = 1
+	exp = 0
+	gold = 500
+	enhance_stone = 5
+	blessed_enhance_stone = 0
+	health_potion = 0
+	init_default_primary_stats()
+	equipped = {"weapon": "", "helmet": "", "armor": "", "legs": "", "gloves": "", "ring": "", "necklace": ""}
+	inventory = []
+	altar_buffs = []
+	_give_starter_gear()
 	var stats = get_final_stats()
 	current_hp = stats["max_hp"]
 	current_mp = stats["max_mp"]
 
-## 初始化默认基础属性（新游戏或兼容旧存档）
-func init_default_primary_stats() -> void:
-	primary_stats = {"STR": 10, "AGI": 10, "INT": 10}
-	unallocated_points = 0
-	_sync_base_stats()
+func _give_starter_gear() -> void:
+	var starter_ids = ["vine_wood_sword", "vine_helmet", "vine_armor", "vine_legs", "vine_gloves"]
+	for base_id in starter_ids:
+		var eq = Equipment.create_from_base(base_id)
+		if eq.is_empty():
+			continue
+		inventory.append(eq)
+		var slot = eq.get("slot", "")
+		if equipped.has(slot):
+			equipped[slot] = eq.get("uid", "")
 
 ## 从旧存档的 base_stats 迁移到 primary_stats
 ## 旧存档公式: max_hp=1000+50/lvl, max_mp=200+15/lvl, atk=80+5/lvl, def=30+3/lvl
@@ -349,5 +405,3 @@ func _migrate_from_base_stats() -> void:
 	primary_stats["STR"] = maxi(1, est_str)
 	primary_stats["AGI"] = maxi(1, est_agi)
 	primary_stats["INT"] = maxi(1, est_int)
-	unallocated_points = 0
-	print("[Migration] Migrated primary_stats: STR=%d, AGI=%d, INT=%d" % [primary_stats["STR"], primary_stats["AGI"], primary_stats["INT"]])

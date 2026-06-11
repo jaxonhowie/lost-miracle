@@ -1,257 +1,374 @@
 {
-  "iron_sword": {
-    "id": "iron_sword",
+  "vine_wood_sword": {
+    "id": "vine_wood_sword",
     "type": "weapon",
-    "name": "铁剑",
-    "name_en": "Iron Sword",
-    "slot": "weapon",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"atk": 20},
-    "set_id": "",
-    "effects": {
-      "tier1": {"atk": 3},
-      "tier2": {"crit_rate": 0.03},
-      "tier3": {"damage_boost_on_kill": 0.10}
-    },
-    "description": "朴素但坚固的铁剑，适合初出茅庐的冒险者"
-  },
-  "bone_axe": {
-    "id": "bone_axe",
-    "type": "weapon",
-    "name": "骸骨战斧",
-    "name_en": "Bone Axe",
+    "name": "紫藤木剑",
     "slot": "weapon",
     "class_req": "warrior",
-    "dual_wield": false,
-    "base_stats": {"atk": 35},
-    "set_id": "undead_hunter",
-    "effects": {
-      "tier1": {"atk": 5},
-      "tier2": {"undead_damage": 0.08},
-      "tier3": {"crit_guarantee_after_kill": true}
+    "drop_tier": "vine",
+    "base_stats": {
+      "atk": 14
     },
-    "description": "以亡灵骸骨锻造的战斧，对亡灵生物有额外的震慑力"
+    "set_id": "",
+    "effects": {
+      "tier1": {
+        "atk": 2
+      },
+      "tier2": {
+        "atk_spd": 0.03
+      },
+      "tier3": {
+        "crit_rate": 0.05
+      }
+    },
+    "description": "紫藤木削成的轻剑，适合初阶战士"
   },
-  "shadow_blade": {
-    "id": "shadow_blade",
+  "chain_longsword": {
+    "id": "chain_longsword",
     "type": "weapon",
-    "name": "暗影之刃",
-    "name_en": "Shadow Blade",
+    "name": "锁链长剑",
     "slot": "weapon",
-    "class_req": "ranger",
-    "dual_wield": true,
-    "base_stats": {"atk": 45, "crit_rate": 0.05},
-    "set_id": "blood_oath",
-    "effects": {
-      "tier1": {"crit_rate": 0.05},
-      "tier2": {"crit_guarantee_after_crit": true},
-      "tier3": {"execute_below_20hp": true}
+    "class_req": "warrior",
+    "drop_tier": "chain",
+    "base_stats": {
+      "atk": 22
     },
-    "description": "暗影之力凝聚而成的双刃，致命且迅捷"
+    "set_id": "",
+    "effects": {
+      "tier1": {
+        "atk": 3
+      },
+      "tier2": {
+        "crit_rate": 0.03
+      },
+      "tier3": {
+        "lifesteal": 0.03
+      }
+    },
+    "description": "精钢链刃锻造的长剑，攻守兼备"
   },
-  "bone_helmet": {
-    "id": "bone_helmet",
+  "plate_greatsword": {
+    "id": "plate_greatsword",
+    "type": "weapon",
+    "name": "锻钢巨剑",
+    "slot": "weapon",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "atk": 32
+    },
+    "set_id": "",
+    "effects": {
+      "tier1": {
+        "atk": 5
+      },
+      "tier2": {
+        "damage_reduce": 0.03
+      },
+      "tier3": {
+        "crit_dmg": 0.15
+      }
+    },
+    "description": "沉重锻钢巨剑，每一击都势大力沉"
+  },
+  "vine_helmet": {
+    "id": "vine_helmet",
     "type": "armor",
-    "name": "骸骨头盔",
-    "name_en": "Bone Helmet",
+    "name": "紫藤头盔",
     "slot": "helmet",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"def": 12, "max_hp": 80},
-    "set_id": "",
-    "effects": {
-      "tier1": {"max_hp": 30},
-      "tier2": {"def": 5},
-      "tier3": {"damage_reduce": 0.05}
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 3,
+      "max_hp": 25
     },
-    "description": "用骸骨碎片拼接而成的头盔，散发着淡淡的亡灵气息"
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "max_hp": 25
+      },
+      "tier2": {
+        "hit": 0.03
+      },
+      "tier3": {
+        "skill_damage": 0.05
+      }
+    },
+    "description": "紫藤编织的轻便头盔"
   },
-  "iron_helmet": {
-    "id": "iron_helmet",
+  "vine_armor": {
+    "id": "vine_armor",
     "type": "armor",
-    "name": "黑铁头盔",
-    "name_en": "Black Iron Helmet",
+    "name": "紫藤胸甲",
+    "slot": "armor",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 5,
+      "max_hp": 40
+    },
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "atk_spd": 0.03
+      },
+      "tier2": {
+        "dodge": 0.02
+      },
+      "tier3": {
+        "atk_spd": 0.05
+      }
+    },
+    "description": "紫藤与皮革编织的胸甲，几乎不阻碍行动"
+  },
+  "vine_gloves": {
+    "id": "vine_gloves",
+    "type": "armor",
+    "name": "紫藤护手",
+    "slot": "gloves",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 2,
+      "max_hp": 15
+    },
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "atk": 2
+      },
+      "tier2": {
+        "crit_rate": 0.02
+      },
+      "tier3": {
+        "lifesteal": 0.02
+      }
+    },
+    "description": "紫藤缠绕的护手，保持手指灵活"
+  },
+  "vine_legs": {
+    "id": "vine_legs",
+    "type": "armor",
+    "name": "紫藤护腿",
+    "slot": "legs",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 4,
+      "max_hp": 30
+    },
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "atk_spd": 0.04
+      },
+      "tier3": {
+        "crit_rate": 0.03
+      }
+    },
+    "description": "紫藤护腿，轻便利于冲刺"
+  },
+  "chain_helmet": {
+    "id": "chain_helmet",
+    "type": "armor",
+    "name": "锁链头盔",
     "slot": "helmet",
     "class_req": "warrior",
-    "dual_wield": false,
-    "base_stats": {"def": 18, "max_hp": 120},
-    "set_id": "black_iron",
-    "effects": {
-      "tier1": {"def": 4},
-      "tier2": {"max_hp": 50},
-      "tier3": {"thorns_percent": 0.08}
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 4,
+      "max_hp": 30
     },
-    "description": "黑铁铸造的重盔，坚固异常"
-  },
-  "leather_armor": {
-    "id": "leather_armor",
-    "type": "armor",
-    "name": "皮革胸甲",
-    "name_en": "Leather Armor",
-    "slot": "armor",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"def": 15, "max_hp": 100},
-    "set_id": "",
+    "set_id": "chain_warrior",
     "effects": {
-      "tier1": {"def": 3},
-      "tier2": {"dodge": 0.03},
-      "tier3": {"damage_reduce": 0.05}
+      "tier1": {
+        "max_hp": 30
+      },
+      "tier2": {
+        "dodge": 0.03
+      },
+      "tier3": {
+        "damage_reduce": 0.05
+      }
     },
-    "description": "轻便的皮革护甲，提供基本的防护"
+    "description": "精钢锁链编织的头盔"
   },
-  "bone_armor": {
-    "id": "bone_armor",
+  "chain_armor": {
+    "id": "chain_armor",
     "type": "armor",
-    "name": "骸骨铠甲",
-    "name_en": "Bone Armor",
-    "slot": "armor",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"def": 22, "max_hp": 150},
-    "set_id": "undead_hunter",
-    "effects": {
-      "tier1": {"max_hp": 40},
-      "tier2": {"def": 6},
-      "tier3": {"undead_damage_reduce": 0.10}
-    },
-    "description": "由亡灵骨骼拼接而成的铠甲，对亡灵攻击有天然的抗性"
-  },
-  "black_iron_armor": {
-    "id": "black_iron_armor",
-    "type": "armor",
-    "name": "黑铁重甲",
-    "name_en": "Black Iron Armor",
+    "name": "锁链胸甲",
     "slot": "armor",
     "class_req": "warrior",
-    "dual_wield": false,
-    "base_stats": {"def": 30, "max_hp": 200},
-    "set_id": "black_iron",
-    "effects": {
-      "tier1": {"def": 5},
-      "tier2": {"max_hp": 60},
-      "tier3": {"thorns_percent": 0.10}
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 6,
+      "max_hp": 50
     },
-    "description": "黑铁锻造的重甲，穿戴者如同移动的堡垒"
-  },
-  "cloth_gloves": {
-    "id": "cloth_gloves",
-    "type": "accessory",
-    "name": "布制护手",
-    "name_en": "Cloth Gloves",
-    "slot": "gloves",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"def": 5, "atk": 8},
-    "set_id": "",
+    "set_id": "chain_warrior",
     "effects": {
-      "tier1": {"atk": 2},
-      "tier2": {"spd": 2},
-      "tier3": {"skill_damage": 0.08}
+      "tier1": {
+        "dodge": 0.03
+      },
+      "tier2": {
+        "def": 3
+      },
+      "tier3": {
+        "dodge": 0.05
+      }
     },
-    "description": "轻薄的布制护手，不影响手指灵活度"
+    "description": "锁链编织的中阶胸甲，兼顾防护与灵活"
   },
-  "bone_gloves": {
-    "id": "bone_gloves",
-    "type": "accessory",
-    "name": "骸骨护手",
-    "name_en": "Bone Gloves",
-    "slot": "gloves",
-    "class_req": "ranger",
-    "dual_wield": false,
-    "base_stats": {"def": 10, "atk": 12},
-    "set_id": "blood_oath",
-    "effects": {
-      "tier1": {"crit_rate": 0.03},
-      "tier2": {"atk": 4},
-      "tier3": {"lifesteal": 0.05}
-    },
-    "description": "骸骨碎片编织的护手，赋予穿戴者嗜血的本能"
-  },
-  "copper_ring": {
-    "id": "copper_ring",
-    "type": "accessory",
-    "name": "铜戒指",
-    "name_en": "Copper Ring",
-    "slot": "ring",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"atk": 10},
-    "set_id": "",
-    "effects": {
-      "tier1": {"atk": 2},
-      "tier2": {"crit_rate": 0.02},
-      "tier3": {"crit_dmg": 0.15}
-    },
-    "description": "铜质的朴素戒指，蕴含微弱的力量"
-  },
-  "blood_ring": {
-    "id": "blood_ring",
-    "type": "accessory",
-    "name": "血誓指环",
-    "name_en": "Blood Oath Ring",
-    "slot": "ring",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"atk": 18, "crit_rate": 0.03},
-    "set_id": "blood_oath",
-    "effects": {
-      "tier1": {"crit_rate": 0.03},
-      "tier2": {"lifesteal": 0.04},
-      "tier3": {"blood_rage_below_30hp": 0.25}
-    },
-    "description": "以血为誓锻造的指环，低血量时激发狂暴之力"
-  },
-  "bone_necklace": {
-    "id": "bone_necklace",
-    "type": "accessory",
-    "name": "骸骨项链",
-    "name_en": "Bone Necklace",
-    "slot": "necklace",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"max_hp": 60, "def": 5},
-    "set_id": "",
-    "effects": {
-      "tier1": {"max_hp": 25},
-      "tier2": {"def": 3},
-      "tier3": {"damage_reduce": 0.04}
-    },
-    "description": "由细小骸骨串成的项链，佩戴时感到一丝安宁"
-  },
-  "undead_pendant": {
-    "id": "undead_pendant",
-    "type": "accessory",
-    "name": "亡灵吊坠",
-    "name_en": "Undead Pendant",
-    "slot": "necklace",
-    "class_req": null,
-    "dual_wield": false,
-    "base_stats": {"max_hp": 100, "atk": 10},
-    "set_id": "undead_hunter",
-    "effects": {
-      "tier1": {"atk": 3},
-      "tier2": {"undead_damage": 0.06},
-      "tier3": {"undead_lifesteal": 0.08}
-    },
-    "description": "蕴含亡灵之力的吊坠，对抗亡灵时吸收其生命精华"
-  },
-  "iron_shield_gloves": {
-    "id": "iron_shield_gloves",
-    "type": "accessory",
-    "name": "铁盾护手",
-    "name_en": "Iron Shield Gloves",
+  "chain_gloves": {
+    "id": "chain_gloves",
+    "type": "armor",
+    "name": "锁链护手",
     "slot": "gloves",
     "class_req": "warrior",
-    "dual_wield": false,
-    "base_stats": {"def": 15, "max_hp": 50},
-    "set_id": "black_iron",
-    "effects": {
-      "tier1": {"def": 4},
-      "tier2": {"max_hp": 40},
-      "tier3": {"block_chance": 0.10}
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 3,
+      "max_hp": 20
     },
-    "description": "厚重的铁盾护手，能格挡致命一击"
+    "set_id": "chain_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "dodge": 0.02
+      },
+      "tier3": {
+        "damage_reduce": 0.04
+      }
+    },
+    "description": "锁链护手，格挡时不易受伤"
+  },
+  "chain_legs": {
+    "id": "chain_legs",
+    "type": "armor",
+    "name": "锁链护腿",
+    "slot": "legs",
+    "class_req": "warrior",
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 5,
+      "max_hp": 35
+    },
+    "set_id": "chain_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "max_hp": 40
+      },
+      "tier3": {
+        "dodge": 0.04
+      }
+    },
+    "description": "锁链护腿，步伐轻盈难以捉摸"
+  },
+  "plate_helmet": {
+    "id": "plate_helmet",
+    "type": "armor",
+    "name": "锻钢头盔",
+    "slot": "helmet",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 6,
+      "max_hp": 40
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 3
+      },
+      "tier2": {
+        "max_hp": 40
+      },
+      "tier3": {
+        "block_chance": 0.08
+      }
+    },
+    "description": "锻钢重盔，坚不可摧"
+  },
+  "plate_armor": {
+    "id": "plate_armor",
+    "type": "armor",
+    "name": "锻钢胸甲",
+    "slot": "armor",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 8,
+      "max_hp": 60
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 3
+      },
+      "tier2": {
+        "max_hp": 50
+      },
+      "tier3": {
+        "damage_reduce": 0.06
+      }
+    },
+    "description": "锻钢重甲，战士的终极壁垒"
+  },
+  "plate_gloves": {
+    "id": "plate_gloves",
+    "type": "armor",
+    "name": "锻钢护手",
+    "slot": "gloves",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 4,
+      "max_hp": 25
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "thorns_percent": 0.05
+      },
+      "tier3": {
+        "def": 4
+      }
+    },
+    "description": "锻钢护手，反震来袭之敌"
+  },
+  "plate_legs": {
+    "id": "plate_legs",
+    "type": "armor",
+    "name": "锻钢护腿",
+    "slot": "legs",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 7,
+      "max_hp": 45
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 3
+      },
+      "tier2": {
+        "max_hp": 60
+      },
+      "tier3": {
+        "damage_reduce": 0.05
+      }
+    },
+    "description": "锻钢护腿，稳如磐石"
   }
 }

@@ -5,9 +5,11 @@ extends Node
 var monsters: Dictionary = {}
 var skills: Dictionary = {}
 var equipment_base: Dictionary = {}
-var affixes: Array = []
 var sets: Dictionary = {}
 var dungeon_events: Dictionary = {}
+var affixes: Array = []
+var equipment_grades: Dictionary = {}
+var enhance_rules: Dictionary = {}
 
 func _ready() -> void:
 	monsters = _load_json("res://data/monsters.json")
@@ -16,10 +18,9 @@ func _ready() -> void:
 	sets = _load_json("res://data/sets.json")
 	dungeon_events = _load_json("res://data/dungeon_events.json")
 	var affix_data = _load_json("res://data/affixes.json")
-	if affix_data.has("affixes"):
-		affixes = affix_data["affixes"]
-	elif affix_data is Array:
-		affixes = affix_data
+	affixes = affix_data.get("affixes", []) if affix_data is Dictionary else []
+	equipment_grades = _load_json("res://data/equipment_grades.json")
+	enhance_rules = _load_json("res://data/enhance_rules.json")
 
 func _load_json(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
@@ -49,14 +50,6 @@ func get_monsters_by_type(type: String) -> Array:
 func get_skill(skill_id: String) -> Dictionary:
 	return skills.get(skill_id, {})
 
-func get_player_skills() -> Array:
-	var result := []
-	for id in skills:
-		var s = skills[id]
-		if s.get("type", "") == "active" or s.get("type", "") == "passive":
-			result.append(s)
-	return result
-
 func get_equipment_base(base_id: String) -> Dictionary:
 	return equipment_base.get(base_id, {})
 
@@ -69,10 +62,17 @@ func get_all_equipment_bases() -> Array:
 func get_set(set_id: String) -> Dictionary:
 	return sets.get(set_id, {})
 
-func get_random_affix() -> Dictionary:
-	if affixes.is_empty():
-		return {}
-	return affixes[randi() % affixes.size()]
-
 func get_event_probabilities() -> Dictionary:
 	return dungeon_events.get("events", {})
+
+func get_elite_auto_chance() -> float:
+	return float(dungeon_events.get("elite_auto_challenge_chance", 0.25))
+
+func get_affixes() -> Array:
+	return affixes
+
+func get_grade(grade_id: String) -> Dictionary:
+	return equipment_grades.get(grade_id, {})
+
+func get_enhance_rules() -> Dictionary:
+	return enhance_rules
