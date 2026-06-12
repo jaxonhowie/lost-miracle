@@ -1,0 +1,16 @@
+# Godot 4+ 生成文件
+.godot/
+.import/
+export/
+export_presets.cfg
+export_credentials.cfg
+
+# 平台导出产物
+android/
+ios/
+*.apk
+*.aab
+*.ipa
+
+# 编辑器 / OS
+.DS_Store

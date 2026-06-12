@@ -1,0 +1,426 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/inventory/InventoryScene.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_main_panel"]
+bg_color = Color(0.07, 0.05, 0.09, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.52, 0.42, 0.24, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+content_margin_left = 12
+content_margin_top = 10
+content_margin_right = 12
+content_margin_bottom = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_column"]
+bg_color = Color(0.1, 0.08, 0.12, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.48, 0.4, 0.24, 0.85)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 2
+content_margin_left = 10
+content_margin_top = 8
+content_margin_right = 10
+content_margin_bottom = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_inner"]
+bg_color = Color(0.05, 0.04, 0.07, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.26, 0.18, 0.75)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+content_margin_left = 6
+content_margin_top = 6
+content_margin_right = 6
+content_margin_bottom = 6
+
+[node name="InventoryScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.06, 0.1, 1)
+
+[node name="Panel" type="PanelContainer" parent="."]
+clip_contents = true
+layout_mode = 1
+theme_override_styles/panel = SubResource("StyleBox_main_panel")
+anchors_preset = 5
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -500.0
+offset_top = 8.0
+offset_right = 500.0
+offset_bottom = 578.0
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.92, 0.82, 0.52, 1)
+theme_override_font_sizes/font_size = 20
+text = "背包"
+clip_text = true
+
+[node name="CloseBtn" type="Button" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 30)
+text = "关闭"
+
+[node name="Content" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="EquipmentPanel" type="PanelContainer" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBox_column")
+
+[node name="EquipVBox" type="VBoxContainer" parent="Panel/Margin/VBox/Content/EquipmentPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="EquipTitle" type="Label" parent="Panel/Margin/VBox/Content/EquipmentPanel/EquipVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.76, 0.46, 1)
+theme_override_font_sizes/font_size = 14
+text = "当前装备"
+horizontal_alignment = 1
+
+[node name="EquipTitleLine" type="ColorRect" parent="Panel/Margin/VBox/Content/EquipmentPanel/EquipVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 1)
+color = Color(0.48, 0.4, 0.24, 0.55)
+
+[node name="EquipSlotsFrame" type="PanelContainer" parent="Panel/Margin/VBox/Content/EquipmentPanel/EquipVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 326)
+theme_override_styles/panel = SubResource("StyleBox_inner")
+
+[node name="EquipSlots" type="VBoxContainer" parent="Panel/Margin/VBox/Content/EquipmentPanel/EquipVBox/EquipSlotsFrame"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+
+[node name="InventoryPanel" type="PanelContainer" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBox_column")
+
+[node name="InvVBox" type="VBoxContainer" parent="Panel/Margin/VBox/Content/InventoryPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="InvTitle" type="Label" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.76, 0.46, 1)
+theme_override_font_sizes/font_size = 14
+text = "物品栏"
+horizontal_alignment = 1
+
+[node name="InvTitleLine" type="ColorRect" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 1)
+color = Color(0.48, 0.4, 0.24, 0.55)
+
+[node name="TabBar" type="HBoxContainer" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
+theme_override_constants/separation = 6
+
+[node name="TabAll" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 28)
+text = "全部"
+
+[node name="TabWeapon" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 28)
+text = "武器"
+
+[node name="TabArmor" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 28)
+text = "防具"
+
+[node name="TabJewelry" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 28)
+text = "首饰"
+
+[node name="TabConsumable" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 28)
+text = "消耗"
+
+[node name="ItemListFrame" type="Control" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox"]
+clip_contents = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 340)
+size_flags_vertical = 0
+
+[node name="InnerPanel" type="PanelContainer" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/ItemListFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_inner")
+
+[node name="ItemList" type="VBoxContainer" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/ItemListFrame/InnerPanel"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 2
+
+[node name="ListSpacer" type="Control" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Pagination" type="HBoxContainer" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+alignment = 1
+
+[node name="PrevBtn" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/Pagination"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 30)
+text = "◀"
+
+[node name="PageLabel" type="Label" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/Pagination"]
+layout_mode = 2
+text = "1 / 1"
+
+[node name="NextBtn" type="Button" parent="Panel/Margin/VBox/Content/InventoryPanel/InvVBox/Pagination"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 30)
+text = "▶"
+
+[node name="DetailPanel" type="PanelContainer" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBox_column")
+
+[node name="DetailVBox" type="VBoxContainer" parent="Panel/Margin/VBox/Content/DetailPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="DetailTitle" type="Label" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.76, 0.46, 1)
+theme_override_font_sizes/font_size = 14
+text = "物品详情"
+horizontal_alignment = 1
+
+[node name="DetailTitleLine" type="ColorRect" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 1)
+color = Color(0.48, 0.4, 0.24, 0.55)
+
+[node name="DetailTextFrame" type="PanelContainer" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 326)
+theme_override_styles/panel = SubResource("StyleBox_inner")
+
+[node name="DetailText" type="RichTextLabel" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox/DetailTextFrame"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.82, 0.82, 0.88, 1)
+bbcode_enabled = true
+scroll_active = false
+text = "选择一件物品查看详情"
+
+[node name="ActionButtons" type="HBoxContainer" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EquipBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 35)
+text = "装备"
+
+[node name="UnequipBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 35)
+text = "卸下"
+
+[node name="EnhanceBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 35)
+text = "强化"
+
+[node name="DiscardBtn" type="Button" parent="Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 35)
+text = "丢弃"
+
+[node name="StatsPanel" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 4
+
+[node name="StatsTitle" type="Label" parent="Panel/Margin/VBox/StatsPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.76, 0.46, 1)
+theme_override_font_sizes/font_size = 14
+text = "角色属性"
+
+[node name="StatsRow1" type="Label" parent="Panel/Margin/VBox/StatsPanel"]
+layout_mode = 2
+clip_text = true
+text = "..."
+
+[node name="StatsRow2" type="Label" parent="Panel/Margin/VBox/StatsPanel"]
+layout_mode = 2
+clip_text = true
+text = ""
+
+[node name="StatsFooter" type="HBoxContainer" parent="Panel/Margin/VBox/StatsPanel"]
+layout_mode = 2
+
+[node name="ResonanceLabel" type="Label" parent="Panel/Margin/VBox/StatsPanel/StatsFooter"]
+layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
+text = ""
+
+[node name="GoldLabel" type="Label" parent="Panel/Margin/VBox/StatsPanel/StatsFooter"]
+layout_mode = 2
+text = "金币: 0"
+
+[node name="EnhanceOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Dim" type="ColorRect" parent="EnhanceOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
+
+[node name="Center" type="CenterContainer" parent="EnhanceOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Dialog" type="PanelContainer" parent="EnhanceOverlay/Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(440, 0)
+
+[node name="Margin" type="MarginContainer" parent="EnhanceOverlay/Center/Dialog"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="EnhanceOverlay/Center/Dialog/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="EnhanceOverlay/Center/Dialog/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "装备强化"
+horizontal_alignment = 1
+
+[node name="ItemName" type="Label" parent="EnhanceOverlay/Center/Dialog/Margin/VBox"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
+[node name="StoneSelect" type="HBoxContainer" parent="EnhanceOverlay/Center/Dialog/Margin/VBox"]
+layout_mode = 2
+
+[node name="StoneLabel" type="Label" parent="EnhanceOverlay/Center/Dialog/Margin/VBox/StoneSelect"]
+layout_mode = 2
+text = "强化石:"
+
+[node name="StoneOption" type="OptionButton" parent="EnhanceOverlay/Center/Dialog/Margin/VBox/StoneSelect"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(150, 30)
+
+[node name="EnhanceInfo" type="RichTextLabel" parent="EnhanceOverlay/Center/Dialog/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(408, 0)
+size_flags_vertical = 0
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = ""
+
+[node name="BtnRow" type="HBoxContainer" parent="EnhanceOverlay/Center/Dialog/Margin/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="ConfirmEnhanceBtn" type="Button" parent="EnhanceOverlay/Center/Dialog/Margin/VBox/BtnRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 35)
+text = "确认强化"
+
+[node name="CancelEnhanceBtn" type="Button" parent="EnhanceOverlay/Center/Dialog/Margin/VBox/BtnRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 35)
+text = "取消"

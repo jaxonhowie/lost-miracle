@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: lm-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: lost_miracle
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - lm_mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    container_name: lm-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - lm_redis_data:/data
+
+volumes:
+  lm_mysql_data:
+  lm_redis_data:

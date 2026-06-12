@@ -1,12 +1,45 @@
-# Godot cache
+# ── Godot 客户端 (lost-miracle-client) ──
+lost-miracle-client/.godot/
+lost-miracle-client/export/
+lost-miracle-client/export_presets.cfg
+lost-miracle-client/android/
+lost-miracle-client/ios/
+lost-miracle-client/.import/
+
+# 误在 monorepo 根目录打开 Godot 时产生的缓存
 .godot/
-
-# Claude Code
-.claude/
-
-# Godot export
 export/
 
-# OS files
+# ── Java 服务端 (lost-miracle-server) ──
+lost-miracle-server/target/
+lost-miracle-server/.mvn/wrapper/maven-wrapper.jar
+
+# ── IDE ──
+.idea/
+*.iml
+.vscode/
+*.classpath
+*.project
+.settings/
+*.swp
+*~
+
+# ── 环境变量与密钥（勿提交生产配置）──
+.env
+.env.*
+!.env.example
+**/application-local.yml
+**/application-prod.yml
+
+# ── 日志与崩溃转储 ──
+*.log
+hs_err_pid*
+replay_pid*
+
+# ── Claude / 本地工具 ──
+.claude/
+
+# ── 操作系统 ──
 .DS_Store
 Thumbs.db
+Desktop.ini

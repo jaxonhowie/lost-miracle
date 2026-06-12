@@ -1,6 +1,0 @@
-{
-  "normal": {"id": "normal", "name": "普通", "color": "#cccccc", "stat_mult": 1.0},
-  "advanced": {"id": "advanced", "name": "高级", "color": "#55cc55", "stat_mult": 1.08},
-  "rare": {"id": "rare", "name": "稀有", "color": "#4488ff", "stat_mult": 1.18},
-  "unique": {"id": "unique", "name": "独特", "color": "#ffaa33", "stat_mult": 1.30}
-}
