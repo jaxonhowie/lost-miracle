@@ -16,6 +16,9 @@ import com.lostmiracle.module.save.entity.CharacterSaveEntity;
 import com.lostmiracle.module.save.mapper.CharacterSaveMapper;
 import com.lostmiracle.module.save.util.PowerScoreCalculator;
 import com.lostmiracle.module.save.util.SaveChecksum;
+import com.lostmiracle.module.save.util.SaveValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,24 +28,35 @@ import java.util.Map;
 @Service
 public class SaveService {
 
+    private static final Logger log = LoggerFactory.getLogger(SaveService.class);
+
     private final CharacterService characterService;
     private final CharacterSaveMapper characterSaveMapper;
     private final LeaderboardService leaderboardService;
     private final LostMiracleProperties properties;
     private final ObjectMapper objectMapper;
+    private final RedisLockService redisLockService;
+    private final RateLimitService rateLimitService;
+    private final SaveSnapshotService saveSnapshotService;
 
     public SaveService(
             CharacterService characterService,
             CharacterSaveMapper characterSaveMapper,
             LeaderboardService leaderboardService,
             LostMiracleProperties properties,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            RedisLockService redisLockService,
+            RateLimitService rateLimitService,
+            SaveSnapshotService saveSnapshotService
     ) {
         this.characterService = characterService;
         this.characterSaveMapper = characterSaveMapper;
         this.leaderboardService = leaderboardService;
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.redisLockService = redisLockService;
+        this.rateLimitService = rateLimitService;
+        this.saveSnapshotService = saveSnapshotService;
     }
 
     @SuppressWarnings("unchecked")
@@ -52,6 +66,7 @@ public class SaveService {
 
         CharacterSaveEntity save = characterSaveMapper.selectById(characterId);
         if (save == null) {
+            log.warn("save download missing userId={} characterId={}", userId, characterId);
             throw new BusinessException(ErrorCode.NOT_FOUND, "save not found");
         }
         try {
@@ -63,20 +78,40 @@ public class SaveService {
                     saveMap
             );
         } catch (JsonProcessingException e) {
+            log.error("save download json invalid characterId={}", characterId, e);
             throw new BusinessException(ErrorCode.INTERNAL_ERROR, "invalid save data");
         }
     }
 
     @Transactional
     public UploadSaveResponse upload(long userId, long characterId, UploadSaveRequest request) {
+        log.debug("save upload begin userId={} characterId={} clientVersion={}", userId, characterId, request.saveVersion());
+        String lockToken = redisLockService.acquireSaveLock(characterId);
+        try {
+            rateLimitService.checkSaveUpload(userId, characterId);
+            return uploadLocked(userId, characterId, request);
+        } finally {
+            redisLockService.releaseSaveLock(characterId, lockToken);
+        }
+    }
+
+    private UploadSaveResponse uploadLocked(long userId, long characterId, UploadSaveRequest request) {
         CharacterEntity character = characterService.requireOwnedCharacter(userId, characterId);
         CharacterSaveEntity existing = characterSaveMapper.selectById(characterId);
         if (existing == null) {
+            log.warn("save upload missing userId={} characterId={}", userId, characterId);
             throw new BusinessException(ErrorCode.NOT_FOUND, "save not found");
         }
 
         boolean force = Boolean.TRUE.equals(request.force());
         if (!force && !existing.getSaveVersion().equals(request.saveVersion())) {
+            log.warn(
+                    "save version conflict userId={} characterId={} clientVersion={} serverVersion={}",
+                    userId,
+                    characterId,
+                    request.saveVersion(),
+                    existing.getSaveVersion()
+            );
             long serverUpdatedAt = existing.getServerUpdatedAt() == null
                     ? 0L
                     : existing.getServerUpdatedAt().atZone(ZoneId.systemDefault()).toEpochSecond();
@@ -87,6 +122,8 @@ public class SaveService {
             );
         }
 
+        SaveValidator.validate(request.save());
+
         String saveJson;
         try {
             saveJson = objectMapper.writeValueAsString(request.save());
@@ -95,13 +132,21 @@ public class SaveService {
         }
 
         if (saveJson.getBytes().length > properties.getSave().getMaxBytes()) {
+            log.warn(
+                    "save too large userId={} characterId={} bytes={} limit={}",
+                    userId,
+                    characterId,
+                    saveJson.getBytes().length,
+                    properties.getSave().getMaxBytes()
+            );
             throw new BusinessException(ErrorCode.BAD_REQUEST, "save too large");
         }
 
+        String checksum = SaveChecksum.sha256(saveJson);
         long newVersion = existing.getSaveVersion() + 1;
         existing.setSaveVersion(newVersion);
         existing.setSaveJson(saveJson);
-        existing.setChecksum(SaveChecksum.sha256(saveJson));
+        existing.setChecksum(checksum);
         existing.setClientUpdatedAt(request.clientUpdatedAt());
         characterSaveMapper.updateById(existing);
 
@@ -110,6 +155,7 @@ public class SaveService {
         characterService.touchLogin(character);
 
         leaderboardService.submitPowerScore(character);
+        saveSnapshotService.snapshotAsync(characterId, newVersion, saveJson);
 
         long serverUpdatedAt = existing.getServerUpdatedAt() == null
                 ? request.clientUpdatedAt()

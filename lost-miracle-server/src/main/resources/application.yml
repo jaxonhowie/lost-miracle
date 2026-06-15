@@ -20,13 +20,11 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-mybatis-plus:
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
-  global-config:
-    db-config:
-      id-type: assign_id
 
 lost-miracle:
   jwt:
@@ -36,6 +34,10 @@ lost-miracle:
     max-slots-per-user: 3
   save:
     max-bytes: 524288
+  enhance:
+    padding:
+      threshold: 100
+      bonus-rate: 0.25
 
 springdoc:
   api-docs:

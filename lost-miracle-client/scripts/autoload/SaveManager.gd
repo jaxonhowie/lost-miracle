@@ -6,6 +6,8 @@ const LEGACY_SAVE_PATH := "user://save.json"
 const SAVES_DIR := "user://saves/"
 const MANIFEST_PATH := "user://saves/manifest.json"
 const DISPLAY_SLOT_COUNT := 3
+const SLOT_WIDTH := 520
+const SLOT_HEIGHT := 96
 
 var current_save_id: String = ""
 
@@ -44,6 +46,9 @@ func _write_manifest(manifest: Dictionary) -> void:
 
 func _generate_save_id() -> String:
 	return "save_%d" % int(Time.get_unix_time_from_system())
+
+func _network_manager() -> Node:
+	return get_node_or_null("/root/NetworkManager")
 
 func _migrate_legacy_save() -> void:
 	if not FileAccess.file_exists(LEGACY_SAVE_PATH):
@@ -93,6 +98,120 @@ func get_display_slots() -> Array:
 	while result.size() < DISPLAY_SLOT_COUNT:
 		result.append({"empty": true, "meta": {}})
 	return result
+
+func get_cloud_display_slots(characters: Array, max_slots: int = DISPLAY_SLOT_COUNT) -> Array:
+	var result := []
+	for ch in characters:
+		if result.size() >= max_slots:
+			break
+		var char_id := ApiIds.from_value(ch.get("id", 0))
+		result.append({
+			"empty": false,
+			"meta": {
+				"id": SaveManager.find_local_save_id_for_character(char_id),
+				"character_id": char_id,
+				"name": str(ch.get("name", "")),
+				"player_class": str(ch.get("playerClass", ch.get("player_class", "warrior"))),
+				"level": int(ch.get("level", 1)),
+				"last_login_at": int(ch.get("lastLoginAt", ch.get("last_login_at", 0))),
+				"current_dungeon_id": str(ch.get("currentDungeonId", ch.get("current_dungeon_id", "bone_crypt"))),
+				"save_version": int(ch.get("saveVersion", ch.get("save_version", 0))),
+			},
+		})
+	var create_slots := maxi(0, max_slots - characters.size())
+	for _i in create_slots:
+		if result.size() >= max_slots:
+			break
+		result.append({"empty": true, "meta": {}})
+	return result
+
+func find_local_save_id_for_character(character_id: String) -> String:
+	var cid := ApiIds.from_value(character_id)
+	if cid.is_empty():
+		return ""
+	for s in _load_manifest().get("saves", []):
+		if ApiIds.from_value(s.get("character_id", "")) == cid:
+			return str(s.get("id", ""))
+	return ""
+
+func create_cache_for_character(character_id: String, char_meta: Dictionary, save_data: Dictionary) -> String:
+	var save_id := _generate_save_id()
+	current_save_id = save_id
+	_apply_save_data(save_data)
+	var file = FileAccess.open(_save_path(save_id), FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(save_data, "\t"))
+		file.close()
+	update_manifest_for_character(character_id, char_meta, save_id)
+	return save_id
+
+func update_manifest_for_character(character_id: String, char_meta: Dictionary, save_id: String = "") -> void:
+	var manifest = _load_manifest()
+	var saves: Array = manifest.get("saves", [])
+	var id = save_id if not save_id.is_empty() else current_save_id
+	if id.is_empty():
+		return
+	var cid := ApiIds.from_value(character_id)
+	var entry := {
+		"id": id,
+		"character_id": cid,
+		"name": str(char_meta.get("name", "")),
+		"player_class": str(char_meta.get("playerClass", char_meta.get("player_class", Game.player_class))),
+		"level": int(char_meta.get("level", PlayerData.level)),
+		"last_login_at": int(char_meta.get("lastLoginAt", char_meta.get("last_login_at", Time.get_unix_time_from_system()))),
+		"current_dungeon_id": str(char_meta.get("currentDungeonId", char_meta.get("current_dungeon_id", Game.current_dungeon_id))),
+	}
+	var found := false
+	for i in saves.size():
+		if saves[i].get("id", "") == id or ApiIds.from_value(saves[i].get("character_id", "")) == cid:
+			saves[i] = entry
+			found = true
+			break
+	if not found:
+		saves.append(entry)
+	manifest["saves"] = saves
+	_write_manifest(manifest)
+
+func export_save_data() -> Dictionary:
+	return _build_save_data()
+
+func import_save_data(data: Dictionary) -> void:
+	_apply_save_data(data)
+
+func load_manifest() -> Dictionary:
+	return _load_manifest()
+
+func write_manifest(manifest: Dictionary) -> void:
+	_write_manifest(manifest)
+
+func remove_local_character(character_id: String, save_id: String = "") -> void:
+	var cid := ApiIds.from_value(character_id)
+	if not save_id.is_empty():
+		var path = get_save_path(save_id)
+		if FileAccess.file_exists(path):
+			var dir = DirAccess.open(SAVES_DIR)
+			if dir:
+				dir.remove(save_id + ".json")
+	var manifest = _load_manifest()
+	var saves: Array = manifest.get("saves", [])
+	saves = saves.filter(func(s):
+		return ApiIds.from_value(s.get("character_id", "")) != cid and s.get("id", "") != save_id
+	)
+	manifest["saves"] = saves
+	var dismissed: Array = manifest.get("dismissed_characters", [])
+	dismissed = dismissed.filter(func(entry):
+		return ApiIds.from_value(entry.get("character_id", "")) != cid
+	)
+	manifest["dismissed_characters"] = dismissed
+	_write_manifest(manifest)
+	if current_save_id == save_id:
+		current_save_id = ""
+
+func get_save_path(save_id: String) -> String:
+	return _save_path(save_id)
+
+func generate_save_id() -> String:
+	return _generate_save_id()
 
 func format_class_name(player_class: String) -> String:
 	match player_class:
@@ -234,6 +353,7 @@ func _sync_manifest_entry() -> void:
 	var saves: Array = manifest.get("saves", [])
 	var entry := {
 		"id": current_save_id,
+		"character_id": _manifest_character_id_for_current(),
 		"player_class": Game.player_class,
 		"level": PlayerData.level,
 		"last_login_at": int(Time.get_unix_time_from_system()),
@@ -249,6 +369,15 @@ func _sync_manifest_entry() -> void:
 		saves.append(entry)
 	manifest["saves"] = saves
 	_write_manifest(manifest)
+
+func _manifest_character_id_for_current() -> String:
+	var nm = _network_manager()
+	if nm and nm.logged_in:
+		return nm.get_character_id()
+	for s in _load_manifest().get("saves", []):
+		if s.get("id", "") == current_save_id:
+			return ApiIds.from_value(s.get("character_id", ""))
+	return ""
 
 func _touch_login_time() -> void:
 	if current_save_id.is_empty():

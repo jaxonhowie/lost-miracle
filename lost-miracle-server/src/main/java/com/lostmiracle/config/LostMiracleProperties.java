@@ -8,6 +8,7 @@ public class LostMiracleProperties {
     private final Jwt jwt = new Jwt();
     private final Character character = new Character();
     private final Save save = new Save();
+    private final Enhance enhance = new Enhance();
 
     public Jwt getJwt() {
         return jwt;
@@ -19,6 +20,10 @@ public class LostMiracleProperties {
 
     public Save getSave() {
         return save;
+    }
+
+    public Enhance getEnhance() {
+        return enhance;
     }
 
     public static class Jwt {
@@ -63,6 +68,35 @@ public class LostMiracleProperties {
 
         public void setMaxBytes(int maxBytes) {
             this.maxBytes = maxBytes;
+        }
+    }
+
+    public static class Enhance {
+        private final Padding padding = new Padding();
+
+        public Padding getPadding() {
+            return padding;
+        }
+
+        public static class Padding {
+            private int threshold = 100;
+            private double bonusRate = 0.25;
+
+            public int getThreshold() {
+                return threshold;
+            }
+
+            public void setThreshold(int threshold) {
+                this.threshold = threshold;
+            }
+
+            public double getBonusRate() {
+                return bonusRate;
+            }
+
+            public void setBonusRate(double bonusRate) {
+                this.bonusRate = bonusRate;
+            }
         }
     }
 }

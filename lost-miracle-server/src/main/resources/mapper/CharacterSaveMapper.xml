@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.save.mapper.CharacterSaveMapper">
+
+    <resultMap id="saveResultMap" type="com.lostmiracle.module.save.entity.CharacterSaveEntity">
+        <id property="characterId" column="character_id"/>
+        <result property="saveVersion" column="save_version"/>
+        <result property="saveJson" column="save_json"/>
+        <result property="checksum" column="checksum"/>
+        <result property="clientUpdatedAt" column="client_updated_at"/>
+        <result property="serverUpdatedAt" column="server_updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="saveResultMap">
+        SELECT * FROM character_save WHERE character_id = #{characterId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO character_save (character_id, save_version, save_json, checksum, client_updated_at)
+        VALUES (#{characterId}, #{saveVersion}, #{saveJson}, #{checksum}, #{clientUpdatedAt})
+    </insert>
+
+    <update id="updateById">
+        UPDATE character_save
+        SET save_version = #{saveVersion},
+            save_json = #{saveJson},
+            checksum = #{checksum},
+            client_updated_at = #{clientUpdatedAt}
+        WHERE character_id = #{characterId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM character_save WHERE character_id = #{characterId}
+    </delete>
+
+</mapper>

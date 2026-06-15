@@ -1,6 +1,5 @@
 package com.lostmiracle.module.auth;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lostmiracle.common.BusinessException;
 import com.lostmiracle.common.ErrorCode;
 import com.lostmiracle.module.auth.dto.AuthResponse;
@@ -28,9 +27,8 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        Long count = userMapper.selectCount(new LambdaQueryWrapper<UserEntity>()
-                .eq(UserEntity::getUsername, request.username()));
-        if (count != null && count > 0) {
+        long count = userMapper.countByUsername(request.username());
+        if (count > 0) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "username already exists");
         }
 
@@ -43,8 +41,7 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        UserEntity user = userMapper.selectOne(new LambdaQueryWrapper<UserEntity>()
-                .eq(UserEntity::getUsername, request.username()));
+        UserEntity user = userMapper.selectByUsername(request.username());
         if (user == null || user.getStatus() == null || user.getStatus() != 1) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "invalid username or password");
         }

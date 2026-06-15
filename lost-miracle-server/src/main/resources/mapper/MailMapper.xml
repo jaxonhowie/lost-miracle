@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.mail.mapper.MailMapper">
+
+    <resultMap id="mailResultMap" type="com.lostmiracle.module.mail.entity.MailEntity">
+        <id property="id" column="id"/>
+        <result property="characterId" column="character_id"/>
+        <result property="title" column="title"/>
+        <result property="body" column="body"/>
+        <result property="attachments" column="attachments"/>
+        <result property="claimed" column="claimed"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="claimedAt" column="claimed_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="mailResultMap">
+        SELECT * FROM mail WHERE id = #{id}
+    </select>
+
+    <select id="selectByCharacterId" resultMap="mailResultMap">
+        SELECT * FROM mail WHERE character_id = #{characterId} ORDER BY created_at DESC
+    </select>
+
+    <update id="updateClaimed">
+        UPDATE mail
+        SET claimed = #{claimed},
+            claimed_at = #{claimedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByCharacterId">
+        DELETE FROM mail WHERE character_id = #{characterId}
+    </delete>
+
+</mapper>

@@ -3,10 +3,15 @@
   "default_safe_until": 3,
   "break_from_level": 4,
   "break_chance_normal_scroll": 0.35,
-  "break_chance_blessed_scroll": 0.0,
+  "break_chance_blessed_scroll": 0.15,
   "blessed_equipment_save_chance": 0.5,
   "blessed_equipment_on_drop": 0.10,
   "blessed_equipment_on_enhance_plus7": 0.15,
+  "jewelry_break_rates": [
+    [0.40, 0.20],
+    [0.50, 0.25],
+    [0.60, 0.30]
+  ],
   "drop_tier_weights": {
     "normal": {"vine": 25, "chain": 10, "plate": 5},
     "elite": {"vine": 15, "chain": 25, "plate": 15},

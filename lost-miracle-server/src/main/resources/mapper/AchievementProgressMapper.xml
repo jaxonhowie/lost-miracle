@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.achievement.mapper.AchievementProgressMapper">
+
+    <resultMap id="progressResultMap" type="com.lostmiracle.module.achievement.entity.AchievementProgressEntity">
+        <id property="id" column="id"/>
+        <result property="characterId" column="character_id"/>
+        <result property="achievementId" column="achievement_id"/>
+        <result property="progress" column="progress"/>
+        <result property="completed" column="completed"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectByCharacterAndAchievement" resultMap="progressResultMap">
+        SELECT * FROM achievement_progress
+        WHERE character_id = #{characterId} AND achievement_id = #{achievementId}
+    </select>
+
+    <select id="selectByCharacterId" resultMap="progressResultMap">
+        SELECT * FROM achievement_progress WHERE character_id = #{characterId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO achievement_progress (character_id, achievement_id, progress, completed, updated_at)
+        VALUES (#{characterId}, #{achievementId}, #{progress}, #{completed}, #{updatedAt})
+    </insert>
+
+    <update id="updateById">
+        UPDATE achievement_progress
+        SET progress = #{progress},
+            completed = #{completed},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByCharacterId">
+        DELETE FROM achievement_progress WHERE character_id = #{characterId}
+    </delete>
+
+</mapper>

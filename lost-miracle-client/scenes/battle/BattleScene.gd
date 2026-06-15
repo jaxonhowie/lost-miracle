@@ -13,6 +13,7 @@ var battle_manager: BattleManager
 var battle_over: bool = false
 var potion_cooldown: float = 0.0
 var finish_then_return: bool = false
+var _inventory_open: bool = false
 
 @onready var _player_card := $BattleArea/PlayerCard/CardPanel/CardVBox
 @onready var _monster_card := $BattleArea/MonsterCard/CardPanel/CardVBox
@@ -33,6 +34,8 @@ func _ready() -> void:
 	$SkillPanel/SkillBar/Skill3.pressed.connect(_on_skill.bind("blood_slash"))
 	$SkillPanel/SkillBar/PotionBtn.pressed.connect(_use_potion)
 	$SkillPanel/SkillBar/AutoBtn.pressed.connect(_toggle_auto)
+	$SkillPanel/SkillBar/InvBtn.pressed.connect(_open_inventory)
+	_style_button($SkillPanel/SkillBar/InvBtn, Color(0.25, 0.22, 0.35), Color(0.4, 0.35, 0.55))
 	_update_potion_btn()
 	_update_auto_btn_style()
 	battle_manager.auto_battle = Game.auto_battle
@@ -58,6 +61,7 @@ func _apply_visual_theme() -> void:
 	_style_button($SkillPanel/SkillBar/AutoBtn, Color(0.25, 0.22, 0.35), Color(0.4, 0.35, 0.55))
 	$TopBar/TopHBox/BattleTitle.add_theme_font_size_override("font_size", 20)
 	$TopBar/TopHBox/BattleTitle.modulate = Color(0.9, 0.85, 0.95)
+	$TopBar/TopHBox/BattleTitle.text = "⚔  %s · 战斗" % SaveManager.format_dungeon_name(Game.current_dungeon_id)
 	$LogPanel/BattleLog.add_theme_font_size_override("normal_font_size", 13)
 
 func _make_panel_style(bg: Color, border: Color, radius: int) -> StyleBoxFlat:
@@ -116,11 +120,14 @@ func _pulse_glow(rect: ColorRect) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not battle_over:
+		if _inventory_open:
+			return
 		match event.keycode:
 			KEY_1: _on_skill("heavy_strike")
 			KEY_2: _on_skill("battle_roar")
 			KEY_3: _on_skill("blood_slash")
 			KEY_4: _use_potion()
+			KEY_TAB: _open_inventory()
 
 func _process(delta: float) -> void:
 	if potion_cooldown > 0:
@@ -210,6 +217,7 @@ func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 		if monster_type == "boss":
 			_on_log_message("[color=#ffaa44]击败了地牢领主！[/color]")
 		SaveManager.save_game()
+		await CloudSaveService.sync_after_local_save(self, true)
 		if finish_then_return:
 			await get_tree().create_timer(2.0).timeout
 			_return_to_dungeon()
@@ -227,7 +235,9 @@ func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 		_return_to_dungeon()
 
 func _return_to_dungeon() -> void:
-	SaveManager.save_game()
+	var result = await CloudSaveService.sync_before_scene_exit(self)
+	if result.get("cancelled", false):
+		return
 	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
 
 func _auto_use_potion() -> void:
@@ -299,6 +309,20 @@ func _update_auto_btn_style() -> void:
 	else:
 		btn.text = "⚡ 自动"
 		btn.modulate = Color.WHITE
+
+func _open_inventory() -> void:
+	if _inventory_open or battle_over:
+		return
+	_inventory_open = true
+	var inv_scene = load("res://scenes/inventory/InventoryScene.tscn").instantiate()
+	inv_scene.set_meta("overlay_mode", true)
+	inv_scene.set_meta("open_enhance", false)
+	inv_scene.tree_exited.connect(_on_inventory_closed)
+	add_child(inv_scene)
+	move_child(inv_scene, $FloatLayer.get_index())
+
+func _on_inventory_closed() -> void:
+	_inventory_open = false
 
 func _update_ui() -> void:
 	var p = battle_manager.player

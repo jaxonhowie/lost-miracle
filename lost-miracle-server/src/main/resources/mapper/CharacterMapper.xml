@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.character.mapper.CharacterMapper">
+
+    <resultMap id="characterResultMap" type="com.lostmiracle.module.character.entity.CharacterEntity">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="playerClass" column="player_class"/>
+        <result property="level" column="level"/>
+        <result property="powerScore" column="power_score"/>
+        <result property="currentDungeonId" column="current_dungeon_id"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `character` (user_id, name, player_class, level, power_score, current_dungeon_id, last_login_at)
+        VALUES (#{userId}, #{name}, #{playerClass}, #{level}, #{powerScore}, #{currentDungeonId}, #{lastLoginAt})
+    </insert>
+
+    <select id="selectById" resultMap="characterResultMap">
+        SELECT * FROM `character` WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultMap="characterResultMap">
+        SELECT * FROM `character` WHERE user_id = #{userId} ORDER BY last_login_at DESC
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM `character` WHERE user_id = #{userId}
+    </select>
+
+    <update id="updateById">
+        UPDATE `character`
+        SET name = #{name},
+            player_class = #{playerClass},
+            level = #{level},
+            power_score = #{powerScore},
+            current_dungeon_id = #{currentDungeonId},
+            last_login_at = #{lastLoginAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM `character` WHERE id = #{id}
+    </delete>
+
+</mapper>

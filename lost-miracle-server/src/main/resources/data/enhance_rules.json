@@ -1,0 +1,38 @@
+{
+  "max_enhance": 10,
+  "max_jewelry_enhance": 3,
+  "default_safe_until": 3,
+  "break_from_level": 4,
+  "break_chance_normal_scroll": 0.35,
+  "break_chance_blessed_scroll": 0.15,
+  "blessed_equipment_save_chance": 0.5,
+  "blessed_equipment_on_drop": 0.10,
+  "blessed_equipment_on_enhance_plus7": 0.15,
+  "armor_rates": [
+    [1.00, 1.00],
+    [1.00, 1.00],
+    [1.00, 1.00],
+    [0.70, 1.00],
+    [0.50, 0.90],
+    [0.40, 0.50],
+    [0.30, 0.45],
+    [0.28, 0.35],
+    [0.25, 0.33],
+    [0.20, 0.25]
+  ],
+  "jewelry_rates": [
+    [0.50, 0.85],
+    [0.30, 0.55],
+    [0.10, 0.25]
+  ],
+  "jewelry_break_rates": [
+    [0.40, 0.20],
+    [0.50, 0.25],
+    [0.60, 0.30]
+  ],
+  "drop_tier_weights": {
+    "normal": {"vine": 25, "chain": 10, "plate": 5},
+    "elite": {"vine": 15, "chain": 25, "plate": 15},
+    "boss": {"vine": 5, "chain": 10, "plate": 55}
+  }
+}

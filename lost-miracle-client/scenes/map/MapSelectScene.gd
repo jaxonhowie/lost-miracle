@@ -14,6 +14,7 @@ func _ready() -> void:
 	$VBox/Title.add_theme_font_size_override("font_size", 32)
 	$VBox/Subtitle.modulate = Color(0.7, 0.7, 0.75)
 	_build_map_list()
+	CloudSaveService.try_resume_sync()
 
 func _build_map_list() -> void:
 	var list := $VBox/MapList
@@ -35,6 +36,9 @@ func _on_select_dungeon(dungeon_id: String) -> void:
 	PlayerData.current_hp = stats["max_hp"]
 	PlayerData.current_mp = stats["max_mp"]
 	SaveManager.save_game()
+	var result = await CloudSaveService.sync_before_scene_exit(self)
+	if result.get("cancelled", false):
+		return
 	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
 
 func _on_back() -> void:

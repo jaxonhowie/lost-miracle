@@ -73,7 +73,7 @@
 	},
 	"jewelry_stone_drop": {
 		"forge_ruins": {
-			"normal": {"jewelry_rate": 0.20, "jewelry_min": 0, "jewelry_max": 1, "blessed_jewelry_rate": 0.05, "blessed_jewelry_min": 0, "blessed_jewelry_max": 1, "enhance_rate": 0.05, "enhance_min": 0, "enhance_max": 1},
+			"normal": {"jewelry_rate": 0.02, "jewelry_min": 0, "jewelry_max": 1, "blessed_jewelry_rate": 0.005, "blessed_jewelry_min": 0, "blessed_jewelry_max": 1, "enhance_rate": 0.05, "enhance_min": 0, "enhance_max": 1},
 			"elite": {"jewelry_rate": 0.40, "jewelry_min": 1, "jewelry_max": 2, "blessed_jewelry_rate": 0.15, "blessed_jewelry_min": 0, "blessed_jewelry_max": 1, "enhance_rate": 0.15, "enhance_min": 0, "enhance_max": 2},
 			"boss": {"jewelry_rate": 0.80, "jewelry_min": 2, "jewelry_max": 4, "blessed_jewelry_rate": 0.40, "blessed_jewelry_min": 1, "blessed_jewelry_max": 2, "enhance_rate": 0.30, "enhance_min": 1, "enhance_max": 3}
 		}
@@ -134,7 +134,7 @@
 	"necklace_lines": {
 		"power": {
 			"id": "necklace_power",
-			"names": ["寒钢吊坠", "进阶寒钢吊坠", "精炼寒钢吊坠", "霜裂意志坠"],
+			"names": ["强攻吊坠", "进阶强攻吊坠", "精炼强攻吊坠", "毁灭意志吊坠"],
 			"stats_by_level": [
 				{"STR": 2},
 				{"STR": 4},
@@ -144,7 +144,7 @@
 		},
 		"swift": {
 			"id": "necklace_swift",
-			"names": ["霜羽吊坠", "进阶霜羽吊坠", "精炼霜羽吊坠", "疾风霜羽坠"],
+			"names": ["迅捷吊坠", "进阶迅捷吊坠", "精炼迅捷吊坠", "暴风意志吊坠"],
 			"stats_by_level": [
 				{"AGI": 2},
 				{"AGI": 4},
@@ -154,7 +154,7 @@
 		},
 		"prophecy": {
 			"id": "necklace_prophecy",
-			"names": ["冰晶吊坠", "进阶冰晶吊坠", "精炼冰晶吊坠", "元素霜晶坠"],
+			"names": ["预言吊坠", "进阶预言吊坠", "精炼预言吊坠", "元素意志吊坠"],
 			"stats_by_level": [
 				{"INT": 2},
 				{"INT": 4},
@@ -164,7 +164,7 @@
 		},
 		"steady": {
 			"id": "necklace_steady",
-			"names": ["坚冰吊坠", "进阶坚冰吊坠", "精炼坚冰吊坠", "永冻守卫坠"],
+			"names": ["稳固吊坠", "进阶稳固吊坠", "精炼稳固吊坠", "坚固意志吊坠"],
 			"stats_by_level": [
 				{"def": 3},
 				{"def": 7},

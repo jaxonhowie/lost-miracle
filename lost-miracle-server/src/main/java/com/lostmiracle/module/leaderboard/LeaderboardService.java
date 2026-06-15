@@ -32,6 +32,10 @@ public class LeaderboardService {
         redisTemplate.opsForZSet().add(key, String.valueOf(character.getId()), character.getPowerScore());
     }
 
+    public void removeCharacter(long characterId) {
+        redisTemplate.opsForZSet().remove(redisKey(BOARD_POWER, "all"), String.valueOf(characterId));
+    }
+
     public LeaderboardResponse getLeaderboard(String boardType, String season, int page, int pageSize, Long viewerCharacterId) {
         if (!BOARD_POWER.equals(boardType)) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "unsupported board type");

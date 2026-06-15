@@ -8,13 +8,13 @@ const ENHANCE_RATES := [
 	[1.00, 1.00],
 	[1.00, 1.00],
 	[1.00, 1.00],
-	[0.30, 1.00],
-	[0.28, 0.33],
+	[0.70, 1.00],
+	[0.50, 0.90],
+	[0.40, 0.50],
+	[0.30, 0.45],
+	[0.28, 0.35],
+	[0.25, 0.33],
 	[0.20, 0.25],
-	[0.18, 0.23],
-	[0.15, 0.20],
-	[0.13, 0.18],
-	[0.10, 0.15],
 ]
 const MAX_ENHANCE_LEVEL := 10
 const MAX_JEWELRY_ENHANCE_LEVEL := 3
@@ -201,7 +201,19 @@ static func roll_jewelry_enhance(eq: Dictionary, use_blessed_stone: bool) -> Dic
 		apply_jewelry_level(eq, new_level)
 		var msg = "首饰强化成功！+%d  %s" % [new_level, eq.get("name", "")]
 		return {"success": true, "broken": false, "new_level": new_level, "message": msg, "gained_blessed": false}
+	var broken = _roll_jewelry_break_on_fail(level, use_blessed_stone)
+	if broken:
+		return {"success": false, "broken": true, "new_level": level, "message": "首饰强化失败！装备已损毁...", "gained_blessed": false}
 	return {"success": false, "broken": false, "new_level": level, "message": "首饰强化失败...材料已消耗", "gained_blessed": false}
+
+static func _roll_jewelry_break_on_fail(level: int, use_blessed_stone: bool) -> bool:
+	var rules = DataManager.get_enhance_rules()
+	var break_rates: Array = rules.get("jewelry_break_rates", [[0.40, 0.20], [0.50, 0.25], [0.60, 0.30]])
+	if level >= break_rates.size():
+		level = break_rates.size() - 1
+	var rates: Array = break_rates[level]
+	var break_chance: float = rates[1] if use_blessed_stone else rates[0]
+	return randf() < break_chance
 
 static func generate_equipment(monster_type: String, slot_override: String = "") -> Dictionary:
 	var tier = roll_drop_tier(monster_type)
@@ -264,7 +276,9 @@ static func get_break_risk_text(eq: Dictionary, use_blessed_stone: bool) -> Stri
 	if level + 1 < break_from:
 		return ""
 	if use_blessed_stone:
-		return "受祝福强化石：失败不损毁装备"
+		var break_chance = float(rules.get("break_chance_blessed_scroll", 0.15)) * 100.0
+		var save = 100.0 - break_chance
+		return "受祝福强化石：失败有 %.0f%% 概率保留装备" % save
 	var chance = float(rules.get("break_chance_normal_scroll", 0.35)) * 100.0
 	var text = "警告：失败有 %.0f%% 概率损毁装备！" % chance
 	if eq.get("is_blessed", false):
@@ -301,6 +315,8 @@ static func roll_enhance(eq: Dictionary, use_blessed_stone: bool) -> Dictionary:
 	var fail_msg = "强化失败...材料已消耗"
 	if broken:
 		fail_msg = "强化失败！装备已损毁..."
+	elif use_blessed_stone:
+		fail_msg = "强化失败...受祝福石保住了装备"
 	elif eq.get("is_blessed", false):
 		fail_msg = "强化失败...祝福之力保住了装备"
 	return {"success": false, "broken": broken, "new_level": level, "message": fail_msg, "gained_blessed": false}
@@ -311,12 +327,12 @@ static func _roll_break_on_fail(eq: Dictionary, use_blessed_stone: bool) -> bool
 	var break_from = int(rules.get("break_from_level", 4))
 	if level + 1 < break_from:
 		return false
-	if use_blessed_stone:
-		return false
 	var safe_until = get_safe_enhance_until(eq)
 	if level <= safe_until:
 		return false
-	var break_chance = float(rules.get("break_chance_normal_scroll", 0.35))
+	var break_chance_key = "break_chance_blessed_scroll" if use_blessed_stone else "break_chance_normal_scroll"
+	var default_break = 0.15 if use_blessed_stone else 0.35
+	var break_chance = float(rules.get(break_chance_key, default_break))
 	if randf() >= break_chance:
 		return false
 	if eq.get("is_blessed", false):

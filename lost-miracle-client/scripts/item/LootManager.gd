@@ -34,6 +34,10 @@ static func roll_drops(monster_id: String) -> Array:
 		_roll_corrupt_swamp_drops(drops, monster_type)
 	elif dungeon_id == "frozen_abyss":
 		_roll_frozen_abyss_drops(drops, monster_type)
+	elif dungeon_id == "forge_ruins":
+		var gold_range = DataManager.get_jewelry_config().get("forge_ruins_drops", {}).get("gold", {}).get(monster_type, GOLD_DROP.get(monster_type, GOLD_DROP["normal"]))
+		drops.append({"type": "gold", "amount": randi_range(int(gold_range["min"]), int(gold_range["max"]))})
+		_roll_forge_ruins_stones(drops, monster_type)
 	else:
 		var equip_info = EQUIP_DROP.get(monster_type, EQUIP_DROP["normal"])
 		if randf() <= equip_info["rate"]:
@@ -44,20 +48,13 @@ static func roll_drops(monster_id: String) -> Array:
 					drops.append(eq)
 
 		var gold_range = GOLD_DROP.get(monster_type, GOLD_DROP["normal"])
-		if dungeon_id == "forge_ruins":
-			var forge_gold: Dictionary = DataManager.get_jewelry_config().get("forge_ruins_drops", {}).get("gold", {}).get(monster_type, {})
-			if not forge_gold.is_empty():
-				gold_range = forge_gold
 		drops.append({"type": "gold", "amount": randi_range(int(gold_range["min"]), int(gold_range["max"]))})
 
-		if dungeon_id == "forge_ruins":
-			_roll_forge_ruins_stones(drops, monster_type)
-		else:
-			var stone_info = STONE_DROP.get(monster_type, STONE_DROP["normal"])
-			if randf() <= stone_info["rate"]:
-				var stone_count = randi_range(stone_info["min"], stone_info["max"])
-				if stone_count > 0:
-					drops.append({"type": "enhance_stone", "amount": stone_count})
+		var stone_info = STONE_DROP.get(monster_type, STONE_DROP["normal"])
+		if randf() <= stone_info["rate"]:
+			var stone_count = randi_range(stone_info["min"], stone_info["max"])
+			if stone_count > 0:
+				drops.append({"type": "enhance_stone", "amount": stone_count})
 
 	if randf() <= 0.5:
 		drops.append({"type": "health_potion", "amount": randi_range(1, 5)})
@@ -156,7 +153,3 @@ static func _roll_forge_ruins_stones(drops: Array, monster_type: String) -> void
 		var blessed_count = randi_range(int(stone_info.get("blessed_jewelry_min", 0)), int(stone_info.get("blessed_jewelry_max", 0)))
 		if blessed_count > 0:
 			drops.append({"type": "blessed_jewelry_enhance_stone", "amount": blessed_count})
-	if randf() <= float(stone_info.get("enhance_rate", 0.0)):
-		var enhance_count = randi_range(int(stone_info.get("enhance_min", 0)), int(stone_info.get("enhance_max", 0)))
-		if enhance_count > 0:
-			drops.append({"type": "enhance_stone", "amount": enhance_count})

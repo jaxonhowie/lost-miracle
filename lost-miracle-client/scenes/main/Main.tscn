@@ -40,6 +40,19 @@ layout_mode = 2
 text = "—— 暗黑刷装 RPG ——"
 horizontal_alignment = 1
 
+[node name="AccountBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -260.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = 48.0
+grow_horizontal = 0
+theme_override_constants/separation = 10
+alignment = 2
+
 [node name="SaveList" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
@@ -55,6 +68,29 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 16
 
+[node name="SlotMenu" type="PopupMenu" parent="."]
+item_count = 2
+item_0/text = "重命名"
+item_1/text = "删除角色"
+
+[node name="RenameDialog" type="AcceptDialog" parent="."]
+title = "重命名"
+size = Vector2i(320, 140)
+visible = false
+
+[node name="LineEdit" type="LineEdit" parent="RenameDialog"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 296.0
+offset_bottom = 48.0
+max_length = 20
+
+[node name="DeleteDialog" type="ConfirmationDialog" parent="."]
+title = "删除角色"
+size = Vector2i(360, 160)
+visible = false
+
 [node name="QuitBtn" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = 3
@@ -69,3 +105,7 @@ offset_bottom = -16.0
 grow_horizontal = 0
 grow_vertical = 0
 text = "退出"
+
+[connection signal="id_pressed" from="SlotMenu" to="." method="_on_slot_menu_id_pressed"]
+[connection signal="confirmed" from="RenameDialog" to="." method="_on_rename_confirmed"]
+[connection signal="confirmed" from="DeleteDialog" to="." method="_on_delete_confirmed"]

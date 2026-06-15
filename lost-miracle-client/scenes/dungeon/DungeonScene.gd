@@ -18,6 +18,7 @@ func _ready() -> void:
 	$BottomButtons/MapSelectBtn.pressed.connect(_on_map_select)
 	$BottomButtons/MenuBtn.pressed.connect(_on_menu)
 	$EventResult/VBox/ConfirmBtn.pressed.connect(_on_event_confirm)
+	CloudSaveService.try_resume_sync()
 	if Game.auto_battle:
 		$CenterPanel/ExploreBtn.disabled = true
 		await get_tree().create_timer(1.0).timeout
@@ -229,6 +230,7 @@ func _log_event(msg: String) -> void:
 
 func _auto_continue() -> void:
 	SaveManager.save_game()
+	CloudSaveService.request_background_sync()
 	await get_tree().create_timer(1.5).timeout
 	dungeon_manager.explore()
 
@@ -247,10 +249,12 @@ func _on_event_confirm() -> void:
 		_start_battle(data.get("monster_id", "rotting_skeleton"))
 	else:
 		SaveManager.save_game()
+		CloudSaveService.request_background_sync()
 		$CenterPanel/ExploreBtn.disabled = false
 
 func _start_battle(monster_id: String) -> void:
 	SaveManager.save_game()
+	CloudSaveService.request_background_sync()
 	PlayerData.reset_for_battle()
 	var battle_scene = load("res://scenes/battle/BattleScene.tscn").instantiate()
 	battle_scene.set_meta("monster_id", monster_id)
@@ -267,8 +271,13 @@ func _on_inventory(open_enhance: bool = false) -> void:
 	self.queue_free()
 
 func _on_map_select() -> void:
-	SaveManager.save_game()
+	var result = await CloudSaveService.sync_before_scene_exit(self)
+	if result.get("cancelled", false):
+		return
 	get_tree().change_scene_to_file("res://scenes/map/MapSelectScene.tscn")
 
 func _on_menu() -> void:
+	var result = await CloudSaveService.sync_before_scene_exit(self)
+	if result.get("cancelled", false):
+		return
 	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")

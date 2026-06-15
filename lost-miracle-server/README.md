@@ -37,6 +37,11 @@ mvn spring-boot:run
 | GET | `/characters/{id}/save` | 下载云存档 |
 | PUT | `/characters/{id}/save` | 上传云存档 |
 | GET | `/leaderboards/power` | 战力榜 |
+| POST | `/characters/{id}/enhance/roll` | 服务端权威强化（需 `saveVersion`） |
+| GET | `/characters/{id}/mail` | 邮件列表 |
+| POST | `/characters/{id}/mail/{mailId}/claim` | 领取邮件（需 `saveVersion`） |
+| GET | `/achievements?characterId=` | 成就进度 |
+| POST | `/achievements/{id}/claim?characterId=` | 领取成就奖励（需 `saveVersion`） |
 
 ## 示例
 

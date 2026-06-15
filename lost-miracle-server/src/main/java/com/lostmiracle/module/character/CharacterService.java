@@ -1,20 +1,25 @@
 package com.lostmiracle.module.character;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lostmiracle.common.BusinessException;
 import com.lostmiracle.common.ErrorCode;
 import com.lostmiracle.config.LostMiracleProperties;
+import com.lostmiracle.module.achievement.mapper.AchievementProgressMapper;
 import com.lostmiracle.module.character.dto.CharacterListResponse;
 import com.lostmiracle.module.character.dto.CharacterSummaryResponse;
 import com.lostmiracle.module.character.dto.CreateCharacterRequest;
 import com.lostmiracle.module.character.entity.CharacterEntity;
 import com.lostmiracle.module.character.mapper.CharacterMapper;
+import com.lostmiracle.module.leaderboard.LeaderboardService;
+import com.lostmiracle.module.mail.mapper.MailMapper;
 import com.lostmiracle.module.save.entity.CharacterSaveEntity;
 import com.lostmiracle.module.save.mapper.CharacterSaveMapper;
+import com.lostmiracle.module.save.SaveSnapshotService;
 import com.lostmiracle.module.save.util.DefaultSaveFactory;
 import com.lostmiracle.module.save.util.PowerScoreCalculator;
 import com.lostmiracle.module.save.util.SaveChecksum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,27 +32,39 @@ import java.util.List;
 @Service
 public class CharacterService {
 
+    private static final Logger log = LoggerFactory.getLogger(CharacterService.class);
+
     private final CharacterMapper characterMapper;
     private final CharacterSaveMapper characterSaveMapper;
+    private final MailMapper mailMapper;
+    private final AchievementProgressMapper achievementProgressMapper;
+    private final SaveSnapshotService saveSnapshotService;
+    private final LeaderboardService leaderboardService;
     private final LostMiracleProperties properties;
     private final ObjectMapper objectMapper;
 
     public CharacterService(
             CharacterMapper characterMapper,
             CharacterSaveMapper characterSaveMapper,
+            MailMapper mailMapper,
+            AchievementProgressMapper achievementProgressMapper,
+            SaveSnapshotService saveSnapshotService,
+            LeaderboardService leaderboardService,
             LostMiracleProperties properties,
             ObjectMapper objectMapper
     ) {
         this.characterMapper = characterMapper;
         this.characterSaveMapper = characterSaveMapper;
+        this.mailMapper = mailMapper;
+        this.achievementProgressMapper = achievementProgressMapper;
+        this.saveSnapshotService = saveSnapshotService;
+        this.leaderboardService = leaderboardService;
         this.properties = properties;
         this.objectMapper = objectMapper;
     }
 
     public CharacterListResponse listCharacters(long userId) {
-        List<CharacterEntity> characters = characterMapper.selectList(new LambdaQueryWrapper<CharacterEntity>()
-                .eq(CharacterEntity::getUserId, userId)
-                .orderByDesc(CharacterEntity::getLastLoginAt));
+        List<CharacterEntity> characters = characterMapper.selectByUserId(userId);
         List<CharacterSummaryResponse> items = characters.stream()
                 .sorted(Comparator.comparing(CharacterEntity::getLastLoginAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(this::toSummary)
@@ -57,9 +74,8 @@ public class CharacterService {
 
     @Transactional
     public CharacterSummaryResponse createCharacter(long userId, CreateCharacterRequest request) {
-        Long count = characterMapper.selectCount(new LambdaQueryWrapper<CharacterEntity>()
-                .eq(CharacterEntity::getUserId, userId));
-        if (count != null && count >= properties.getCharacter().getMaxSlotsPerUser()) {
+        long count = characterMapper.countByUserId(userId);
+        if (count >= properties.getCharacter().getMaxSlotsPerUser()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "character slot limit reached");
         }
 
@@ -86,6 +102,18 @@ public class CharacterService {
         characterSaveMapper.insert(save);
 
         return toSummary(character);
+    }
+
+    @Transactional
+    public void deleteCharacter(long userId, long characterId) {
+        requireOwnedCharacter(userId, characterId);
+        log.info("delete character userId={} characterId={}", userId, characterId);
+        mailMapper.deleteByCharacterId(characterId);
+        achievementProgressMapper.deleteByCharacterId(characterId);
+        saveSnapshotService.deleteByCharacterId(characterId);
+        characterSaveMapper.deleteById(characterId);
+        leaderboardService.removeCharacter(characterId);
+        characterMapper.deleteById(characterId);
     }
 
     public CharacterEntity requireOwnedCharacter(long userId, long characterId) {

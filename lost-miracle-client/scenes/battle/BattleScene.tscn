@@ -331,6 +331,11 @@ custom_minimum_size = Vector2(120, 56)
 layout_mode = 2
 text = "自动战斗"
 
+[node name="InvBtn" type="Button" parent="SkillPanel/SkillBar"]
+custom_minimum_size = Vector2(100, 56)
+layout_mode = 2
+text = "背包 [Tab]"
+
 [node name="LogPanel" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 12

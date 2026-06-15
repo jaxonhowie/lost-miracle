@@ -157,6 +157,14 @@ func _refresh_inventory() -> void:
 			btn.flat = true
 			btn.pressed.connect(_on_potion_click)
 			list.add_child(_wrap_item_row(btn))
+		elif entry["type"] == "stone":
+			var btn = Button.new()
+			btn.text = "%s x%d" % [entry["stone_name"], entry["stone_count"]]
+			btn.modulate = Color(0.7, 0.6, 1.0)
+			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			btn.flat = true
+			btn.pressed.connect(_on_stone_click.bind(entry))
+			list.add_child(_wrap_item_row(btn))
 		else:
 			var item = entry["item"]
 			var is_equipped = entry["equipped"]
@@ -233,6 +241,15 @@ func _build_inventory_entries() -> Array:
 			equipped_uids[uid] = true
 	if PlayerData.health_potion > 0:
 		entries.append({"type": "potion"})
+	var stone_types := [
+		{"key": "enhance_stone", "name": "强化石", "count": PlayerData.enhance_stone},
+		{"key": "blessed_enhance_stone", "name": "受祝福强化石", "count": PlayerData.blessed_enhance_stone},
+		{"key": "jewelry_enhance_stone", "name": "首饰强化石", "count": PlayerData.jewelry_enhance_stone},
+		{"key": "blessed_jewelry_enhance_stone", "name": "受祝福首饰强化石", "count": PlayerData.blessed_jewelry_enhance_stone},
+	]
+	for s in stone_types:
+		if s["count"] > 0:
+			entries.append({"type": "stone", "stone_key": s["key"], "stone_name": s["name"], "stone_count": s["count"]})
 	for item in PlayerData.inventory:
 		entries.append({
 			"type": "equip",
@@ -249,7 +266,7 @@ func _filter_inventory_entries(entries: Array, tab_id: String) -> Array:
 func _entry_matches_tab(entry: Dictionary, tab_id: String) -> bool:
 	match tab_id:
 		"consumable":
-			return entry.get("type", "") == "potion"
+			return entry.get("type", "") in ["potion", "stone"]
 		"weapon", "armor", "jewelry":
 			if entry.get("type", "") != "equip":
 				return false
@@ -269,11 +286,11 @@ func _get_equip_category(item: Dictionary) -> String:
 	return "other"
 
 func _sort_inventory_entries(entries: Array, tab_id: String) -> Array:
-	var potions: Array = []
+	var consumables: Array = []
 	var equips: Array = []
 	for entry in entries:
-		if entry.get("type", "") == "potion":
-			potions.append(entry)
+		if entry.get("type", "") in ["potion", "stone"]:
+			consumables.append(entry)
 		else:
 			equips.append(entry)
 	equips.sort_custom(func(a, b):
@@ -294,9 +311,9 @@ func _sort_inventory_entries(entries: Array, tab_id: String) -> Array:
 		return str(item_a.get("name", "")) < str(item_b.get("name", ""))
 	)
 	if tab_id == "consumable":
-		return potions
-	if tab_id == "all" and not potions.is_empty():
-		return potions + equips
+		return consumables
+	if tab_id == "all" and not consumables.is_empty():
+		return consumables + equips
 	return equips
 
 func _update_pagination() -> void:
@@ -318,6 +335,24 @@ func _on_next_page() -> void:
 func _on_potion_click() -> void:
 	_hide_enhance_panel()
 	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/DetailTextFrame/DetailText.text = "生命药水\n\n恢复 20 点生命值\n\n数量: %d" % PlayerData.health_potion
+	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons/EquipBtn.visible = false
+	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons/UnequipBtn.visible = false
+	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons/EnhanceBtn.visible = false
+	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons/DiscardBtn.visible = false
+
+func _on_stone_click(entry: Dictionary) -> void:
+	_hide_enhance_panel()
+	var desc := ""
+	match entry.get("stone_key", ""):
+		"enhance_stone":
+			desc = "强化石\n\n用于强化武器和防具\n\n数量: %d" % PlayerData.enhance_stone
+		"blessed_enhance_stone":
+			desc = "受祝福强化石\n\n强化成功率更高，失败有概率保留装备\n\n数量: %d" % PlayerData.blessed_enhance_stone
+		"jewelry_enhance_stone":
+			desc = "首饰强化石\n\n用于强化戒指和项链\n\n数量: %d" % PlayerData.jewelry_enhance_stone
+		"blessed_jewelry_enhance_stone":
+			desc = "受祝福首饰强化石\n\n首饰强化成功率更高\n\n数量: %d" % PlayerData.blessed_jewelry_enhance_stone
+	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/DetailTextFrame/DetailText.text = desc
 	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons/EquipBtn.visible = false
 	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons/UnequipBtn.visible = false
 	$Panel/Margin/VBox/Content/DetailPanel/DetailVBox/ActionButtons/EnhanceBtn.visible = false
@@ -531,6 +566,9 @@ func _update_enhance_info() -> void:
 			if next_val != cur_val:
 				text += "%s: %s → %s\n" % [_stat_name(key), _format_stat_value(key, cur_val), _format_stat_value(key, next_val)]
 		text += "\n名称: %s" % next_name
+		var jewelry_break_text = _get_jewelry_break_risk_text(level, use_blessed_stone)
+		if not jewelry_break_text.is_empty():
+			text += "\n[color=orange]%s[/color]" % jewelry_break_text
 	else:
 		for key in selected_item.get("base_stats", {}):
 			var current_val = Equipment.calc_effective_stat_value(selected_item, key, level)
@@ -562,6 +600,18 @@ func _update_enhance_info() -> void:
 		info.text += "\n[color=red]材料不足！[/color]"
 	_sync_enhance_dialog_layout()
 
+func _get_jewelry_break_risk_text(level: int, use_blessed: bool) -> String:
+	var rules = DataManager.get_enhance_rules()
+	var break_rates: Array = rules.get("jewelry_break_rates", [[0.40, 0.20], [0.50, 0.25], [0.60, 0.30]])
+	if level >= break_rates.size():
+		level = break_rates.size() - 1
+	var rates: Array = break_rates[level]
+	var break_chance: float = rates[1] if use_blessed else rates[0]
+	var keep_chance: float = (1.0 - break_chance) * 100.0
+	if use_blessed:
+		return "受祝福首饰石：失败有 %.0f%% 概率保留装备" % keep_chance
+	return "警告：失败有 %.0f%% 概率损毁装备！" % (break_chance * 100.0)
+
 func _sync_enhance_dialog_layout() -> void:
 	call_deferred("_deferred_sync_enhance_dialog_layout")
 
@@ -575,6 +625,12 @@ func _deferred_sync_enhance_dialog_layout() -> void:
 func _on_enhance_confirm() -> void:
 	if selected_item.is_empty():
 		return
+	if NetworkManager.logged_in and not NetworkManager.get_character_id().is_empty():
+		await _enhance_confirm_server()
+		return
+	_enhance_confirm_local()
+
+func _enhance_confirm_local() -> void:
 	var level = int(selected_item.get("enhance_level", 0))
 	var is_jewelry = Equipment.is_jewelry(selected_item)
 	var max_level = Equipment.MAX_JEWELRY_ENHANCE_LEVEL if is_jewelry else Equipment.MAX_ENHANCE_LEVEL
@@ -616,6 +672,50 @@ func _on_enhance_confirm() -> void:
 	_show_enhance_result(result.get("message", ""), result_color)
 	
 	SaveManager.save_game()
+	await CloudSaveService.sync_after_local_save(self, true)
+	_init_stone_select()
+	if not selected_item.is_empty():
+		_update_enhance_info()
+		var is_equipped = false
+		for slot in PlayerData.equipped:
+			if PlayerData.equipped[slot] == uid:
+				is_equipped = true
+				break
+		_show_item_detail(selected_item, is_equipped)
+	_refresh_equipped()
+	_refresh_inventory()
+	_refresh_stats()
+
+func _enhance_confirm_server() -> void:
+	var uid = selected_item.get("uid", "")
+	if uid.is_empty():
+		return
+	$EnhanceOverlay/Center/Dialog/Margin/VBox/BtnRow/ConfirmEnhanceBtn.disabled = true
+	var result = await NetworkManager.enhance_roll(uid, use_blessed_stone)
+	$EnhanceOverlay/Center/Dialog/Margin/VBox/BtnRow/ConfirmEnhanceBtn.disabled = false
+	if not result.get("ok", false):
+		if int(result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
+			var resolved = await CloudSaveService.handle_conflict(self, result)
+			if resolved.get("ok", false):
+				_show_enhance_result("存档冲突已解决，请重新强化", Color.YELLOW)
+			return
+		_show_enhance_result("强化失败: %s" % result.get("message", ""), Color.RED)
+		return
+	var data: Dictionary = result.get("data", {})
+	var save_data: Dictionary = data.get("save", {})
+	if save_data.is_empty():
+		_show_enhance_result("服务器返回存档异常", Color.RED)
+		return
+	NetworkManager.apply_server_save(save_data, int(data.get("saveVersion", NetworkManager.get_save_version())))
+	var result_color = Color.GREEN if data.get("success", false) else Color.RED
+	if data.get("broken", false):
+		result_color = Color(1.0, 0.3, 0.1)
+		selected_item = {}
+		_hide_enhance_panel()
+		_clear_detail()
+	else:
+		selected_item = PlayerData.get_equipment_by_uid(uid)
+	_show_enhance_result(str(data.get("message", "")), result_color)
 	_init_stone_select()
 	if not selected_item.is_empty():
 		_update_enhance_info()
@@ -658,6 +758,7 @@ func _on_equip() -> void:
 			_show_alert("无法装备")
 		return
 	SaveManager.save_game()
+	await CloudSaveService.sync_after_local_save(self, true)
 	_refresh_ui()
 
 func _show_alert(message: String) -> void:
@@ -674,6 +775,7 @@ func _on_unequip() -> void:
 		return
 	PlayerData.unequip_by_uid(selected_item.get("uid", ""))
 	SaveManager.save_game()
+	await CloudSaveService.sync_after_local_save(self, true)
 	_refresh_ui()
 
 func _on_discard() -> void:
@@ -688,9 +790,16 @@ func _on_discard() -> void:
 	PlayerData.remove_from_inventory(uid)
 	selected_item = {}
 	SaveManager.save_game()
+	await CloudSaveService.sync_after_local_save(self, true)
 	_refresh_ui()
 
 func _on_close() -> void:
+	if get_meta("overlay_mode", false):
+		queue_free()
+		return
+	var result = await CloudSaveService.sync_before_scene_exit(self)
+	if result.get("cancelled", false):
+		return
 	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
 
 func _slot_name(slot: String) -> String:

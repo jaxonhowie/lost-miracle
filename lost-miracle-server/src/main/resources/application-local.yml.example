@@ -1,0 +1,4 @@
+# Copy to application-local.yml and set spring.profiles.active=local
+spring:
+  datasource:
+    password: your-local-mysql-password
