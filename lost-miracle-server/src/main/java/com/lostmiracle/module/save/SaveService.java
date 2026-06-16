@@ -164,6 +164,70 @@ public class SaveService {
         return new UploadSaveResponse(characterId, newVersion, serverUpdatedAt, powerScore);
     }
 
+    @Transactional
+    public UploadSaveResponse adminForceUpload(long characterId, Map<String, Object> save, long clientUpdatedAt) {
+        CharacterEntity character = characterService.requireCharacter(characterId);
+        CharacterSaveEntity existing = characterSaveMapper.selectById(characterId);
+        if (existing == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "save not found");
+        }
+
+        SaveValidator.validate(save);
+
+        String saveJson;
+        try {
+            saveJson = objectMapper.writeValueAsString(save);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "invalid save json");
+        }
+
+        if (saveJson.getBytes().length > properties.getSave().getMaxBytes()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "save too large");
+        }
+
+        String checksum = SaveChecksum.sha256(saveJson);
+        long newVersion = existing.getSaveVersion() + 1;
+        existing.setSaveVersion(newVersion);
+        existing.setSaveJson(saveJson);
+        existing.setChecksum(checksum);
+        existing.setClientUpdatedAt(clientUpdatedAt);
+        characterSaveMapper.updateById(existing);
+
+        int powerScore = PowerScoreCalculator.calculate(objectMapper, saveJson);
+        updateCharacterFromSave(character, saveJson, powerScore);
+        characterService.touchLogin(character);
+
+        leaderboardService.submitPowerScore(character);
+        saveSnapshotService.snapshotAsync(characterId, newVersion, saveJson);
+
+        long serverUpdatedAt = existing.getServerUpdatedAt() == null
+                ? clientUpdatedAt
+                : existing.getServerUpdatedAt().atZone(ZoneId.systemDefault()).toEpochSecond();
+
+        return new UploadSaveResponse(characterId, newVersion, serverUpdatedAt, powerScore);
+    }
+
+    public String readSaveChecksum(long characterId) {
+        CharacterSaveEntity existing = characterSaveMapper.selectById(characterId);
+        if (existing == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "save not found");
+        }
+        return existing.getChecksum();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> readSaveMap(long characterId) {
+        CharacterSaveEntity existing = characterSaveMapper.selectById(characterId);
+        if (existing == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "save not found");
+        }
+        try {
+            return objectMapper.readValue(existing.getSaveJson(), Map.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "invalid save data");
+        }
+    }
+
     private void updateCharacterFromSave(CharacterEntity character, String saveJson, int powerScore) {
         character.setPowerScore(powerScore);
         character.setLevel(PowerScoreCalculator.extractLevel(objectMapper, saveJson));

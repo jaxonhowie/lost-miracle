@@ -188,7 +188,11 @@ func _friendly_error(code: int, msg: String) -> String:
 			return "用户名已存在" if msg.contains("already exists") else msg
 		40100:
 			return "用户名或密码错误"
+		40301:
+			return "登录已过期，请重新登录"
 		-1:
+			if msg.contains("登录已过期"):
+				return msg
 			return "无法连接服务器，请检查网络"
 		_:
 			return msg if not msg.is_empty() else "请求失败 (%d)" % code

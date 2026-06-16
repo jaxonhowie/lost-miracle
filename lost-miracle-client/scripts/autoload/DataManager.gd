@@ -9,6 +9,7 @@ var sets: Dictionary = {}
 var dungeon_events: Dictionary = {}
 var enhance_rules: Dictionary = {}
 var jewelry: Dictionary = {}
+var _runtime_config: Dictionary = {}
 
 func _ready() -> void:
 	monsters = _load_json("res://data/monsters.json")
@@ -18,6 +19,13 @@ func _ready() -> void:
 	dungeon_events = _load_json("res://data/dungeon_events.json")
 	enhance_rules = _load_json("res://data/enhance_rules.json")
 	jewelry = _load_json("res://data/jewelry.json")
+
+func apply_runtime_config(configs: Dictionary) -> void:
+	_runtime_config = configs.duplicate(true)
+	if configs.has("dungeon.explore") and configs["dungeon.explore"] is Dictionary:
+		dungeon_events = configs["dungeon.explore"]
+	if configs.has("enhance.rules") and configs["enhance.rules"] is Dictionary:
+		enhance_rules = configs["enhance.rules"]
 
 func _load_json(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
@@ -71,12 +79,18 @@ func get_set(set_id: String) -> Dictionary:
 	return sets.get(set_id, {})
 
 func get_event_probabilities() -> Dictionary:
+	if _runtime_config.has("dungeon.explore") and _runtime_config["dungeon.explore"] is Dictionary:
+		return _runtime_config["dungeon.explore"].get("events", dungeon_events.get("events", {}))
 	return dungeon_events.get("events", {})
 
 func get_elite_auto_chance() -> float:
+	if _runtime_config.has("dungeon.explore") and _runtime_config["dungeon.explore"] is Dictionary:
+		return float(_runtime_config["dungeon.explore"].get("elite_auto_challenge_chance", 0.25))
 	return float(dungeon_events.get("elite_auto_challenge_chance", 0.25))
 
 func get_enhance_rules() -> Dictionary:
+	if _runtime_config.has("enhance.rules") and _runtime_config["enhance.rules"] is Dictionary:
+		return _runtime_config["enhance.rules"]
 	return enhance_rules
 
 func get_jewelry_config() -> Dictionary:

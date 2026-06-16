@@ -228,7 +228,6 @@ func _end_battle(player_won: bool) -> void:
 			Game.dungeon_progress["normal_kill_count"] += 1
 		elif monster_type == "elite":
 			Game.dungeon_progress["elite_kill_count"] += 1
-			Game.mark_elite_killed()
 		elif monster_type == "boss":
 			Game.mark_boss_killed()
 	else:

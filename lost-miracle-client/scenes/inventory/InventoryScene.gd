@@ -671,8 +671,7 @@ func _enhance_confirm_local() -> void:
 		_clear_detail()
 	_show_enhance_result(result.get("message", ""), result_color)
 	
-	SaveManager.save_game()
-	await CloudSaveService.sync_after_local_save(self, true)
+	await CloudSaveService.sync_to_cloud(self, true)
 	_init_stone_select()
 	if not selected_item.is_empty():
 		_update_enhance_info()
@@ -757,8 +756,7 @@ func _on_equip() -> void:
 		else:
 			_show_alert("无法装备")
 		return
-	SaveManager.save_game()
-	await CloudSaveService.sync_after_local_save(self, true)
+	await CloudSaveService.sync_to_cloud(self, true)
 	_refresh_ui()
 
 func _show_alert(message: String) -> void:
@@ -774,8 +772,7 @@ func _on_unequip() -> void:
 	if selected_item.is_empty():
 		return
 	PlayerData.unequip_by_uid(selected_item.get("uid", ""))
-	SaveManager.save_game()
-	await CloudSaveService.sync_after_local_save(self, true)
+	await CloudSaveService.sync_to_cloud(self, true)
 	_refresh_ui()
 
 func _on_discard() -> void:
@@ -789,8 +786,7 @@ func _on_discard() -> void:
 			return
 	PlayerData.remove_from_inventory(uid)
 	selected_item = {}
-	SaveManager.save_game()
-	await CloudSaveService.sync_after_local_save(self, true)
+	await CloudSaveService.sync_to_cloud(self, true)
 	_refresh_ui()
 
 func _on_close() -> void:

@@ -1,6 +1,7 @@
 package com.lostmiracle.module.enhance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lostmiracle.module.config.GameConfigService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class EnhanceRollEngineTest {
 
@@ -17,7 +20,9 @@ class EnhanceRollEngineTest {
 
     @BeforeEach
     void setUp() {
-        engine = new EnhanceRollEngine(new EnhanceRulesLoader(new ObjectMapper()));
+        GameConfigService gameConfigService = mock(GameConfigService.class);
+        when(gameConfigService.getPublishedMap(org.mockito.ArgumentMatchers.anyString())).thenReturn(Map.of());
+        engine = new EnhanceRollEngine(new EnhanceRulesLoader(new ObjectMapper(), gameConfigService));
     }
 
     @Test

@@ -15,12 +15,12 @@ docs/
 **失落奇迹：亡灵地牢** — 静态图刷装 RPG + 实时半挂机战斗（1280×720，Godot 4.6.2，GDScript）。
 
 ```
-scenes/main/ → map/ → dungeon/ ⇄ battle/
-                         ↕
-                    inventory/ (+ enhance inline)
+login/ → scenes/main/ → map/ → dungeon/ ⇄ battle/
+                              ↕
+                         inventory/ (+ enhance inline)
 ```
 
-Autoloads: `Game`, `PlayerData`, `DataManager`, `SaveManager`
+Autoloads: `Game`, `PlayerData`, `DataManager`, `SaveManager`, `NetworkManager`, `CloudSaveService`, `ConnectivityMonitor`
 
 ### Current Scope
 
@@ -28,8 +28,8 @@ Autoloads: `Game`, `PlayerData`, `DataManager`, `SaveManager`
 - **Class**: Warrior only for new game; 4 classes in data for future
 - **Equipment**: 8 slots (dual rings), vine/chain/plate tiers, +0~+10 enhance (**stones only, no gold**)
 - **Rings/Necklace**: swamp rings, forge jewelry stones, frozen necklaces — see `docs/DESIGN.md` §11
-- **Dungeon**: 4 maps; explore 75/10/10/5; elite/boss CD 120s/300s
-- **Save**: Local multi-slot `user://saves/`; cloud sync planned via server
+- **Dungeon**: 4 maps; explore 75/10/10/5; global spawn slots (normal×3/type 60s, elite 180s, boss 300s)
+- **Save**: **Online-only** — must login + network; cloud is sole persistence (`CloudSaveService`); `SaveManager` is in-memory serialize only; local disk keeps JWT only (`user://auth_token.json`)
 
 ### Key Formulas
 

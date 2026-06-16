@@ -4,11 +4,13 @@ import com.lostmiracle.common.ApiResponse;
 import com.lostmiracle.module.character.dto.CharacterListResponse;
 import com.lostmiracle.module.character.dto.CharacterSummaryResponse;
 import com.lostmiracle.module.character.dto.CreateCharacterRequest;
+import com.lostmiracle.module.character.dto.UpdateCharacterRequest;
 import com.lostmiracle.security.SecurityUtils;
 import com.lostmiracle.security.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +38,15 @@ public class CharacterController {
         UserPrincipal principal = SecurityUtils.requirePrincipal();
         CreateCharacterRequest body = request == null ? new CreateCharacterRequest(null) : request;
         return ApiResponse.ok(characterService.createCharacter(principal.userId(), body));
+    }
+
+    @PatchMapping("/{characterId}")
+    public ApiResponse<CharacterSummaryResponse> update(
+            @PathVariable long characterId,
+            @Valid @RequestBody UpdateCharacterRequest request
+    ) {
+        UserPrincipal principal = SecurityUtils.requirePrincipal();
+        return ApiResponse.ok(characterService.updateCharacter(principal.userId(), characterId, request));
     }
 
     @DeleteMapping("/{characterId}")

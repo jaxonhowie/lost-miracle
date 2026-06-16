@@ -6,12 +6,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LostMiracleProperties {
 
     private final Jwt jwt = new Jwt();
+    private final Gm gm = new Gm();
     private final Character character = new Character();
     private final Save save = new Save();
     private final Enhance enhance = new Enhance();
 
     public Jwt getJwt() {
         return jwt;
+    }
+
+    public Gm getGm() {
+        return gm;
     }
 
     public Character getCharacter() {
@@ -24,6 +29,45 @@ public class LostMiracleProperties {
 
     public Enhance getEnhance() {
         return enhance;
+    }
+
+    public static class Gm {
+        private String bootstrapSuperUsername = "super";
+        private String bootstrapSuperPassword = "gm-admin-change-me";
+        private long expirationSeconds = 7200;
+        private long confirmExpirationSeconds = 300;
+
+        public String getBootstrapSuperUsername() {
+            return bootstrapSuperUsername;
+        }
+
+        public void setBootstrapSuperUsername(String bootstrapSuperUsername) {
+            this.bootstrapSuperUsername = bootstrapSuperUsername;
+        }
+
+        public String getBootstrapSuperPassword() {
+            return bootstrapSuperPassword;
+        }
+
+        public void setBootstrapSuperPassword(String bootstrapSuperPassword) {
+            this.bootstrapSuperPassword = bootstrapSuperPassword;
+        }
+
+        public long getExpirationSeconds() {
+            return expirationSeconds;
+        }
+
+        public void setExpirationSeconds(long expirationSeconds) {
+            this.expirationSeconds = expirationSeconds;
+        }
+
+        public long getConfirmExpirationSeconds() {
+            return confirmExpirationSeconds;
+        }
+
+        public void setConfirmExpirationSeconds(long confirmExpirationSeconds) {
+            this.confirmExpirationSeconds = confirmExpirationSeconds;
+        }
     }
 
     public static class Jwt {

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.spawn.mapper.DungeonSpawnMapper">
+
+    <resultMap id="spawnSlotResultMap" type="com.lostmiracle.module.spawn.entity.DungeonSpawnSlotEntity">
+        <id property="id" column="id"/>
+        <result property="dungeonId" column="dungeon_id"/>
+        <result property="spawnType" column="spawn_type"/>
+        <result property="monsterId" column="monster_id"/>
+        <result property="slotIndex" column="slot_index"/>
+        <result property="respawnAt" column="respawn_at"/>
+        <result property="engagedCharacterId" column="engaged_character_id"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dungeon_spawn_slot (dungeon_id, spawn_type, monster_id, slot_index, respawn_at, engaged_character_id)
+        VALUES (#{dungeonId}, #{spawnType}, #{monsterId}, #{slotIndex}, #{respawnAt}, #{engagedCharacterId})
+    </insert>
+
+    <select id="countByDungeonId" resultType="long">
+        SELECT COUNT(*) FROM dungeon_spawn_slot WHERE dungeon_id = #{dungeonId}
+    </select>
+
+    <select id="selectByDungeonId" resultMap="spawnSlotResultMap">
+        SELECT * FROM dungeon_spawn_slot WHERE dungeon_id = #{dungeonId} ORDER BY spawn_type, monster_id, slot_index
+    </select>
+
+    <select id="selectAvailableByDungeonAndType" resultMap="spawnSlotResultMap">
+        SELECT * FROM dungeon_spawn_slot
+        WHERE dungeon_id = #{dungeonId}
+          AND spawn_type = #{spawnType}
+          AND engaged_character_id IS NULL
+          AND respawn_at &lt;= #{now}
+    </select>
+
+    <select id="selectById" resultMap="spawnSlotResultMap">
+        SELECT * FROM dungeon_spawn_slot WHERE id = #{id}
+    </select>
+
+    <update id="tryEngage">
+        UPDATE dungeon_spawn_slot
+        SET engaged_character_id = #{characterId}
+        WHERE id = #{id}
+          AND engaged_character_id IS NULL
+          AND respawn_at &lt;= #{now}
+    </update>
+
+    <update id="releaseEngagement">
+        UPDATE dungeon_spawn_slot
+        SET engaged_character_id = NULL
+        WHERE id = #{id}
+          AND engaged_character_id = #{characterId}
+    </update>
+
+    <update id="applyDefeatCooldown">
+        UPDATE dungeon_spawn_slot
+        SET engaged_character_id = NULL,
+            respawn_at = #{respawnAt}
+        WHERE id = #{id}
+          AND engaged_character_id = #{characterId}
+    </update>
+
+    <update id="adminResetSlot">
+        UPDATE dungeon_spawn_slot
+        SET engaged_character_id = NULL,
+            respawn_at = 0
+        WHERE id = #{id}
+    </update>
+
+    <update id="adminResetDungeon">
+        UPDATE dungeon_spawn_slot
+        SET engaged_character_id = NULL,
+            respawn_at = 0
+        WHERE dungeon_id = #{dungeonId}
+    </update>
+</mapper>

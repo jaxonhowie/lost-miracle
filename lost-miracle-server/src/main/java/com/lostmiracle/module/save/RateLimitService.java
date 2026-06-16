@@ -21,7 +21,7 @@ public class RateLimitService {
     }
 
     public void checkSaveUpload(long userId, long characterId) {
-        check("ratelimit:save:" + userId + ":" + characterId, 10, Duration.ofMinutes(1));
+        check("ratelimit:save:" + userId + ":" + characterId, 60, Duration.ofMinutes(1));
     }
 
     public void checkEnhanceRoll(long userId, long characterId) {

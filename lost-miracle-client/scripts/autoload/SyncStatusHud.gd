@@ -11,6 +11,8 @@ func _ready() -> void:
 	_update_display(CloudSaveService.get_status(), CloudSaveService.get_status_message())
 	CloudSaveService.sync_status_changed.connect(_on_sync_status_changed)
 	NetworkManager.loginStateChanged.connect(_on_login_state_changed)
+	# 网络恢复/断开时刷新文案，让"离线·连接重试中"及时更新。
+	ConnectivityMonitor.connectivity_changed.connect(_on_connectivity_changed)
 
 
 func _on_sync_status_changed(status: int, _message: String) -> void:
@@ -18,6 +20,10 @@ func _on_sync_status_changed(status: int, _message: String) -> void:
 
 
 func _on_login_state_changed() -> void:
+	_update_display(CloudSaveService.get_status(), CloudSaveService.get_status_message())
+
+
+func _on_connectivity_changed(_online: bool) -> void:
 	_update_display(CloudSaveService.get_status(), CloudSaveService.get_status_message())
 
 

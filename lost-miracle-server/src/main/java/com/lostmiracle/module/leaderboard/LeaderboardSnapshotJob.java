@@ -30,7 +30,7 @@ public class LeaderboardSnapshotJob {
         response.items().forEach(entry -> jdbcTemplate.update(
                 """
                         INSERT INTO leaderboard_snapshot
-                        (board_type, season, character_id, score, rank)
+                        (board_type, season, character_id, score, `rank`)
                         VALUES (?, ?, ?, ?, ?)
                         """,
                 boardType,

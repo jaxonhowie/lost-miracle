@@ -25,4 +25,26 @@
         SELECT COUNT(*) FROM `user` WHERE username = #{username}
     </select>
 
+    <select id="selectById" resultMap="userResultMap">
+        SELECT * FROM `user` WHERE id = #{id}
+    </select>
+
+    <select id="search" resultMap="userResultMap">
+        SELECT * FROM `user`
+        WHERE username LIKE CONCAT('%', #{query}, '%')
+           OR CAST(id AS CHAR) = #{query}
+        ORDER BY id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countSearch" resultType="long">
+        SELECT COUNT(*) FROM `user`
+        WHERE username LIKE CONCAT('%', #{query}, '%')
+           OR CAST(id AS CHAR) = #{query}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE `user` SET status = #{status} WHERE id = #{id}
+    </update>
+
 </mapper>

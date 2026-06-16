@@ -40,7 +40,9 @@ func _ready() -> void:
 	_update_auto_btn_style()
 	battle_manager.auto_battle = Game.auto_battle
 	battle_manager.start_battle(monster_id)
-	set_process_unhandled_key_input(true)
+	for child in $SkillPanel/SkillBar.get_children():
+		if child is Control:
+			child.focus_mode = Control.FOCUS_NONE
 	$LogPanel/BattleLog.clear()
 	_on_log_message("[color=#aabbcc]战斗开始...[/color]")
 
@@ -118,16 +120,27 @@ func _pulse_glow(rect: ColorRect) -> void:
 	tween.tween_property(rect, "modulate:a", 0.35, 1.8)
 	tween.tween_property(rect, "modulate:a", 0.75, 1.8)
 
-func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not battle_over:
-		if _inventory_open:
-			return
-		match event.keycode:
-			KEY_1: _on_skill("heavy_strike")
-			KEY_2: _on_skill("battle_roar")
-			KEY_3: _on_skill("blood_slash")
-			KEY_4: _use_potion()
-			KEY_TAB: _open_inventory()
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if _inventory_open or battle_over:
+		return
+	match event.keycode:
+		KEY_1:
+			_on_skill("heavy_strike")
+			get_viewport().set_input_as_handled()
+		KEY_2:
+			_on_skill("battle_roar")
+			get_viewport().set_input_as_handled()
+		KEY_3:
+			_on_skill("blood_slash")
+			get_viewport().set_input_as_handled()
+		KEY_4:
+			_use_potion()
+			get_viewport().set_input_as_handled()
+		KEY_TAB:
+			_open_inventory()
+			get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
 	if potion_cooldown > 0:
@@ -184,6 +197,7 @@ func _on_action_performed(attacker: BattleUnit, defender: BattleUnit, result: Di
 
 func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 	battle_over = true
+	var spawn_slot_id := str(get_meta("spawn_slot_id", ""))
 	if player_won:
 		PlayerData.add_exp(rewards.get("exp", 0))
 		PlayerData.gold += rewards.get("gold", 0)
@@ -216,8 +230,14 @@ func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 		var monster_type = DataManager.get_monster(battle_manager.monster.unit_id).get("type", "normal")
 		if monster_type == "boss":
 			_on_log_message("[color=#ffaa44]击败了地牢领主！[/color]")
-		SaveManager.save_game()
-		await CloudSaveService.sync_after_local_save(self, true)
+		if not spawn_slot_id.is_empty():
+			await SpawnService.report_defeat(Game.current_dungeon_id, spawn_slot_id)
+		if Game.auto_battle:
+			CloudSaveService.queue_progress_sync()
+		else:
+			var sync_result = await CloudSaveService.sync_to_cloud(self, true)
+			if not sync_result.get("ok", false) and not sync_result.get("cancelled", false):
+				return
 		if finish_then_return:
 			await get_tree().create_timer(2.0).timeout
 			_return_to_dungeon()
@@ -230,13 +250,20 @@ func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 			_return_to_dungeon()
 	else:
 		_on_log_message("[color=#ff6666]💀 你阵亡了，返回地牢...[/color]")
+		if not spawn_slot_id.is_empty():
+			await SpawnService.report_release(Game.current_dungeon_id, spawn_slot_id)
 		PlayerData.current_hp = PlayerData.get_final_stats()["max_hp"] / 2
 		await get_tree().create_timer(2.0).timeout
 		_return_to_dungeon()
 
 func _return_to_dungeon() -> void:
+	if Game.auto_battle:
+		get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
+		return
 	var result = await CloudSaveService.sync_before_scene_exit(self)
 	if result.get("cancelled", false):
+		return
+	if not result.get("ok", false):
 		return
 	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
 

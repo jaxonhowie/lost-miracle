@@ -1,0 +1,9 @@
+{
+  "events": {
+    "normal_monster": {"probability": 0.75, "description": "普通怪物"},
+    "chest": {"probability": 0.10, "description": "宝箱"},
+    "altar": {"probability": 0.10, "description": "祭坛"},
+    "trap": {"probability": 0.05, "description": "陷阱"}
+  },
+  "elite_auto_challenge_chance": 0.25
+}
