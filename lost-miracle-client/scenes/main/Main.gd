@@ -3,7 +3,6 @@ extends Control
 ## 主菜单 — 云端角色槽 + 登录状态 + 云存档同步
 
 var _selected_character_id: String = ""
-var _selected_save_id: String = ""
 var _cloud_characters: Array = []
 var _max_slots: int = 3
 
@@ -18,11 +17,42 @@ func _ready() -> void:
 		get_tree().call_deferred("change_scene_to_file", "res://scenes/login/LoginScene.tscn")
 		return
 
+	if not await CloudSaveService.await_online():
+		_show_offline_blocker()
+		return
+
+	await ConfigService.fetch_bundle(false)
+
 	await _refresh_character_list()
 	await CloudSaveService.flush_sync_queue(self)
 	_build_account_bar()
 	_build_save_list()
 	CloudSaveService.sync_status_changed.connect(_on_sync_status_changed)
+
+func _show_offline_blocker() -> void:
+	_build_account_bar()
+	var list = $SaveList
+	for child in list.get_children():
+		child.queue_free()
+	var lbl := Label.new()
+	lbl.text = "无法连接服务器，请检查网络后重试"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 18)
+	lbl.modulate = Color(0.85, 0.5, 0.5)
+	list.add_child(lbl)
+
+	var retry_btn := Button.new()
+	retry_btn.text = "重试连接"
+	retry_btn.custom_minimum_size = Vector2(160, 44)
+	retry_btn.pressed.connect(_on_retry_connect)
+	list.add_child(retry_btn)
+
+func _on_retry_connect() -> void:
+	if await CloudSaveService.await_online():
+		await _refresh_character_list()
+		_build_save_list()
+	else:
+		_show_alert("仍无法连接服务器")
 
 func _on_login_state_changed() -> void:
 	_build_account_bar()
@@ -51,7 +81,7 @@ func _build_account_bar() -> void:
 		bar.add_child(lb_btn)
 
 		var sync_btn := Button.new()
-		sync_btn.text = "云同步"
+		sync_btn.text = "同步存档"
 		sync_btn.add_theme_font_size_override("font_size", 14)
 		sync_btn.pressed.connect(_on_cloud_sync)
 		bar.add_child(sync_btn)
@@ -136,7 +166,7 @@ func _make_save_slot(meta: Dictionary) -> Control:
 	more_btn.text = "..."
 	more_btn.custom_minimum_size = Vector2(40, SaveManager.SLOT_HEIGHT)
 	more_btn.add_theme_font_size_override("font_size", 18)
-	more_btn.pressed.connect(_on_more_pressed.bind(char_id, str(meta.get("id", ""))))
+	more_btn.pressed.connect(_on_more_pressed.bind(char_id))
 	hbox.add_child(more_btn)
 
 	return hbox
@@ -166,6 +196,10 @@ func _make_empty_slot() -> Control:
 func _on_load_character(character_id: String, meta: Dictionary) -> void:
 	if character_id.is_empty():
 		return
+	if not await CloudSaveService.await_online():
+		_show_alert("无法连接服务器，请检查网络")
+		return
+
 	NetworkManager.set_character_id(character_id)
 	var save_version := int(meta.get("save_version", NetworkManager.get_save_version()))
 	NetworkManager.set_save_version(save_version)
@@ -180,12 +214,15 @@ func _on_load_character(character_id: String, meta: Dictionary) -> void:
 					var create_result = await NetworkManager.create_character()
 					if create_result.get("ok", false):
 						var new_ch: Dictionary = create_result["data"]
-						NetworkManager.set_character_id(ApiIds.from_value(new_ch.get("id", "")))
+						var new_id := ApiIds.from_value(new_ch.get("id", ""))
+						NetworkManager.set_character_id(new_id)
 						NetworkManager.set_save_version(int(new_ch.get("saveVersion", 1)))
-						SaveManager.create_new_save()
-						CloudSaveService.sync_current()
-						_go_to_dungeon()
-						return
+						var dl = await CloudSaveService.download_for_character(new_id)
+						if dl.get("ok", false):
+							var data: Dictionary = dl.get("data", {})
+							CloudSaveService.bind_cloud_character(new_ch, data.get("save", {}), int(data.get("saveVersion", 1)))
+							_go_to_dungeon()
+							return
 				else:
 					var fresh_ch: Dictionary = items[0]
 					var fresh_id := ApiIds.from_value(fresh_ch.get("id", ""))
@@ -207,6 +244,9 @@ func _on_load_character(character_id: String, meta: Dictionary) -> void:
 	_go_to_dungeon()
 
 func _on_new_character() -> void:
+	if not await CloudSaveService.await_online():
+		_show_alert("无法连接服务器，请检查网络")
+		return
 	if _server_character_count() >= _max_slots:
 		_show_alert("角色槽位已满（最多 %d 个）" % _max_slots)
 		return
@@ -223,21 +263,18 @@ func _on_new_character() -> void:
 	NetworkManager.set_save_version(save_version)
 
 	var dl = await CloudSaveService.download_for_character(char_id)
-	if dl.get("ok", false):
-		var data: Dictionary = dl.get("data", {})
-		CloudSaveService.bind_cloud_character(ch, data.get("save", {}), int(data.get("saveVersion", save_version)))
-	else:
-		SaveManager.create_new_save()
-		SaveManager.update_manifest_for_character(char_id, ch)
-		await CloudSaveService.sync_after_local_save(self, false)
+	if not dl.get("ok", false):
+		_show_alert("拉取新角色存档失败: %s" % dl.get("message", ""))
+		return
+	var data: Dictionary = dl.get("data", {})
+	CloudSaveService.bind_cloud_character(ch, data.get("save", {}), int(data.get("saveVersion", save_version)))
 
 	await _refresh_character_list()
 	_build_save_list()
 	_go_to_map()
 
-func _on_more_pressed(character_id: String, save_id: String) -> void:
+func _on_more_pressed(character_id: String) -> void:
 	_selected_character_id = character_id
-	_selected_save_id = save_id
 	var popup: PopupMenu = $SlotMenu
 	popup.position = Vector2i(get_global_mouse_position()) + Vector2i(0, 20)
 	popup.popup()
@@ -250,13 +287,11 @@ func _on_slot_menu_id_pressed(id: int) -> void:
 			_show_delete_confirm()
 
 func _show_rename_dialog() -> void:
-	var manifest = SaveManager.load_manifest()
-	var saves: Array = manifest.get("saves", [])
 	var current_name := ""
 	var selected_cid := ApiIds.from_value(_selected_character_id)
-	for s in saves:
-		if ApiIds.from_value(s.get("character_id", "")) == selected_cid or s.get("id", "") == _selected_save_id:
-			current_name = str(s.get("name", ""))
+	for ch in _cloud_characters:
+		if ApiIds.from_value(ch.get("id", "")) == selected_cid:
+			current_name = str(ch.get("name", ""))
 			break
 
 	var dialog: AcceptDialog = $RenameDialog
@@ -273,15 +308,11 @@ func _on_rename_confirmed() -> void:
 	if new_name.is_empty():
 		return
 
-	var manifest = SaveManager.load_manifest()
-	var saves: Array = manifest.get("saves", [])
-	var selected_cid := ApiIds.from_value(_selected_character_id)
-	for i in saves.size():
-		if ApiIds.from_value(saves[i].get("character_id", "")) == selected_cid or saves[i].get("id", "") == _selected_save_id:
-			saves[i]["name"] = new_name
-			break
-	manifest["saves"] = saves
-	SaveManager.write_manifest(manifest)
+	var result = await NetworkManager.rename_character(_selected_character_id, new_name)
+	if not result.get("ok", false):
+		_show_alert("重命名失败: %s" % result.get("message", ""))
+		return
+	await _refresh_character_list()
 	_build_save_list()
 
 func _show_delete_confirm() -> void:
@@ -305,36 +336,34 @@ func _on_delete_confirmed() -> void:
 		return
 
 	var deleted_id := ApiIds.from_value(_selected_character_id)
-	var deleted_save_id := _selected_save_id
 
 	var result = await NetworkManager.delete_character(deleted_id)
 	if not result.get("ok", false):
 		var msg := str(result.get("message", ""))
 		if int(result.get("code", 0)) == 40300 or msg.contains("character not found"):
-			SaveManager.remove_local_character(deleted_id, deleted_save_id)
 			CloudSaveService.clear_pending_sync(deleted_id)
 			if NetworkManager.get_character_id() == deleted_id:
 				NetworkManager.set_character_id("")
 				NetworkManager.set_save_version(0)
+				SaveManager.clear_session()
 			await _refresh_character_list()
 			_build_save_list()
 			_selected_character_id = ""
-			_selected_save_id = ""
+			return
 		_show_alert("删除失败: %s" % msg)
 		return
 
-	SaveManager.remove_local_character(deleted_id, deleted_save_id)
 	CloudSaveService.clear_pending_sync(deleted_id)
 
 	if NetworkManager.get_character_id() == deleted_id:
 		NetworkManager.set_character_id("")
 		NetworkManager.set_save_version(0)
+		SaveManager.clear_session()
 
 	_cloud_characters = _cloud_characters.filter(func(ch):
 		return ApiIds.from_value(ch.get("id", "")) != deleted_id
 	)
 	_selected_character_id = ""
-	_selected_save_id = ""
 	_build_save_list()
 
 func _server_character_count() -> int:
@@ -344,12 +373,12 @@ func _on_cloud_sync() -> void:
 	if NetworkManager.get_character_id().is_empty():
 		_show_alert("请先选择角色")
 		return
-	var result = await CloudSaveService.sync_after_local_save(self, true)
-	if result.get("ok", false) and not result.get("skipped", false):
-		_show_alert("云同步成功")
+	if not SaveManager.session_active:
+		_show_alert("请先进入角色")
 		return
-	if result.get("skipped", false):
-		_show_alert("当前为仅本地存档模式")
+	var result = await CloudSaveService.sync_to_cloud(self, true)
+	if result.get("ok", false):
+		_show_alert("同步成功")
 		return
 	if result.get("cancelled", false):
 		return
@@ -360,11 +389,13 @@ func _on_leaderboard() -> void:
 	get_tree().change_scene_to_file("res://scenes/leaderboard/LeaderboardScene.tscn")
 
 func _on_logout() -> void:
-	if not NetworkManager.get_character_id().is_empty():
-		SaveManager.save_game()
+	if SaveManager.session_active and NetworkManager.has_character():
 		var result = await CloudSaveService.sync_before_scene_exit(self)
 		if result.get("cancelled", false):
 			return
+		if not result.get("ok", false):
+			return
+	SaveManager.clear_session()
 	NetworkManager.logout()
 	get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn")
 

@@ -5,6 +5,7 @@ const METHODS := {
 	"GET": HTTPClient.METHOD_GET,
 	"POST": HTTPClient.METHOD_POST,
 	"PUT": HTTPClient.METHOD_PUT,
+	"PATCH": HTTPClient.METHOD_PATCH,
 	"DELETE": HTTPClient.METHOD_DELETE,
 }
 
@@ -35,21 +36,46 @@ func make_request(method: String, path: String, body: Dictionary = {}, token: St
 	var status: int = result[1]
 	var response_body: PackedByteArray = result[3]
 
+	# http_status 用于上层识别鉴权失败（服务端 token 过期/无效返回 403 空响应体，
+	# 不走 GlobalExceptionHandler，无法靠业务 code 区分）。
 	if result_code != HTTPRequest.RESULT_SUCCESS:
-		return {"ok": false, "code": -1, "message": "Connection failed (error %d)" % result_code, "data": {}}
+		return {
+			"ok": false, "code": -1, "http_status": 0,
+			"message": "Connection failed (error %d)" % result_code, "data": {}
+		}
+
+	if _is_auth_failure(status):
+		return _auth_failure_response(status)
 
 	var json := JSON.new()
-	var parse_err := json.parse(response_body.get_string_from_utf8())
+	var body_text := ApiIds.quote_snowflake_ids(response_body.get_string_from_utf8())
+	var parse_err := json.parse(body_text)
 	if parse_err != OK:
-		return {"ok": false, "code": -1, "message": "Invalid JSON response", "data": {}}
+		return {
+			"ok": false, "code": -1, "http_status": status,
+			"message": "Invalid JSON response (status %d)" % status, "data": {}
+		}
 
 	var resp: Dictionary = json.data
 	var resp_code: int = int(resp.get("code", -1))
 	return {
 		"ok": resp_code == 0,
 		"code": resp_code,
+		"http_status": status,
 		"message": str(resp.get("message", "")),
 		"data": resp.get("data", {}),
+	}
+
+func _is_auth_failure(status: int) -> bool:
+	return status == 401 or status == ApiConfig.HTTP_UNAUTHORIZED
+
+func _auth_failure_response(status: int) -> Dictionary:
+	return {
+		"ok": false,
+		"code": ApiConfig.CLIENT_AUTH_EXPIRED_CODE,
+		"http_status": status,
+		"message": ApiConfig.AUTH_FAILURE_MESSAGE,
+		"data": {},
 	}
 
 func _spawn_http() -> HTTPRequest:

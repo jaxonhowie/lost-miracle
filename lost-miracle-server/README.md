@@ -43,7 +43,39 @@ mvn spring-boot:run
 | GET | `/achievements?characterId=` | 成就进度 |
 | POST | `/achievements/{id}/claim?characterId=` | 领取成就奖励（需 `saveVersion`） |
 
-## 示例
+## GM 后台 API（P0）
+
+详见 [`../docs/GM_ADMIN.md`](../docs/GM_ADMIN.md)。Base：`http://127.0.0.1:8080/api/v1/admin`
+
+| 方法 | 路径 | 角色 | 说明 |
+|------|------|------|------|
+| POST | `/admin/auth/login` | — | GM 登录 |
+| GET | `/admin/auth/me` | viewer+ | 当前 GM 信息 |
+| GET | `/admin/users?q=` | viewer+ | 搜索玩家 |
+| GET | `/admin/characters/{id}/save` | viewer+ | 读存档 |
+| PATCH | `/admin/characters/{id}/save/fields` | operator+ | 改金币/等级等 |
+| POST | `/admin/characters/{id}/save/preview` | super | 完整 JSON diff 预览 |
+| PUT | `/admin/characters/{id}/save` | super | 完整 JSON 替换（需 confirmToken） |
+| POST | `/admin/users/{id}/ban` | super | 封禁 |
+| GET | `/admin/dungeons/{id}/spawns` | viewer+ | 刷怪槽状态 |
+| POST | `/admin/spawns/{slotId}/reset` | operator+ | 重置单槽 |
+| GET | `/admin/audit-log` | viewer+ | 审计日志 |
+| GET | `/admin/config` | viewer+ | 配置列表 |
+| PUT | `/admin/config/{key}` | operator+ | 保存草稿 |
+| POST | `/admin/config/publish` | operator+ | 发布配置 |
+
+游戏侧：`GET /config/bundle?since=`（需登录）
+
+首次启动自动创建 super 账号：`super` / `gm-admin-change-me`（见 `lost-miracle.gm.*` 配置）。
+
+```bash
+# GM 登录
+curl -s -X POST http://127.0.0.1:8080/api/v1/admin/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"super","password":"gm-admin-change-me"}'
+```
+
+## 示例（游戏 API）
 
 ```bash
 # 注册

@@ -1,7 +1,7 @@
 # 失落奇迹：亡灵地牢 — 设计文档
 
 > **Lost Miracle: Undead Dungeon**  
-> 版本 v1.9 | 2026-06-12  
+> 版本 v1.11 | 2026-06-16  
 > 本文档为项目唯一设计规范，描述以**当前代码实现**为准。
 
 ---
@@ -15,15 +15,15 @@
 MVP 验证闭环：
 
 ```text
-选档/新建 → 选地牢 → 探索 → 战斗 → 掉落 → 穿戴/强化 → 战力提升 → 继续刷怪
+登录 → 选角色/新建 → 选地牢 → 探索 → 战斗 → 掉落 → 穿戴/强化 → 战力提升 → 继续刷怪
 ```
 
 ### 1.2 刻意不做（当前阶段）
 
-- 大地图行走、攻击动画、联网、复杂剧情
-- 多账号 / 登录系统（**留待最终阶段**；本地多存档槽已实现，见 §12）
+- 大地图行走、攻击动画、复杂剧情
 - 装备随机词条、装备品阶
 - 地牢「通关」概念（Boss/精英可反复刷）
+- 邮件/成就 UI、异步 PvP、交易行（在线能力见 §12）
 
 ### 1.3 技术栈
 
@@ -53,14 +53,15 @@ lost-miracle/
 
 ```text
   scenes/
-    main/           Main.tscn           主菜单（三存档槽）
+    login/          LoginScene.tscn     登录 / 注册
+    main/           Main.tscn           主菜单（云端角色槽）
     map/            MapSelectScene.tscn  地牢选择
     dungeon/        DungeonScene.tscn   地牢探索
     battle/         BattleScene.tscn    战斗
     inventory/      InventoryScene.tscn 背包（含分栏、强化弹窗）
-    enhance/        EnhanceScene.tscn   遗留独立场景（主流程未使用）
   scripts/
-    autoload/       Game, PlayerData, DataManager, SaveManager
+    autoload/       Game, PlayerData, DataManager, SaveManager, NetworkManager
+    network/        ApiClient, CloudSaveService, ConnectivityMonitor
     battle/         BattleManager, BattleUnit, DamageCalculator
     dungeon/        DungeonManager
     item/           Equipment, LootManager
@@ -72,15 +73,18 @@ lost-miracle/
 ## 三、游戏流程
 
 ```text
-主菜单（固定展示 3 个存档槽，按最近登录排序）
-  ├─ 点击已有存档 → 读档 → 地牢探索
-  └─ 点击「+ 创建新存档」→ 新档（战士 Lv.1）→ 地图选择
-       └─ 地牢探索
-            ├─ 点击探索（随机事件）
-            ├─ 挑战精英（独立按钮，击杀后 2 分钟 CD）
-            ├─ 挑战 Boss（独立按钮，击杀后 5 分钟 CD）
-            ├─ 背包 Tab / 强化 R（底栏按钮）
-            └─ 战斗 → 结算 → 自动存档 → 返回地牢
+启动
+  ├─ 未登录 → LoginScene（注册 / 登录，JWT）
+  └─ 已登录 → 主菜单（须联网，离线则阻断并提示重试）
+       ├─ 固定展示 3 个角色槽（服务端列表，按最近登录排序）
+       ├─ 点击已有角色 → GET 云存档 → 地牢探索
+       └─ 点击「+ 创建新角色」→ POST 创建 → GET 默认档 → 地图选择
+            └─ 地牢探索
+                 ├─ 点击探索（随机事件）
+                 ├─ 挑战精英（独立按钮，击杀后 2 分钟 CD）
+                 ├─ 挑战 Boss（独立按钮，击杀后 5 分钟 CD）
+                 ├─ 背包 Tab / 强化 R（底栏按钮）
+                 └─ 战斗 → 结算 → 云同步 → 返回地牢
 ```
 
 **地牢界面布局**（1280×720）：
@@ -89,7 +93,8 @@ lost-miracle/
 - **中央**：探索日志、探索按钮、挑战精英 / Boss（含 CD 倒计时）
 - **底栏**：「背包 (Tab)」「强化 (R)」两个独立按钮
 
-- **无手动保存按钮**；战斗结算、事件确认、背包操作等时机自动存档。
+- **无手动保存按钮**；战斗结算、事件确认、背包操作等时机**自动云同步**（`CloudSaveService.sync_to_cloud`）。
+- 切场景、登出、退出游戏前须同步成功；失败则弹窗并阻止离开。
 - 击杀 Boss 后**返回当前地牢**，不跳转选地图，无通关弹窗。
 
 ---
@@ -168,7 +173,7 @@ lost-miracle/
 - 每次回复：`HP + floor(STR/3)`，`MP + floor(INT/3)`（含装备主属性）
 - 同帧递减战吼剩余时间（`battle_roar_remaining`）
 - **无**战后 +50% HP/MP 恢复；胜利/战败均保留当前 HP/MP（战败 HP 先设为上限一半）
-- `current_hp` / `current_mp` 不写入存档，读档后由 `reset_for_new_game` / 进图逻辑重置；**战吼剩余时间与加成比例写入存档**
+- `current_hp` / `current_mp` 不写入存档，加载云存档后由 `reset_for_new_game` / 进图逻辑重置；**战吼剩余时间与加成比例写入存档**
 
 ### 5.5 战斗表现
 
@@ -177,7 +182,7 @@ lost-miracle/
 
 ### 5.6 战败 / 胜败后
 
-- 胜利：发奖励，自动存档，回地牢（自动战斗 3 秒后继续）；HP/MP 保持战斗结束时的值
+- 胜利：发奖励，云同步，回地牢（自动战斗 3 秒后继续）；HP/MP 保持战斗结束时的值
 - 战败：HP 设为 **一半上限**，回地牢；靠自然回复与药水恢复
 
 ---
@@ -362,7 +367,7 @@ lost-miracle/
 |------|------|
 | 损毁计入 | 在线强化失败且装备损毁时，按被毁装备等级静默积累（`强化等级 + 1`） |
 | 加成触发 | 池满阈值（默认 100）后，**下一次**在线强化额外 +25% 成功率（非必成），消耗阈值后重新积累 |
-| 范围 | 防具/武器与首饰；未登录走本地强化，不参与 |
+| 范围 | 防具/武器与首饰；须登录且联网，强化走服务端 API |
 
 配置：`lost-miracle.enhance.padding.threshold` / `bonus-rate`  
 API：`POST /characters/{id}/enhance/roll`（仅此一条对外接口）
@@ -514,12 +519,24 @@ API：`POST /characters/{id}/enhance/roll`（仅此一条对外接口）
 
 配置：`data/monsters.json`、`data/jewelry.json` → `frozen_abyss_drops`、`necklace_lines`。
 
-### 10.2 Boss / 精英刷新
+### 10.2 怪物刷新（服务端全局）
 
-| 类型 | 冷却 |
-|------|------|
-| 精英 | 120 秒（2 分钟） |
-| Boss | 300 秒（5 分钟） |
+刷怪槽持久化在 MySQL `dungeon_spawn_slot`，**全服共享**（同地图所有玩家共用冷却）。
+
+| 类型 | 每图数量 | 冷却 |
+|------|----------|------|
+| 普通怪 | 每种 3 个槽位 | 击杀后 60 秒 |
+| 精英 | 1 个槽位 | 击杀后 180 秒（3 分钟） |
+| Boss | 1 个槽位 | 击杀后 300 秒（5 分钟） |
+
+API（需登录 + 角色归属校验）：
+
+- `GET /characters/{id}/dungeons/{dungeonId}/spawns` — 查询槽位状态
+- `POST .../spawns/encounter` `{ "type": "normal|elite|boss" }` — 占用槽位并返回怪物 ID
+- `POST .../spawns/{slotId}/defeat` — 击杀，进入冷却
+- `POST .../spawns/{slotId}/release` — 未击杀（玩家阵亡），释放占用
+
+客户端 `SpawnService` 拉取状态；战斗胜利/失败分别调用 defeat / release。
 
 ### 10.3 地牢事件（探索随机池）
 
@@ -611,33 +628,59 @@ API：`POST /characters/{id}/enhance/roll`（仅此一条对外接口）
 
 ---
 
-## 十二、存档
+## 十二、存档与在线
 
-### 12.1 当前实现
+> 服务端 API 与架构见 **[`BACKEND_ARCHITECTURE.md`](BACKEND_ARCHITECTURE.md)**。
+
+### 12.1 模型：云端唯一持久化
+
+本游戏为**必须登录、必须联网**的在线游戏。游戏进度只存服务端，客户端内存中持有当前会话状态。
 
 | 项目 | 说明 |
 |------|------|
-| 存档文件 | `user://saves/{save_id}.json`（每角色独立） |
-| 索引 | `user://saves/manifest.json`（元数据列表） |
-| 主菜单 UI | 固定 **3 个槽位**，展示 manifest 中 **最近登录** 的存档；不足 3 个时剩余槽显示「+ 创建新存档」 |
-| 槽位上限 | manifest 可存多于 3 条记录，UI 仅显示最近 3 个；**无删档 UI** |
-| 旧档迁移 | 首次启动若存在 `user://save.json` 且 manifest 为空，自动迁入新体系后删除旧文件 |
-| 账号 | **无**登录 / 多账号 |
+| 持久化 | MySQL `character_save` 表（整包 JSON + 版本号） |
+| 客户端内存 | `SaveManager` 负责 `export_save_data()` / `import_save_data()`，**不写游戏存档到磁盘** |
+| 本地文件 | 仅 `user://auth_token.json`（JWT 与当前角色 ID，不含游戏数据） |
+| 联网门禁 | `ConnectivityMonitor` 探活；主菜单离线阻断；关键操作前检查可达性 |
+| 主菜单 UI | 固定 **3 个槽位**，展示服务端角色列表（按最近登录排序）；不足 3 个时显示「+ 创建新角色」 |
+| 槽位上限 | 每账号最多 3 个角色（服务端 `maxSlots`） |
+| 角色管理 | 重命名（`PATCH /characters/{id}`）、删除（`DELETE`，含云端存档） |
 
-**单档 JSON 内容**：玩家等级与属性、背包、装备（含 `ring_left` / `ring_right` / `necklace` 及旧 `ring` 迁移）、强化石与首饰强化石、药水、地牢进度与 Boss/精英 CD、当前地牢 ID、自动战斗开关、祭坛 Buff、战吼全局状态。
+**存档 JSON 内容**：玩家等级与属性、背包、装备（含 `ring_left` / `ring_right` / `necklace` 及旧 `ring` 迁移）、强化石与首饰强化石、药水、地牢进度与 Boss/精英 CD、当前地牢 ID、自动战斗开关、祭坛 Buff、战吼全局状态。
 
-**自动存档时机**：战斗结算、地牢事件确认、背包穿戴/强化等（无手动保存按钮）。`current_hp` / `current_mp` 不写入存档。
+**不写入存档**：`current_hp` / `current_mp`（进图或读档后由逻辑重置）。
 
-### 12.2 在线化规划
+### 12.2 同步时机与策略
 
-服务端技术选型与 API 设计见 **[`BACKEND_ARCHITECTURE.md`](BACKEND_ARCHITECTURE.md)**（HTTP + JSON、Spring Boot、MySQL、Redis）。
+| 时机 | 行为 |
+|------|------|
+| 进入角色 | `GET /characters/{id}/save` 下载并 `import_save_data` |
+| 战斗胜利结算 | `await sync_to_cloud` |
+| 地牢事件确认 / 进战斗前 | `await sync_to_cloud` |
+| 背包穿戴 / 卸下 / 丢弃 / 强化 | `await sync_to_cloud`（强化 roll 走服务端 API，成功后应用返回档） |
+| 切换地牢 / 回主菜单 / 登出 / 退出 | `sync_before_scene_exit`，失败阻止离开 |
+| 同步失败 | 内存重试队列 + 指数退避；网络恢复后自动冲刺 |
 
-**最终阶段待做：**
+**版本冲突（409）**：弹窗选择「以云端为准」或「以本机为准」（force upload）。
 
-- 多账号 / 登录系统（与云存档对接）
-- 删档、重命名、存档管理 UI
-- 槽位数量可配置或分页列表
-- 排行榜、成就、异步 PvP、交易行（按后端文档分阶段）
+**断网行为**：内存中可继续游玩，但切场景与登出会被同步拦住；进程强杀时未同步进度丢失（无本地兜底）。
+
+### 12.3 已实现 / 待做
+
+**已实现：**
+
+- 注册 / 登录（JWT）、角色 CRUD（含重命名、删档）
+- 云存档上下传、版本冲突、内存重试队列（`NetworkManager` + `CloudSaveService`）
+- 网络探活与离线 UI（`ConnectivityMonitor` + `SyncStatusHud`）
+- 战力排行榜查询
+- 服务端权威强化 roll（`POST /characters/{id}/enhance/roll`）
+
+**待做（P2+）：**
+
+- 邮件/成就客户端 UI；成就奖励改走邮件发放
+- 槽位分页（角色数超出 UI 展示时）
+- 异步 PvP、交易行
+- 服务端权威战斗 / 掉落（防作弊，非当前阶段目标）
 
 ---
 
@@ -674,7 +717,8 @@ API：`POST /characters/{id}/enhance/roll`（仅此一条对外接口）
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
-| v1.9 | 2026-06-12 | §12 同步三槽本地多存档；主菜单流程与 MVP 闭环；首饰章节更名；项链实例结构 |
+| v1.11 | 2026-06-16 | §12 全面在线化：取消本地存档，云端唯一持久化；必须登录联网；角色重命名/删档；同步策略与断网行为 |
+| v1.9 | 2026-06-12 | §12 三槽多存档与云同步；主菜单流程与 MVP 闭环；首饰章节更名；项链实例结构 |
 | v1.8 | 2026-06-12 | 永冻深渊怪物池与四系项链；项链掉落/强化与沼泽戒指对称 |
 | v1.7 | 2026-06-12 | 赤焰锻造厂专属怪物池（6 只）与熔火技能；锻造厂金币差异化 |
 | v1.6 | 2026-06-12 | 战吼全局攻速；双戒指已实现；背包分栏与强化弹窗；地牢 UI 重构 |

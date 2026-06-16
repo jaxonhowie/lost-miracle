@@ -1,20 +1,18 @@
 class_name DungeonManager
 extends RefCounted
 
-## 地牢探索管理器 — 普通事件池 + 自动战斗精英挑战
+## 地牢探索管理器 — 事件池 + 服务端刷怪槽
 
 signal event_triggered(event_type: String, event_data: Dictionary)
 
+func roll_event_type() -> String:
+	return _roll_event()
+
 func explore() -> void:
-	# 自动战斗：精英已刷新时概率直接挑战精英
-	if Game.auto_battle and Game.is_elite_available():
-		var chance = DataManager.get_elite_auto_chance()
-		if randf() < chance:
-			event_triggered.emit("elite_monster", _generate_event_data("elite_monster"))
-			return
-	var event_type = _roll_event()
-	var event_data = _generate_event_data(event_type)
-	event_triggered.emit(event_type, event_data)
+	event_triggered.emit(roll_event_type(), {})
+
+func generate_event_data(event_type: String) -> Dictionary:
+	return _generate_event_data(event_type)
 
 func _roll_event() -> String:
 	var events = DataManager.get_event_probabilities()
@@ -28,10 +26,6 @@ func _roll_event() -> String:
 
 func _generate_event_data(event_type: String) -> Dictionary:
 	match event_type:
-		"normal_monster":
-			return {"monster_id": DataManager.pick_random_monster_id("normal", "", "rotting_skeleton")}
-		"elite_monster":
-			return {"monster_id": DataManager.pick_random_monster_id("elite", "", "bone_guardian")}
 		"chest":
 			var gold := 0
 			var stone := 0

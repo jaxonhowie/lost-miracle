@@ -7,28 +7,39 @@ var _xp_bar_hover := false
 
 func _ready() -> void:
 	dungeon_manager = DungeonManager.new()
-	dungeon_manager.event_triggered.connect(_on_event_triggered)
 	_setup_xp_bar_hover()
 	_update_ui()
+	_update_auto_btn()
 	$CenterPanel/ExploreBtn.pressed.connect(_on_explore)
 	$CenterPanel/EliteBtn.pressed.connect(_on_challenge_elite)
 	$CenterPanel/BossBtn.pressed.connect(_on_challenge_boss)
 	$BottomButtons/ShortcutHints/InventoryHint.pressed.connect(_on_inventory)
 	$BottomButtons/ShortcutHints/EnhanceHint.pressed.connect(_on_inventory.bind(true))
+	$BottomButtons/AutoBtn.pressed.connect(_toggle_auto)
 	$BottomButtons/MapSelectBtn.pressed.connect(_on_map_select)
 	$BottomButtons/MenuBtn.pressed.connect(_on_menu)
 	$EventResult/VBox/ConfirmBtn.pressed.connect(_on_event_confirm)
 	CloudSaveService.try_resume_sync()
+	await SpawnService.refresh(Game.current_dungeon_id)
+	_update_spawn_buttons()
+	_start_spawn_poll()
 	if Game.auto_battle:
 		$CenterPanel/ExploreBtn.disabled = true
 		await get_tree().create_timer(1.0).timeout
-		dungeon_manager.explore()
+		await _do_explore()
 
 func _process(delta: float) -> void:
 	PlayerData.tick_regen(delta)
-	if not Game.is_boss_available() or not Game.is_elite_available():
-		_update_spawn_buttons()
 	_update_resource_bars()
+
+func _start_spawn_poll() -> void:
+	while is_inside_tree():
+		await get_tree().create_timer(1.0).timeout
+		if not is_inside_tree():
+			break
+		var result := await SpawnService.refresh(Game.current_dungeon_id)
+		if result.get("ok", false):
+			_update_spawn_buttons()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -136,43 +147,76 @@ func _get_dungeon_name(dungeon_id: String) -> String:
 		"frozen_abyss": return "永冻深渊"
 		_: return "未知地牢"
 
-func _pick_elite_id() -> String:
-	return DataManager.pick_random_monster_id("elite", "", "bone_guardian")
-
-func _pick_boss_id() -> String:
-	var bosses = DataManager.get_monsters_by_type("boss")
-	if bosses.is_empty():
-		return "dungeon_lord_morgan"
-	return bosses[0].get("id", "dungeon_lord_morgan")
-
 func _on_explore() -> void:
 	$CenterPanel/ExploreBtn.disabled = true
-	dungeon_manager.explore()
+	await _do_explore()
+
+func _do_explore() -> void:
+	if Game.auto_battle and SpawnService.is_elite_available():
+		var chance = DataManager.get_elite_auto_chance()
+		if randf() < chance:
+			await _begin_spawn_battle("elite")
+			return
+	var event_type = dungeon_manager.roll_event_type()
+	if event_type == "normal_monster":
+		await _begin_spawn_battle("normal")
+		return
+	_handle_non_combat_event(event_type, dungeon_manager.generate_event_data(event_type))
+
+func _begin_spawn_battle(spawn_type: String) -> void:
+	var result = await SpawnService.encounter(spawn_type, Game.current_dungeon_id)
+	if not result.get("ok", false):
+		await _on_spawn_unavailable(spawn_type)
+		return
+	var data: Dictionary = result.get("data", {})
+	var monster_id := str(data.get("monsterId", ""))
+	var slot_id := ApiIds.from_value(data.get("slotId", 0))
+	if spawn_type == "normal" and not Game.auto_battle:
+		_show_event("遭遇怪物！", "一只怪物挡住了去路...", {
+			"monster_id": monster_id,
+			"spawn_slot_id": slot_id,
+		})
+		return
+	if spawn_type == "elite" and not Game.auto_battle:
+		_show_event("精英怪物！", "强大的精英怪物出现了！", {
+			"monster_id": monster_id,
+			"spawn_slot_id": slot_id,
+		})
+		return
+	_start_battle(monster_id, slot_id)
+
+func _on_spawn_unavailable(spawn_type: String) -> void:
+	var msg := "暂无可用怪物，请稍后再试"
+	match spawn_type:
+		"elite":
+			msg = "精英刷新 %s" % Game.format_cooldown(SpawnService.get_elite_cooldown_remaining())
+		"boss":
+			msg = "Boss刷新 %s" % Game.format_cooldown(SpawnService.get_boss_cooldown_remaining())
+	if Game.auto_battle:
+		_log_event(msg)
+		await get_tree().create_timer(2.0).timeout
+		$CenterPanel/ExploreBtn.disabled = false
+		await _do_explore()
+	else:
+		_log_event(msg)
+		$CenterPanel/ExploreBtn.disabled = false
+	await SpawnService.refresh(Game.current_dungeon_id)
+	_update_spawn_buttons()
 
 func _on_challenge_elite() -> void:
 	if not Game.is_elite_available():
 		return
-	_start_battle(_pick_elite_id())
+	$CenterPanel/ExploreBtn.disabled = true
+	await _begin_spawn_battle("elite")
 
 func _on_challenge_boss() -> void:
 	if not Game.is_boss_available():
 		return
-	_start_battle(_pick_boss_id())
+	$CenterPanel/ExploreBtn.disabled = true
+	await _begin_spawn_battle("boss")
 
-func _on_event_triggered(event_type: String, event_data: Dictionary) -> void:
+func _handle_non_combat_event(event_type: String, event_data: Dictionary) -> void:
 	match event_type:
-		"normal_monster":
-			if Game.auto_battle:
-				_log_event("遭遇怪物！")
-				_start_battle(event_data.get("monster_id", "rotting_skeleton"))
-			else:
-				_show_event("遭遇怪物！", "一只怪物挡住了去路...", event_data)
-		"elite_monster":
-			if Game.auto_battle:
-				_log_event("挑战精英怪！")
-				_start_battle(event_data.get("monster_id", _pick_elite_id()))
-			else:
-				_show_event("精英怪物！", "强大的精英怪物出现了！", event_data)
 		"chest":
 			var gold = event_data.get("gold", 0)
 			var stone = event_data.get("enhance_stone", 0)
@@ -229,10 +273,8 @@ func _log_event(msg: String) -> void:
 		$BattleLog.append_text(msg + "\n")
 
 func _auto_continue() -> void:
-	SaveManager.save_game()
-	CloudSaveService.request_background_sync()
 	await get_tree().create_timer(1.5).timeout
-	dungeon_manager.explore()
+	await _do_explore()
 
 func _show_event(title: String, desc: String, data: Dictionary) -> void:
 	$EventResult/VBox/Title.text = title
@@ -246,18 +288,22 @@ func _on_event_confirm() -> void:
 	var title = $EventResult.get_meta("event_title", "")
 	if title.begins_with("遭遇") or title.begins_with("精英"):
 		var data = $EventResult.get_meta("event_data", {})
-		_start_battle(data.get("monster_id", "rotting_skeleton"))
+		_start_battle(
+			str(data.get("monster_id", "rotting_skeleton")),
+			ApiIds.from_value(data.get("spawn_slot_id", ""))
+		)
 	else:
-		SaveManager.save_game()
-		CloudSaveService.request_background_sync()
+		CloudSaveService.queue_progress_sync()
 		$CenterPanel/ExploreBtn.disabled = false
 
-func _start_battle(monster_id: String) -> void:
-	SaveManager.save_game()
-	CloudSaveService.request_background_sync()
+func _start_battle(monster_id: String, spawn_slot_id: String = "") -> void:
+	if not Game.auto_battle:
+		await CloudSaveService.sync_to_cloud(self, false)
 	PlayerData.reset_for_battle()
 	var battle_scene = load("res://scenes/battle/BattleScene.tscn").instantiate()
 	battle_scene.set_meta("monster_id", monster_id)
+	if not spawn_slot_id.is_empty():
+		battle_scene.set_meta("spawn_slot_id", spawn_slot_id)
 	get_tree().root.add_child(battle_scene)
 	get_tree().current_scene = battle_scene
 	self.queue_free()
@@ -274,10 +320,35 @@ func _on_map_select() -> void:
 	var result = await CloudSaveService.sync_before_scene_exit(self)
 	if result.get("cancelled", false):
 		return
+	if not result.get("ok", false):
+		return
 	get_tree().change_scene_to_file("res://scenes/map/MapSelectScene.tscn")
 
 func _on_menu() -> void:
 	var result = await CloudSaveService.sync_before_scene_exit(self)
 	if result.get("cancelled", false):
 		return
+	if not result.get("ok", false):
+		return
 	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+
+func _toggle_auto() -> void:
+	if Game.auto_battle:
+		Game.auto_battle = false
+		if not $EventResult.visible:
+			$CenterPanel/ExploreBtn.disabled = false
+	else:
+		Game.auto_battle = true
+		if not $EventResult.visible and not $CenterPanel/ExploreBtn.disabled:
+			$CenterPanel/ExploreBtn.disabled = true
+			dungeon_manager.explore()
+	_update_auto_btn()
+
+func _update_auto_btn() -> void:
+	var btn := $BottomButtons/AutoBtn
+	if Game.auto_battle:
+		btn.text = "⚡ 自动中"
+		btn.modulate = Color(0.7, 0.9, 1.0)
+	else:
+		btn.text = "⚡ 自动"
+		btn.modulate = Color.WHITE

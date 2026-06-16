@@ -35,9 +35,10 @@ func _on_select_dungeon(dungeon_id: String) -> void:
 	var stats = PlayerData.get_final_stats()
 	PlayerData.current_hp = stats["max_hp"]
 	PlayerData.current_mp = stats["max_mp"]
-	SaveManager.save_game()
 	var result = await CloudSaveService.sync_before_scene_exit(self)
 	if result.get("cancelled", false):
+		return
+	if not result.get("ok", false):
 		return
 	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
 

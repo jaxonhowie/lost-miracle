@@ -8,6 +8,7 @@ import com.lostmiracle.module.achievement.mapper.AchievementProgressMapper;
 import com.lostmiracle.module.character.dto.CharacterListResponse;
 import com.lostmiracle.module.character.dto.CharacterSummaryResponse;
 import com.lostmiracle.module.character.dto.CreateCharacterRequest;
+import com.lostmiracle.module.character.dto.UpdateCharacterRequest;
 import com.lostmiracle.module.character.entity.CharacterEntity;
 import com.lostmiracle.module.character.mapper.CharacterMapper;
 import com.lostmiracle.module.leaderboard.LeaderboardService;
@@ -105,6 +106,14 @@ public class CharacterService {
     }
 
     @Transactional
+    public CharacterSummaryResponse updateCharacter(long userId, long characterId, UpdateCharacterRequest request) {
+        CharacterEntity character = requireOwnedCharacter(userId, characterId);
+        character.setName(request.name().trim());
+        characterMapper.updateById(character);
+        return toSummary(character);
+    }
+
+    @Transactional
     public void deleteCharacter(long userId, long characterId) {
         requireOwnedCharacter(userId, characterId);
         log.info("delete character userId={} characterId={}", userId, characterId);
@@ -122,6 +131,20 @@ public class CharacterService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "character not found");
         }
         return character;
+    }
+
+    public CharacterEntity requireCharacter(long characterId) {
+        CharacterEntity character = characterMapper.selectById(characterId);
+        if (character == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "character not found");
+        }
+        return character;
+    }
+
+    @Transactional
+    public void adminDeleteCharacter(long characterId) {
+        CharacterEntity character = requireCharacter(characterId);
+        deleteCharacter(character.getUserId(), characterId);
     }
 
     public void touchLogin(CharacterEntity character) {

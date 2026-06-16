@@ -35,11 +35,11 @@ static func roll_drops(monster_id: String) -> Array:
 	elif dungeon_id == "frozen_abyss":
 		_roll_frozen_abyss_drops(drops, monster_type)
 	elif dungeon_id == "forge_ruins":
-		var gold_range = DataManager.get_jewelry_config().get("forge_ruins_drops", {}).get("gold", {}).get(monster_type, GOLD_DROP.get(monster_type, GOLD_DROP["normal"]))
+		var gold_range = DataManager.get_jewelry_config().get("forge_ruins_drops", {}).get("gold", {}).get(monster_type, _gold_drop(monster_type))
 		drops.append({"type": "gold", "amount": randi_range(int(gold_range["min"]), int(gold_range["max"]))})
 		_roll_forge_ruins_stones(drops, monster_type)
 	else:
-		var equip_info = EQUIP_DROP.get(monster_type, EQUIP_DROP["normal"])
+		var equip_info = _equip_drop(monster_type)
 		if randf() <= equip_info["rate"]:
 			var drop_count = randi_range(equip_info["min"], equip_info["max"])
 			for i in drop_count:
@@ -47,10 +47,10 @@ static func roll_drops(monster_id: String) -> Array:
 				if not eq.is_empty():
 					drops.append(eq)
 
-		var gold_range = GOLD_DROP.get(monster_type, GOLD_DROP["normal"])
+		var gold_range = _gold_drop(monster_type)
 		drops.append({"type": "gold", "amount": randi_range(int(gold_range["min"]), int(gold_range["max"]))})
 
-		var stone_info = STONE_DROP.get(monster_type, STONE_DROP["normal"])
+		var stone_info = _stone_drop(monster_type)
 		if randf() <= stone_info["rate"]:
 			var stone_count = randi_range(stone_info["min"], stone_info["max"])
 			if stone_count > 0:
@@ -80,7 +80,7 @@ static func _roll_corrupt_swamp_drops(drops: Array, monster_type: String) -> voi
 		if not ring.is_empty():
 			drops.append(ring)
 
-	var gold_cfg: Dictionary = cfg.get("gold", {}).get(monster_type, GOLD_DROP.get(monster_type, GOLD_DROP["normal"]))
+	var gold_cfg: Dictionary = cfg.get("gold", {}).get(monster_type, _gold_drop(monster_type))
 	drops.append({"type": "gold", "amount": randi_range(int(gold_cfg.get("min", 10)), int(gold_cfg.get("max", 30)))})
 
 	var stone_cfg: Dictionary = cfg.get("enhance_stone", {}).get(monster_type, {})
@@ -88,6 +88,15 @@ static func _roll_corrupt_swamp_drops(drops: Array, monster_type: String) -> voi
 		var stone_count = randi_range(int(stone_cfg.get("min", 0)), int(stone_cfg.get("max", 0)))
 		if stone_count > 0:
 			drops.append({"type": "enhance_stone", "amount": stone_count})
+
+static func _equip_drop(monster_type: String) -> Dictionary:
+	return ConfigService.get_loot_table("loot.equip_drop", monster_type, EQUIP_DROP.get(monster_type, EQUIP_DROP["normal"]))
+
+static func _gold_drop(monster_type: String) -> Dictionary:
+	return ConfigService.get_loot_table("loot.gold_drop", monster_type, GOLD_DROP.get(monster_type, GOLD_DROP["normal"]))
+
+static func _stone_drop(monster_type: String) -> Dictionary:
+	return ConfigService.get_loot_table("loot.stone_drop", monster_type, STONE_DROP.get(monster_type, STONE_DROP["normal"]))
 
 static func _roll_frozen_abyss_drops(drops: Array, monster_type: String) -> void:
 	var cfg = DataManager.get_jewelry_config().get("frozen_abyss_drops", {})
@@ -109,7 +118,7 @@ static func _roll_frozen_abyss_drops(drops: Array, monster_type: String) -> void
 		if not necklace.is_empty():
 			drops.append(necklace)
 
-	var gold_cfg: Dictionary = cfg.get("gold", {}).get(monster_type, GOLD_DROP.get(monster_type, GOLD_DROP["normal"]))
+	var gold_cfg: Dictionary = cfg.get("gold", {}).get(monster_type, _gold_drop(monster_type))
 	drops.append({"type": "gold", "amount": randi_range(int(gold_cfg.get("min", 10)), int(gold_cfg.get("max", 30)))})
 
 	var stone_cfg: Dictionary = cfg.get("enhance_stone", {}).get(monster_type, {})

@@ -209,6 +209,11 @@ text = "强化 (R)"
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="AutoBtn" type="Button" parent="BottomButtons"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 45)
+text = "⚡ 自动"
+
 [node name="MapSelectBtn" type="Button" parent="BottomButtons"]
 layout_mode = 2
 custom_minimum_size = Vector2(100, 45)

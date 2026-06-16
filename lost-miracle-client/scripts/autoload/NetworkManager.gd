@@ -14,6 +14,8 @@ var _api: ApiClient = ApiClient.new()
 const TOKEN_PATH := "user://auth_token.json"
 
 signal loginStateChanged
+## 鉴权失效（token 过期/无效，服务端返回 403）时发出，订阅者可提示重新登录。
+signal auth_invalid
 
 func create_http_request() -> HTTPRequest:
 	var http := HTTPRequest.new()
@@ -29,8 +31,8 @@ func _notification(what: int) -> void:
 		exit_application()
 
 func exit_application() -> void:
-	if logged_in and has_character():
-		SaveManager.save_game()
+	if logged_in and has_character() and SaveManager.session_active:
+		await cloud_sync_save_await()
 	logout()
 	get_tree().quit()
 
@@ -107,6 +109,21 @@ func logout() -> void:
 	_clear_token()
 	loginStateChanged.emit()
 
+
+## 请求结果出现鉴权失效（HTTP 403）时调用：清理失效登录态并广播。
+## 与 logout 的区别：保留 user_id/username 以便回登录页预填，仅清 token。
+func handle_auth_failure() -> void:
+	if token.is_empty() and not logged_in:
+		return
+	token = ""
+	logged_in = false
+	_clear_token()
+	auth_invalid.emit()
+	loginStateChanged.emit()
+
+func api_request(method: String, path: String, body: Dictionary = {}) -> Dictionary:
+	return await _api.make_request(method, path, body, token)
+
 func list_characters() -> Dictionary:
 	return await _api.make_request("GET", "/characters", {}, token)
 
@@ -122,6 +139,12 @@ func delete_character(char_id: String) -> Dictionary:
 		return {"ok": false, "code": -1, "message": "无效角色", "data": {}}
 	return await _api.make_request("DELETE", "/characters/%s" % cid, {}, token)
 
+func rename_character(char_id: String, char_name: String) -> Dictionary:
+	var cid := ApiIds.from_value(char_id)
+	if cid.is_empty():
+		return {"ok": false, "code": -1, "message": "无效角色", "data": {}}
+	return await _api.make_request("PATCH", "/characters/%s" % cid, {"name": char_name}, token)
+
 func download_save(char_id: String) -> Dictionary:
 	var cid := ApiIds.from_value(char_id)
 	return await _api.make_request("GET", "/characters/%s/save" % cid, {}, token)
@@ -136,6 +159,48 @@ func upload_save(char_id: String, save_data: Dictionary, save_version: int, forc
 	if force:
 		body["force"] = true
 	return await _api.make_request("PUT", "/characters/%s/save" % cid, body, token)
+
+func get_spawn_state(dungeon_id: String) -> Dictionary:
+	if not has_character():
+		return {"ok": false, "code": -1, "message": "未选择角色", "data": {}}
+	return await _api.make_request(
+		"GET",
+		"/characters/%s/dungeons/%s/spawns" % [_character_id, dungeon_id],
+		{},
+		token
+	)
+
+func spawn_encounter(dungeon_id: String, spawn_type: String) -> Dictionary:
+	if not has_character():
+		return {"ok": false, "code": -1, "message": "未选择角色", "data": {}}
+	return await _api.make_request(
+		"POST",
+		"/characters/%s/dungeons/%s/spawns/encounter" % [_character_id, dungeon_id],
+		{"type": spawn_type},
+		token
+	)
+
+func spawn_defeat(dungeon_id: String, slot_id: String) -> Dictionary:
+	if not has_character():
+		return {"ok": false, "code": -1, "message": "未选择角色", "data": {}}
+	var sid := ApiIds.from_value(slot_id)
+	return await _api.make_request(
+		"POST",
+		"/characters/%s/dungeons/%s/spawns/%s/defeat" % [_character_id, dungeon_id, sid],
+		{},
+		token
+	)
+
+func spawn_release(dungeon_id: String, slot_id: String) -> Dictionary:
+	if not has_character():
+		return {"ok": false, "code": -1, "message": "未选择角色", "data": {}}
+	var sid := ApiIds.from_value(slot_id)
+	return await _api.make_request(
+		"POST",
+		"/characters/%s/dungeons/%s/spawns/%s/release" % [_character_id, dungeon_id, sid],
+		{},
+		token
+	)
 
 func has_character() -> bool:
 	return not _character_id.is_empty()

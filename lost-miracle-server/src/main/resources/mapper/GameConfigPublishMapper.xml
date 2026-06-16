@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.config.mapper.GameConfigPublishMapper">
+
+    <resultMap id="publishResultMap" type="com.lostmiracle.module.config.entity.GameConfigPublishEntity">
+        <id property="id" column="id"/>
+        <result property="version" column="version"/>
+        <result property="publishedBy" column="published_by"/>
+        <result property="note" column="note"/>
+        <result property="snapshotJson" column="snapshot_json"/>
+        <result property="publishedAt" column="published_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO game_config_publish (version, published_by, note, snapshot_json)
+        VALUES (#{version}, #{publishedBy}, #{note}, #{snapshotJson})
+    </insert>
+
+    <select id="selectRecent" resultMap="publishResultMap">
+        SELECT * FROM game_config_publish ORDER BY version DESC LIMIT #{limit}
+    </select>
+
+    <select id="selectById" resultMap="publishResultMap">
+        SELECT * FROM game_config_publish WHERE id = #{id}
+    </select>
+
+    <select id="selectCurrentVersion" resultType="java.lang.Long">
+        SELECT current_version FROM game_config_meta WHERE id = 1
+    </select>
+
+    <update id="updateCurrentVersion">
+        UPDATE game_config_meta SET current_version = #{version} WHERE id = 1
+    </update>
+
+</mapper>

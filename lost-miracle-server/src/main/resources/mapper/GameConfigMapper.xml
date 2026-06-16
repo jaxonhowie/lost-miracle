@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.config.mapper.GameConfigMapper">
+
+    <resultMap id="gameConfigResultMap" type="com.lostmiracle.module.config.entity.GameConfigEntity">
+        <id property="configKey" column="config_key"/>
+        <result property="draftJson" column="draft_json"/>
+        <result property="publishedJson" column="published_json"/>
+        <result property="description" column="description"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM game_config
+    </select>
+
+    <select id="selectAll" resultMap="gameConfigResultMap">
+        SELECT * FROM game_config ORDER BY config_key
+    </select>
+
+    <select id="selectByKey" resultMap="gameConfigResultMap">
+        SELECT * FROM game_config WHERE config_key = #{configKey}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO game_config (config_key, draft_json, published_json, description)
+        VALUES (#{configKey}, #{draftJson}, #{publishedJson}, #{description})
+    </insert>
+
+    <update id="updateDraft">
+        UPDATE game_config SET draft_json = #{draftJson} WHERE config_key = #{configKey}
+    </update>
+
+    <update id="publishAll">
+        UPDATE game_config SET published_json = draft_json
+    </update>
+
+    <update id="restoreDraftFromPublished">
+        UPDATE game_config SET draft_json = #{publishedJson}, published_json = #{publishedJson}
+        WHERE config_key = #{configKey}
+    </update>
+
+</mapper>

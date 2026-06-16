@@ -48,9 +48,6 @@ public final class DefaultSaveFactory {
             dungeon.put("normal_kill_count", 0);
             dungeon.put("elite_kill_count", 0);
             dungeon.put("boss_kill_count", 0);
-            dungeon.put("boss_defeated", false);
-            dungeon.put("boss_respawn_at", 0);
-            dungeon.put("elite_respawn_at", 0);
 
             ObjectNode world = root.putObject("world");
             world.put("current_dungeon_id", "bone_crypt");

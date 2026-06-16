@@ -30,6 +30,11 @@ lost-miracle:
   jwt:
     secret: change-me-to-a-long-random-secret-key-in-production
     expiration-seconds: 7200
+  gm:
+    bootstrap-super-username: super
+    bootstrap-super-password: gm-admin-change-me
+    expiration-seconds: 7200
+    confirm-expiration-seconds: 300
   character:
     max-slots-per-user: 3
   save:
