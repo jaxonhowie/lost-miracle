@@ -15,6 +15,8 @@ func _ready() -> void:
 	$CenterPanel/BossBtn.pressed.connect(_on_challenge_boss)
 	$BottomButtons/ShortcutHints/InventoryHint.pressed.connect(_on_inventory)
 	$BottomButtons/ShortcutHints/EnhanceHint.pressed.connect(_on_inventory.bind(true))
+	$BottomButtons/ShortcutHints/MailHint.pressed.connect(_on_mail)
+	$BottomButtons/ShortcutHints/AchievementHint.pressed.connect(_on_achievements)
 	$BottomButtons/AutoBtn.pressed.connect(_toggle_auto)
 	$BottomButtons/MapSelectBtn.pressed.connect(_on_map_select)
 	$BottomButtons/MenuBtn.pressed.connect(_on_menu)
@@ -315,6 +317,22 @@ func _on_inventory(open_enhance: bool = false) -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	self.queue_free()
+
+func _on_mail() -> void:
+	var result = await CloudSaveService.sync_before_scene_exit(self)
+	if result.get("cancelled", false):
+		return
+	if not result.get("ok", false):
+		return
+	get_tree().change_scene_to_file("res://scenes/mail/MailScene.tscn")
+
+func _on_achievements() -> void:
+	var result = await CloudSaveService.sync_before_scene_exit(self)
+	if result.get("cancelled", false):
+		return
+	if not result.get("ok", false):
+		return
+	get_tree().change_scene_to_file("res://scenes/achievements/AchievementScene.tscn")
 
 func _on_map_select() -> void:
 	var result = await CloudSaveService.sync_before_scene_exit(self)

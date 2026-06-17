@@ -205,6 +205,16 @@ layout_mode = 2
 flat = true
 text = "强化 (R)"
 
+[node name="MailHint" type="Button" parent="BottomButtons/ShortcutHints"]
+layout_mode = 2
+flat = true
+text = "邮件"
+
+[node name="AchievementHint" type="Button" parent="BottomButtons/ShortcutHints"]
+layout_mode = 2
+flat = true
+text = "成就"
+
 [node name="Spacer" type="Control" parent="BottomButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
