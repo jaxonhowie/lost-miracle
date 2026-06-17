@@ -4,6 +4,7 @@ extends Node
 
 const CONFLICT_CODE := 40901
 const RATE_LIMIT_CODE := 42900
+const QUEUE_PATH := "user://pending_syncs.json"
 
 enum SyncStatus {
 	OFFLINE,
@@ -32,6 +33,7 @@ func _ready() -> void:
 	_retry_timer.one_shot = true
 	_retry_timer.timeout.connect(_on_retry_timer)
 	add_child(_retry_timer)
+	_load_persisted_queue()
 	NetworkManager.loginStateChanged.connect(_on_login_state_changed)
 	NetworkManager.auth_invalid.connect(_on_auth_invalid)
 	ConnectivityMonitor.connectivity_changed.connect(_on_connectivity_changed)
@@ -46,7 +48,7 @@ func _on_login_state_changed() -> void:
 		call_deferred("try_resume_sync")
 	else:
 		_stop_retry_timer()
-		_sync_queue.clear()
+		# 登出不清理队列——持久化以便下次登录后恢复
 
 
 func _on_auth_invalid() -> void:
@@ -281,7 +283,7 @@ func _prompt_relogin_after_conflict(parent: Node) -> void:
 	dialog.popup_centered()
 	await dialog.confirmed
 	dialog.queue_free()
-	NetworkManager.logout()
+	await NetworkManager.end_session()
 	get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn")
 
 
@@ -383,11 +385,13 @@ func _enqueue_sync(char_id: String, save_data: Dictionary, save_version: int) ->
 		"save_version": save_version,
 		"queued_at": int(Time.get_unix_time_from_system()),
 	})
+	_persist_queue()
 
 
 func _clear_queue_entry(char_id: String) -> void:
 	var cid := ApiIds.from_value(char_id)
 	_sync_queue = _sync_queue.filter(func(e): return ApiIds.from_value(e.get("character_id", "")) != cid)
+	_persist_queue()
 
 
 func _is_auth_failure(result: Dictionary) -> bool:
@@ -395,3 +399,33 @@ func _is_auth_failure(result: Dictionary) -> bool:
 		return true
 	var status := int(result.get("http_status", 0))
 	return status == 401 or status == ApiConfig.HTTP_UNAUTHORIZED
+
+
+# ---------- 持久化队列 ----------
+
+func _persist_queue() -> void:
+	var file := FileAccess.open(QUEUE_PATH, FileAccess.WRITE)
+	if file == null:
+		push_warning("CloudSaveService: cannot write queue to " + QUEUE_PATH)
+		return
+	file.store_string(JSON.stringify(_sync_queue))
+	file.close()
+
+
+func _load_persisted_queue() -> void:
+	if not FileAccess.file_exists(QUEUE_PATH):
+		return
+	var file := FileAccess.open(QUEUE_PATH, FileAccess.READ)
+	if file == null:
+		return
+	var text := file.get_as_text()
+	file.close()
+	var parsed = JSON.parse_string(text)
+	if parsed is Array:
+		_sync_queue = parsed
+		# 清除超过 1 小时的过期条目
+		var now := int(Time.get_unix_time_from_system())
+		_sync_queue = _sync_queue.filter(func(e): return now - int(e.get("queued_at", 0)) < 3600)
+		if not _sync_queue.is_empty():
+			print("CloudSaveService: restored %d pending sync(s) from disk" % _sync_queue.size())
+	_persist_queue()  # 回写（移除过期条目后）
