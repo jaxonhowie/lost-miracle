@@ -198,46 +198,33 @@ func _on_action_performed(attacker: BattleUnit, defender: BattleUnit, result: Di
 func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 	battle_over = true
 	var spawn_slot_id := str(get_meta("spawn_slot_id", ""))
+	var monster_id := str(rewards.get("monster_id", battle_manager.monster.unit_id))
 	if player_won:
-		PlayerData.add_exp(rewards.get("exp", 0))
-		PlayerData.gold += rewards.get("gold", 0)
-		for item in rewards.get("items", []):
-			if item.has("uid"):
-				PlayerData.add_to_inventory(item)
-			elif item.has("type"):
-				match item["type"]:
-					"gold": pass
-					"enhance_stone":
-						PlayerData.enhance_stone += item.get("amount", 0)
-					"jewelry_enhance_stone":
-						PlayerData.jewelry_enhance_stone += item.get("amount", 0)
-					"blessed_jewelry_enhance_stone":
-						PlayerData.blessed_jewelry_enhance_stone += item.get("amount", 0)
-					"health_potion":
-						PlayerData.health_potion += item.get("amount", 0)
-		_on_log_message("[color=#ffd666]🏆 获得 %d 经验, %d 金币[/color]" % [rewards.get("exp", 0), rewards.get("gold", 0)])
-		for item in rewards.get("items", []):
-			if item.has("uid"):
-				_on_log_message("[color=#88ccff]  获得装备: %s[/color]" % item.get("name", "未知"))
-			elif item.get("type", "") == "enhance_stone":
-				_on_log_message("[color=#bbaaff]  获得强化石 x%d[/color]" % item.get("amount", 0))
-			elif item.get("type", "") == "jewelry_enhance_stone":
-				_on_log_message("[color=#ffcc88]  获得首饰强化石 x%d[/color]" % item.get("amount", 0))
-			elif item.get("type", "") == "blessed_jewelry_enhance_stone":
-				_on_log_message("[color=#ffddaa]  获得受祝福首饰强化石 x%d[/color]" % item.get("amount", 0))
-			elif item.get("type", "") == "health_potion":
-				_on_log_message("[color=#66dd88]  获得生命药水 x%d[/color]" % item.get("amount", 0))
-		var monster_type = DataManager.get_monster(battle_manager.monster.unit_id).get("type", "normal")
+		if spawn_slot_id.is_empty():
+			_on_log_message("[color=#ff6666]战斗结算失败：缺少刷怪槽信息[/color]")
+			return
+		var settle_result = await SpawnService.settle_victory(
+			Game.current_dungeon_id,
+			spawn_slot_id,
+			monster_id
+		)
+		if not settle_result.get("ok", false):
+			if int(settle_result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
+				await CloudSaveService.handle_conflict(self, settle_result)
+				return
+			else:
+				_on_log_message("[color=#ff6666]战斗结算失败：%s[/color]" % str(settle_result.get("message", "未知错误")))
+				return
+		else:
+			var data: Dictionary = settle_result.get("data", {})
+			NetworkManager.apply_server_save(
+				data.get("save", {}),
+				int(data.get("saveVersion", NetworkManager.get_save_version()))
+			)
+			_log_settle_rewards(data)
+		var monster_type = DataManager.get_monster(monster_id).get("type", "normal")
 		if monster_type == "boss":
 			_on_log_message("[color=#ffaa44]击败了地牢领主！[/color]")
-		if not spawn_slot_id.is_empty():
-			await SpawnService.report_defeat(Game.current_dungeon_id, spawn_slot_id)
-		if Game.auto_battle:
-			CloudSaveService.queue_progress_sync()
-		else:
-			var sync_result = await CloudSaveService.sync_to_cloud(self, true)
-			if not sync_result.get("ok", false) and not sync_result.get("cancelled", false):
-				return
 		if finish_then_return:
 			await get_tree().create_timer(2.0).timeout
 			_return_to_dungeon()
@@ -256,15 +243,25 @@ func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 		await get_tree().create_timer(2.0).timeout
 		_return_to_dungeon()
 
+func _log_settle_rewards(data: Dictionary) -> void:
+	var exp_gain := int(data.get("exp", 0))
+	var gold_gain := int(data.get("gold", 0))
+	_on_log_message("[color=#ffd666]🏆 获得 %d 经验, %d 金币[/color]" % [exp_gain, gold_gain])
+	var items: Array = data.get("items", [])
+	for item in items:
+		if item is Dictionary:
+			if item.has("uid"):
+				_on_log_message("[color=#88ccff]  获得装备: %s[/color]" % item.get("name", "未知"))
+			elif item.get("type", "") == "enhance_stone":
+				_on_log_message("[color=#bbaaff]  获得强化石 x%d[/color]" % int(item.get("amount", 0)))
+			elif item.get("type", "") == "jewelry_enhance_stone":
+				_on_log_message("[color=#ffcc88]  获得首饰强化石 x%d[/color]" % int(item.get("amount", 0)))
+			elif item.get("type", "") == "blessed_jewelry_enhance_stone":
+				_on_log_message("[color=#ffddaa]  获得受祝福首饰强化石 x%d[/color]" % int(item.get("amount", 0)))
+			elif item.get("type", "") == "health_potion":
+				_on_log_message("[color=#66dd88]  获得生命药水 x%d[/color]" % int(item.get("amount", 0)))
+
 func _return_to_dungeon() -> void:
-	if Game.auto_battle:
-		get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
-		return
-	var result = await CloudSaveService.sync_before_scene_exit(self)
-	if result.get("cancelled", false):
-		return
-	if not result.get("ok", false):
-		return
 	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
 
 func _auto_use_potion() -> void:

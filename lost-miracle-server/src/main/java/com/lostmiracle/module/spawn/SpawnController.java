@@ -5,6 +5,8 @@ import com.lostmiracle.module.character.CharacterService;
 import com.lostmiracle.module.spawn.dto.DungeonSpawnStateResponse;
 import com.lostmiracle.module.spawn.dto.SpawnEncounterRequest;
 import com.lostmiracle.module.spawn.dto.SpawnEncounterResponse;
+import com.lostmiracle.module.spawn.dto.SpawnSettleRequest;
+import com.lostmiracle.module.spawn.dto.SpawnSettleResponse;
 import com.lostmiracle.security.SecurityUtils;
 import com.lostmiracle.security.UserPrincipal;
 import jakarta.validation.Valid;
@@ -20,10 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class SpawnController {
 
     private final SpawnService spawnService;
+    private final SpawnSettleService spawnSettleService;
     private final CharacterService characterService;
 
-    public SpawnController(SpawnService spawnService, CharacterService characterService) {
+    public SpawnController(
+            SpawnService spawnService,
+            SpawnSettleService spawnSettleService,
+            CharacterService characterService
+    ) {
         this.spawnService = spawnService;
+        this.spawnSettleService = spawnSettleService;
         this.characterService = characterService;
     }
 
@@ -44,6 +52,23 @@ public class SpawnController {
     ) {
         requireOwned(characterId);
         return ApiResponse.ok(spawnService.encounter(characterId, dungeonId, request.type()));
+    }
+
+    @PostMapping("/{slotId}/settle")
+    public ApiResponse<SpawnSettleResponse> settle(
+            @PathVariable long characterId,
+            @PathVariable String dungeonId,
+            @PathVariable long slotId,
+            @Valid @RequestBody SpawnSettleRequest request
+    ) {
+        UserPrincipal principal = SecurityUtils.requirePrincipal();
+        return ApiResponse.ok(spawnSettleService.settle(
+                principal.userId(),
+                characterId,
+                dungeonId,
+                slotId,
+                request
+        ));
     }
 
     @PostMapping("/{slotId}/defeat")

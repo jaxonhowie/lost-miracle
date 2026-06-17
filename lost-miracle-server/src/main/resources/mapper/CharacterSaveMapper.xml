@@ -21,13 +21,14 @@
         VALUES (#{characterId}, #{saveVersion}, #{saveJson}, #{checksum}, #{clientUpdatedAt})
     </insert>
 
-    <update id="updateById">
+    <update id="updateWithVersion">
         UPDATE character_save
-        SET save_version = #{saveVersion},
-            save_json = #{saveJson},
-            checksum = #{checksum},
-            client_updated_at = #{clientUpdatedAt}
-        WHERE character_id = #{characterId}
+        SET save_version = #{save.saveVersion},
+            save_json = #{save.saveJson},
+            checksum = #{save.checksum},
+            client_updated_at = #{save.clientUpdatedAt}
+        WHERE character_id = #{save.characterId}
+          AND save_version = #{expectedVersion}
     </update>
 
     <delete id="deleteById">

@@ -1,26 +1,41 @@
-import {
-  Alert,
-  Button,
-  Card,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Space,
-  Typography,
-  message,
-} from 'antd';
+import { Alert, Button, Card, Modal, Space, Table, Typography, message } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, unwrap } from '../api/client';
+import { extractOperatorPatch, SaveEditor } from '../components/save/SaveEditor';
+import { useAuth } from '../contexts/AuthContext';
 import type { CharacterSave } from '../api/types';
+
+function cloneSave(save: Record<string, unknown>): Record<string, unknown> {
+  return JSON.parse(JSON.stringify(save)) as Record<string, unknown>;
+}
+
+function parseChangeLine(line: string): { field: string; before: string; after: string } {
+  const splitAt = line.indexOf(': ');
+  if (splitAt < 0) {
+    return { field: line, before: '-', after: '-' };
+  }
+  const field = line.slice(0, splitAt);
+  const rest = line.slice(splitAt + 2);
+  const arrowAt = rest.indexOf(' → ');
+  if (arrowAt < 0) {
+    return { field, before: '-', after: rest };
+  }
+  return {
+    field,
+    before: rest.slice(0, arrowAt),
+    after: rest.slice(arrowAt + 3),
+  };
+}
 
 export default function CharacterPage() {
   const { characterId } = useParams();
   const navigate = useNavigate();
+  const { canOperator, canSuper } = useAuth();
   const [save, setSave] = useState<CharacterSave | null>(null);
-  const [jsonText, setJsonText] = useState('');
+  const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [previewToken, setPreviewToken] = useState('');
+  const [previewMeta, setPreviewMeta] = useState<{ beforeChecksum: string; afterChecksum: string } | null>(null);
   const [changes, setChanges] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -28,22 +43,26 @@ export default function CharacterPage() {
     if (!characterId) return;
     const data = await unwrap<CharacterSave>(api.get(`/characters/${characterId}/save`));
     setSave(data);
-    setJsonText(JSON.stringify(data.save, null, 2));
+    setDraft(cloneSave(data.save));
+    setPreviewToken('');
+    setPreviewMeta(null);
+    setChanges([]);
   };
 
   useEffect(() => {
     void load().catch((e) => message.error(e instanceof Error ? e.message : '加载失败'));
   }, [characterId]);
 
-  const patchFields = async (values: Record<string, number | undefined>) => {
+  const patchFields = async () => {
     if (!characterId) return;
+    const player = (draft.player || {}) as Record<string, unknown>;
     setLoading(true);
     try {
-      await unwrap(api.patch(`/characters/${characterId}/save/fields`, values));
-      message.success('字段已更新');
+      await unwrap(api.patch(`/characters/${characterId}/save/fields`, extractOperatorPatch(player)));
+      message.success('常用字段已保存');
       await load();
     } catch (e) {
-      message.error(e instanceof Error ? e.message : '更新失败');
+      message.error(e instanceof Error ? e.message : '保存失败');
     } finally {
       setLoading(false);
     }
@@ -51,22 +70,22 @@ export default function CharacterPage() {
 
   const previewReplace = async () => {
     if (!characterId) return;
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(jsonText) as Record<string, unknown>;
-    } catch {
-      message.error('JSON 格式无效');
-      return;
-    }
     setLoading(true);
     try {
       const data = await unwrap<{
         confirmToken: string;
+        beforeChecksum: string;
+        afterChecksum: string;
         changes: string[];
-      }>(api.post(`/characters/${characterId}/save/preview`, parsed));
+      }>(api.post(`/characters/${characterId}/save/preview`, draft));
       setPreviewToken(data.confirmToken);
-      setChanges(data.changes);
-      message.info('请确认 diff 后提交');
+      setPreviewMeta({ beforeChecksum: data.beforeChecksum, afterChecksum: data.afterChecksum });
+      setChanges(data.changes ?? []);
+      if (!data.changes?.length) {
+        message.warning('未检测到变更');
+      } else {
+        message.success(`已生成 ${data.changes.length} 条变更摘要，请确认后替换`);
+      }
     } catch (e) {
       message.error(e instanceof Error ? e.message : '预览失败');
     } finally {
@@ -91,13 +110,6 @@ export default function CharacterPage() {
       okText: '确认替换',
       okType: 'danger',
       onOk: async () => {
-        let parsed: Record<string, unknown>;
-        try {
-          parsed = JSON.parse(jsonText) as Record<string, unknown>;
-        } catch {
-          message.error('JSON 格式无效');
-          return;
-        }
         const reason = window.prompt('请输入改档原因（必填）');
         if (!reason?.trim()) {
           message.warning('必须填写原因');
@@ -105,13 +117,12 @@ export default function CharacterPage() {
         }
         await unwrap(
           api.put(`/characters/${characterId}/save`, {
-            save: parsed,
+            save: draft,
             confirmToken: previewToken,
             reason: reason.trim(),
           }),
         );
         message.success('存档已替换');
-        setPreviewToken('');
         await load();
       },
     });
@@ -121,8 +132,6 @@ export default function CharacterPage() {
     return <Card loading />;
   }
 
-  const player = (save.save.player || {}) as Record<string, number>;
-
   return (
     <div>
       <Space style={{ marginBottom: 16 }}>
@@ -130,59 +139,93 @@ export default function CharacterPage() {
         <Typography.Title level={3} style={{ margin: 0 }}>
           角色 {characterId}
         </Typography.Title>
+        <Typography.Text type="secondary">
+          存档 v{save.saveVersion} · checksum {save.checksum.slice(0, 8)}…
+        </Typography.Text>
       </Space>
 
-      <Card title="常用字段（operator）" style={{ marginBottom: 16 }}>
-        <Form
-          layout="inline"
-          initialValues={{
-            gold: player.gold,
-            level: player.level,
-            exp: player.exp,
-            enhanceStone: player.enhance_stone,
-            healthPotion: player.health_potion,
-          }}
-          onFinish={(v) => void patchFields(v)}
-        >
-          <Form.Item name="gold" label="金币">
-            <InputNumber min={0} />
-          </Form.Item>
-          <Form.Item name="level" label="等级">
-            <InputNumber min={1} max={100} />
-          </Form.Item>
-          <Form.Item name="exp" label="经验">
-            <InputNumber min={0} />
-          </Form.Item>
-          <Form.Item name="enhanceStone" label="强化石">
-            <InputNumber min={0} />
-          </Form.Item>
-          <Form.Item name="healthPotion" label="药水">
-            <InputNumber min={0} />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              保存字段
+      <Card
+        title="角色存档"
+        extra={
+          canOperator && !canSuper ? (
+            <Button type="primary" loading={loading} onClick={() => void patchFields()}>
+              保存常用字段
             </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+          ) : null
+        }
+      >
+        {!canOperator && !canSuper ? (
+          <Alert type="info" showIcon message="当前账号只读，无法修改存档。" style={{ marginBottom: 16 }} />
+        ) : null}
+        {canSuper ? (
+          <Alert
+            type="warning"
+            showIcon
+            message="super 可编辑完整存档。修改后先预览 Diff，再确认替换。"
+            style={{ marginBottom: 16 }}
+          />
+        ) : canOperator ? (
+          <Alert
+            type="info"
+            showIcon
+            message="operator 可修改常用字段；装备与背包需 super 权限。"
+            style={{ marginBottom: 16 }}
+          />
+        ) : null}
 
-      <Card title="完整存档 JSON（super + 二次确认）">
-        <Alert
-          type="warning"
-          showIcon
-          message="修改背包装备等复杂数据请在此编辑，先预览 diff 再确认替换。"
-          style={{ marginBottom: 12 }}
+        <SaveEditor
+          value={draft}
+          onChange={setDraft}
+          canEditPlayerFields={canOperator || canSuper}
+          canEditFull={canSuper}
         />
-        <Input.TextArea rows={18} value={jsonText} onChange={(e) => setJsonText(e.target.value)} />
-        <Space style={{ marginTop: 12 }}>
-          <Button onClick={() => void previewReplace()} loading={loading}>
-            预览 Diff
-          </Button>
-          <Button type="primary" danger disabled={!previewToken} onClick={confirmReplace}>
-            确认替换
-          </Button>
-        </Space>
+
+        {canSuper ? (
+          <>
+            <Space style={{ marginTop: 16 }}>
+              <Button onClick={() => void previewReplace()} loading={loading}>
+                预览 Diff
+              </Button>
+              <Button type="primary" danger disabled={!previewToken} onClick={confirmReplace}>
+                确认替换
+              </Button>
+              <Button
+                onClick={() => {
+                  setDraft(cloneSave(save.save));
+                  setPreviewToken('');
+                  setPreviewMeta(null);
+                  setChanges([]);
+                }}
+              >
+                撤销修改
+              </Button>
+            </Space>
+            {previewToken ? (
+              <Card size="small" title="变更预览" style={{ marginTop: 16 }}>
+                {previewMeta ? (
+                  <Typography.Paragraph type="secondary" style={{ marginBottom: 8 }}>
+                    checksum {previewMeta.beforeChecksum.slice(0, 8)}… → {previewMeta.afterChecksum.slice(0, 8)}…
+                  </Typography.Paragraph>
+                ) : null}
+                {changes.length === 0 ? (
+                  <Typography.Text type="secondary">无变更</Typography.Text>
+                ) : (
+                  <Table
+                    size="small"
+                    pagination={false}
+                    rowKey={(row) => `${row.field}-${row.before}-${row.after}`}
+                    dataSource={changes.map(parseChangeLine)}
+                    columns={[
+                      { title: '字段', dataIndex: 'field', width: 180 },
+                      { title: '原值', dataIndex: 'before' },
+                      { title: '新值', dataIndex: 'after' },
+                    ]}
+                  />
+                )}
+              </Card>
+            ) : null}
+          </>
+        ) : null}
       </Card>
     </div>
   );

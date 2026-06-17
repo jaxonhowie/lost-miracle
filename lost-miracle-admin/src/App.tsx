@@ -1,14 +1,21 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Spin } from 'antd';
 import { getToken } from './api/client';
+import { AuthProvider } from './contexts/AuthContext';
 import AdminLayout from './layouts/AdminLayout';
-import AuditPage from './pages/AuditPage';
-import CharacterPage from './pages/CharacterPage';
-import ConfigPage from './pages/ConfigPage';
-import DashboardPage from './pages/DashboardPage';
-import LoginPage from './pages/LoginPage';
-import PlayersPage from './pages/PlayersPage';
-import SpawnsPage from './pages/SpawnsPage';
+
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const PlayersPage = lazy(() => import('./pages/PlayersPage'));
+const CharacterPage = lazy(() => import('./pages/CharacterPage'));
+const SpawnsPage = lazy(() => import('./pages/SpawnsPage'));
+const ConfigPage = lazy(() => import('./pages/ConfigPage'));
+const AuditPage = lazy(() => import('./pages/AuditPage'));
+
+function PageFallback() {
+  return <Spin size="large" style={{ display: 'block', margin: '48px auto' }} />;
+}
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState(getToken());
@@ -41,26 +48,30 @@ function AuthExpiredHandler({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <AuthExpiredHandler>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/"
-          element={
-            <RequireAuth>
-              <AdminLayout />
-            </RequireAuth>
-          }
-        >
-          <Route index element={<DashboardPage />} />
-          <Route path="players" element={<PlayersPage />} />
-          <Route path="characters/:characterId" element={<CharacterPage />} />
-          <Route path="spawns" element={<SpawnsPage />} />
-          <Route path="config" element={<ConfigPage />} />
-          <Route path="audit" element={<AuditPage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AuthExpiredHandler>
+    <AuthProvider>
+      <AuthExpiredHandler>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <AdminLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="players" element={<PlayersPage />} />
+            <Route path="characters/:characterId" element={<CharacterPage />} />
+            <Route path="spawns" element={<SpawnsPage />} />
+            <Route path="config" element={<ConfigPage />} />
+            <Route path="audit" element={<AuditPage />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </AuthExpiredHandler>
+    </AuthProvider>
   );
 }

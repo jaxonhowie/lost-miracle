@@ -1,6 +1,7 @@
 import { Button, Select, Space, Table, Tag, Typography, message } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { api, unwrap } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import type { DungeonSpawnState, SpawnSlotView } from '../api/types';
 
 const DUNGEONS = [
@@ -11,6 +12,7 @@ const DUNGEONS = [
 ];
 
 export default function SpawnsPage() {
+  const { canOperator } = useAuth();
   const [dungeonId, setDungeonId] = useState('bone_crypt');
   const [state, setState] = useState<DungeonSpawnState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,7 +46,7 @@ export default function SpawnsPage() {
     return list;
   }, [state]);
 
-  const resetSlot = async (slotId: number) => {
+  const resetSlot = async (slotId: string) => {
     await unwrap(api.post(`/spawns/${slotId}/reset`));
     message.success('槽位已重置');
     await load();
@@ -69,9 +71,11 @@ export default function SpawnsPage() {
         <Button onClick={() => void load()} loading={loading}>
           刷新
         </Button>
-        <Button danger onClick={() => void resetAll()}>
-          整图重置
-        </Button>
+        {canOperator ? (
+          <Button danger onClick={() => void resetAll()}>
+            整图重置
+          </Button>
+        ) : null}
       </Space>
       <Table
         rowKey="slotId"
@@ -89,11 +93,14 @@ export default function SpawnsPage() {
           },
           {
             title: '操作',
-            render: (_, row) => (
-              <Button size="small" onClick={() => void resetSlot(row.slotId)}>
-                重置
-              </Button>
-            ),
+            render: (_, row) =>
+              canOperator ? (
+                <Button size="small" onClick={() => void resetSlot(row.slotId)}>
+                  重置
+                </Button>
+              ) : (
+                '-'
+              ),
           },
         ]}
       />

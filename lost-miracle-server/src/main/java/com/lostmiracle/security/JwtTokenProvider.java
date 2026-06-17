@@ -31,7 +31,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("username", username)
-                .claim("aud", "game")
+                .audience().add("game").and()
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(expirationSeconds)))
                 .signWith(secretKey)
@@ -44,13 +44,19 @@ public class JwtTokenProvider {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        String aud = claims.get("aud", String.class);
-        if (aud != null && !"game".equals(aud)) {
+        if (!isGameAudience(claims)) {
             throw new IllegalArgumentException("invalid game token audience");
         }
         Long userId = Long.parseLong(claims.getSubject());
         String username = claims.get("username", String.class);
         return new UserPrincipal(userId, username);
+    }
+
+    private static boolean isGameAudience(Claims claims) {
+        if (claims.getAudience() != null && claims.getAudience().contains("game")) {
+            return true;
+        }
+        return "game".equals(claims.get("aud", String.class));
     }
 
     public long getExpirationSeconds() {

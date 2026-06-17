@@ -200,18 +200,8 @@ func sync_to_cloud(parent: Node = null, interact_on_conflict: bool = true) -> Di
 		return result
 
 	if int(result.get("code", 0)) == CONFLICT_CODE:
-		if parent and interact_on_conflict:
-			var resolved := await handle_conflict(parent, result)
-			if resolved.get("ok", false):
-				_set_status(SyncStatus.OK, "冲突已解决")
-				return resolved
-			if resolved.get("cancelled", false):
-				_set_status(SyncStatus.CONFLICT, "同步冲突未解决")
-				return {"ok": false, "cancelled": true, "code": CONFLICT_CODE, "message": "已取消冲突处理"}
-			_set_status(SyncStatus.CONFLICT, "冲突处理失败")
-			return resolved
-		_set_status(SyncStatus.CONFLICT, "存档冲突，待处理")
-		return result
+		var host := parent if parent != null and is_instance_valid(parent) else get_tree().root
+		return await handle_conflict(host, result)
 
 	if _is_auth_failure(result):
 		_set_status(SyncStatus.OFFLINE, "登录已失效，请重新登录")
@@ -238,9 +228,9 @@ func _reset_retry_delay() -> void:
 
 func sync_before_scene_exit(parent: Node) -> Dictionary:
 	var result := await sync_to_cloud(parent, true)
-	if result.get("cancelled", false):
-		_show_toast(parent, "请先解决存档冲突后再离开")
-	elif not result.get("ok", false) and not _is_auth_failure(result):
+	if result.get("relogin", false):
+		return result
+	if not result.get("ok", false) and not _is_auth_failure(result):
 		_show_toast(parent, "存档同步失败，请检查网络后重试")
 	return result
 
@@ -257,67 +247,42 @@ func queue_progress_sync() -> void:
 	request_background_sync()
 
 
-func resolve_conflict_interactive(parent: Node, _conflict_data: Dictionary) -> String:
-	var dialog := ConfirmationDialog.new()
-	dialog.title = "存档冲突"
-	dialog.dialog_text = "云端存档已被其他设备更新。\n请选择要保留的版本："
-	dialog.ok_button_text = "以云端为准"
-	dialog.cancel_button_text = "取消"
-	parent.add_child(dialog)
-
-	var choice := {"value": "cancel"}
-	dialog.confirmed.connect(func():
-		choice.value = "server"
-		dialog.hide()
-	)
-	dialog.canceled.connect(func():
-		choice.value = "cancel"
-		dialog.hide()
-	)
-
-	var local_btn := Button.new()
-	local_btn.text = "以本机为准"
-	local_btn.pressed.connect(func():
-		choice.value = "local"
-		dialog.hide()
-	)
-	if dialog.get_child_count() > 0:
-		var margin = dialog.get_child(0)
-		if margin is MarginContainer:
-			var vb = margin.get_child(0)
-			if vb is VBoxContainer:
-				vb.add_child(local_btn)
-
-	dialog.popup_centered(Vector2(400, 180))
-	while dialog.visible:
-		await parent.get_tree().process_frame
-	dialog.queue_free()
-	return str(choice.value)
-
-
-func handle_conflict(parent: Node, conflict_result: Dictionary) -> Dictionary:
+func handle_conflict(parent: Node, _conflict_result: Dictionary) -> Dictionary:
 	var char_id := NetworkManager.get_character_id()
 	if char_id.is_empty():
 		return {"ok": false, "resolved": false}
 
-	var choice := await resolve_conflict_interactive(parent, conflict_result.get("data", {}))
-	if choice == "cancel":
-		return {"ok": false, "resolved": false, "cancelled": true}
+	var dl := await download_for_character(char_id)
+	if not dl.get("ok", false):
+		_set_status(SyncStatus.CONFLICT, "拉取云端存档失败")
+		return dl
 
-	if choice == "server":
-		var dl := await download_for_character(char_id)
-		if not dl.get("ok", false):
-			return dl
-		var data: Dictionary = dl.get("data", {})
-		apply_server_save(data.get("save", {}), int(data.get("saveVersion", 0)))
-		return {"ok": true, "resolved": true, "source": "server"}
+	var data: Dictionary = dl.get("data", {})
+	apply_server_save(data.get("save", {}), int(data.get("saveVersion", 0)))
+	await _prompt_relogin_after_conflict(parent)
+	return {
+		"ok": false,
+		"resolved": true,
+		"relogin": true,
+		"source": "server",
+		"message": "请重新登录",
+	}
 
-	var save_data := SaveManager.export_save_data()
-	var up := await upload_for_character(char_id, save_data, NetworkManager.get_save_version(), true)
-	if up.get("ok", false):
-		NetworkManager.set_save_version(int(up["data"].get("saveVersion", NetworkManager.get_save_version())))
-		_clear_queue_entry(char_id)
-	return up
+
+func _prompt_relogin_after_conflict(parent: Node) -> void:
+	var host := parent if parent != null and is_instance_valid(parent) else get_tree().root
+	SaveManager.session_active = false
+	Game.auto_battle = false
+	_set_status(SyncStatus.OFFLINE, "请重新登录")
+	var dialog := AcceptDialog.new()
+	dialog.title = "存档冲突"
+	dialog.dialog_text = "云端存档已被其他设备更新，已用云端存档覆盖。\n请重新登录。"
+	host.add_child(dialog)
+	dialog.popup_centered()
+	await dialog.confirmed
+	dialog.queue_free()
+	NetworkManager.logout()
+	get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn")
 
 
 func flush_sync_queue(parent: Node = null) -> void:

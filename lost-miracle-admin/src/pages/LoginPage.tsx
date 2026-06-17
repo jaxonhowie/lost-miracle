@@ -23,6 +23,7 @@ export default function LoginPage() {
       );
       setToken(data.token);
       navigate('/');
+      window.dispatchEvent(new Event('gm:auth-login'));
     } catch (e) {
       setError(e instanceof Error ? e.message : '登录失败');
     } finally {

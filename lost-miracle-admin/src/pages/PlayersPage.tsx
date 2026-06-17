@@ -8,7 +8,7 @@ export default function PlayersPage() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<GmUserSummary[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [characters, setCharacters] = useState<CharacterList['items']>([]);
 
   const search = async () => {
@@ -24,7 +24,7 @@ export default function PlayersPage() {
     }
   };
 
-  const loadCharacters = async (userId: number) => {
+  const loadCharacters = async (userId: string) => {
     setSelectedUserId(userId);
     const data = await unwrap<CharacterList>(api.get(`/users/${userId}/characters`));
     setCharacters(data.items);

@@ -27,6 +27,13 @@ func report_defeat(dungeon_id: String, slot_id: String) -> Dictionary:
 	return result
 
 
+func settle_victory(dungeon_id: String, slot_id: String, monster_id: String) -> Dictionary:
+	var result := await NetworkManager.spawn_settle(dungeon_id, slot_id, monster_id)
+	if result.get("ok", false):
+		await refresh(dungeon_id)
+	return result
+
+
 func report_release(dungeon_id: String, slot_id: String) -> Dictionary:
 	var result := await NetworkManager.spawn_release(dungeon_id, slot_id)
 	if result.get("ok", false):

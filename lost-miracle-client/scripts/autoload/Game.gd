@@ -5,12 +5,32 @@ extends Node
 var player_class: String = ""
 var auto_battle: bool = false
 var current_dungeon_id: String = "bone_crypt"
+var _auth_dialog_open: bool = false
 
 var dungeon_progress := {
 	"normal_kill_count": 0,
 	"elite_kill_count": 0,
 	"boss_kill_count": 0,
 }
+
+func _ready() -> void:
+	NetworkManager.auth_invalid.connect(_on_auth_invalid)
+
+func _on_auth_invalid() -> void:
+	if _auth_dialog_open:
+		return
+	_auth_dialog_open = true
+	SaveManager.session_active = false
+	Game.auto_battle = false
+	var dialog := AcceptDialog.new()
+	dialog.title = "登录已失效"
+	dialog.dialog_text = "请重新登录后继续游戏。"
+	get_tree().root.add_child(dialog)
+	dialog.popup_centered()
+	await dialog.confirmed
+	dialog.queue_free()
+	_auth_dialog_open = false
+	get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn")
 
 func reset_dungeon() -> void:
 	dungeon_progress = {

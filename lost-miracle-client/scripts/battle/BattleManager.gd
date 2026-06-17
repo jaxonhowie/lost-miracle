@@ -223,35 +223,17 @@ func _end_battle(player_won: bool) -> void:
 	is_battle_active = false
 	if player_won:
 		log_message.emit("🏆 你击败了 %s！" % monster.display_name)
-		var monster_type = DataManager.get_monster(monster.unit_id).get("type", "normal")
-		if monster_type == "normal":
-			Game.dungeon_progress["normal_kill_count"] += 1
-		elif monster_type == "elite":
-			Game.dungeon_progress["elite_kill_count"] += 1
-		elif monster_type == "boss":
-			Game.mark_boss_killed()
 	else:
 		log_message.emit("💀 你被 %s 击败了..." % monster.display_name)
 	PlayerData.current_hp = maxi(1, player.hp) if player_won else 0
 	PlayerData.current_mp = player.mp
 	if player_won:
 		PlayerData.tick_altar_buffs()
-	var rewards = _generate_rewards(player_won)
-	if player_won:
-		var total_gold = 0
-		for item in rewards.get("items", []):
-			if item.get("type", "") == "gold":
-				total_gold += item.get("amount", 0)
-		rewards["gold"] = total_gold
+	var rewards := {"monster_id": monster.unit_id}
 	battle_ended.emit(player_won, rewards)
 
 func _generate_rewards(player_won: bool) -> Dictionary:
+	# 奖励由服务端 settle API 权威结算
 	if not player_won:
 		return {"exp": 0, "gold": 0, "items": []}
-	var monster_data = DataManager.get_monster(monster.unit_id)
-	var exp_reward = monster_data.get("level", 1) * 30
-	# 金币由 LootManager 统一生成，这里不再重复
-	var rewards = {"exp": exp_reward, "gold": 0, "items": []}
-	var loot = LootManager.roll_drops(monster.unit_id)
-	rewards["items"] = loot
-	return rewards
+	return {"exp": 0, "gold": 0, "items": [], "monster_id": monster.unit_id}

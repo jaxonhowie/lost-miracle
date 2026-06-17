@@ -96,6 +96,8 @@ func _apply_auth(data: Dictionary, user: String) -> void:
 	user_id = ApiIds.from_value(data.get("userId", data.get("user_id", 0)))
 	username = user
 	logged_in = true
+	_character_id = ""
+	_save_version = 0
 	_persist_token()
 	loginStateChanged.emit()
 
@@ -122,10 +124,19 @@ func handle_auth_failure() -> void:
 	loginStateChanged.emit()
 
 func api_request(method: String, path: String, body: Dictionary = {}) -> Dictionary:
-	return await _api.make_request(method, path, body, token)
+	var result = await _api.make_request(method, path, body, token)
+	if _is_auth_failure_result(result):
+		handle_auth_failure()
+	return result
+
+func _is_auth_failure_result(result: Dictionary) -> bool:
+	if int(result.get("code", 0)) == ApiConfig.CLIENT_AUTH_EXPIRED_CODE:
+		return true
+	var status := int(result.get("http_status", 0))
+	return status == ApiConfig.HTTP_UNAUTHORIZED
 
 func list_characters() -> Dictionary:
-	return await _api.make_request("GET", "/characters", {}, token)
+	return await api_request("GET", "/characters")
 
 func create_character(char_name: String = "") -> Dictionary:
 	var body := {}
@@ -188,6 +199,20 @@ func spawn_defeat(dungeon_id: String, slot_id: String) -> Dictionary:
 		"POST",
 		"/characters/%s/dungeons/%s/spawns/%s/defeat" % [_character_id, dungeon_id, sid],
 		{},
+		token
+	)
+
+func spawn_settle(dungeon_id: String, slot_id: String, monster_id: String) -> Dictionary:
+	if not has_character():
+		return {"ok": false, "code": -1, "message": "未选择角色", "data": {}}
+	var sid := ApiIds.from_value(slot_id)
+	return await _api.make_request(
+		"POST",
+		"/characters/%s/dungeons/%s/spawns/%s/settle" % [_character_id, dungeon_id, sid],
+		{
+			"saveVersion": _save_version,
+			"monsterId": monster_id,
+		},
 		token
 	)
 

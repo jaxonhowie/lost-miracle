@@ -1,0 +1,374 @@
+{
+  "vine_wood_sword": {
+    "id": "vine_wood_sword",
+    "type": "weapon",
+    "name": "紫藤木剑",
+    "slot": "weapon",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "atk": 14
+    },
+    "set_id": "",
+    "effects": {
+      "tier1": {
+        "atk": 2
+      },
+      "tier2": {
+        "atk_spd": 0.03
+      },
+      "tier3": {
+        "crit_rate": 0.05
+      }
+    },
+    "description": "紫藤木削成的轻剑，适合初阶战士"
+  },
+  "chain_longsword": {
+    "id": "chain_longsword",
+    "type": "weapon",
+    "name": "锁链长剑",
+    "slot": "weapon",
+    "class_req": "warrior",
+    "drop_tier": "chain",
+    "base_stats": {
+      "atk": 22
+    },
+    "set_id": "",
+    "effects": {
+      "tier1": {
+        "atk": 3
+      },
+      "tier2": {
+        "crit_rate": 0.03
+      },
+      "tier3": {
+        "lifesteal": 0.03
+      }
+    },
+    "description": "精钢链刃锻造的长剑，攻守兼备"
+  },
+  "plate_greatsword": {
+    "id": "plate_greatsword",
+    "type": "weapon",
+    "name": "锻钢巨剑",
+    "slot": "weapon",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "atk": 32
+    },
+    "set_id": "",
+    "effects": {
+      "tier1": {
+        "atk": 5
+      },
+      "tier2": {
+        "damage_reduce": 0.03
+      },
+      "tier3": {
+        "crit_dmg": 0.15
+      }
+    },
+    "description": "沉重锻钢巨剑，每一击都势大力沉"
+  },
+  "vine_helmet": {
+    "id": "vine_helmet",
+    "type": "armor",
+    "name": "紫藤头盔",
+    "slot": "helmet",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 3,
+      "max_hp": 25
+    },
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "max_hp": 25
+      },
+      "tier2": {
+        "hit": 0.03
+      },
+      "tier3": {
+        "skill_damage": 0.05
+      }
+    },
+    "description": "紫藤编织的轻便头盔"
+  },
+  "vine_armor": {
+    "id": "vine_armor",
+    "type": "armor",
+    "name": "紫藤胸甲",
+    "slot": "armor",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 5,
+      "max_hp": 40
+    },
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "atk_spd": 0.03
+      },
+      "tier2": {
+        "dodge": 0.02
+      },
+      "tier3": {
+        "atk_spd": 0.05
+      }
+    },
+    "description": "紫藤与皮革编织的胸甲，几乎不阻碍行动"
+  },
+  "vine_gloves": {
+    "id": "vine_gloves",
+    "type": "armor",
+    "name": "紫藤护手",
+    "slot": "gloves",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 2,
+      "max_hp": 15
+    },
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "atk": 2
+      },
+      "tier2": {
+        "crit_rate": 0.02
+      },
+      "tier3": {
+        "lifesteal": 0.02
+      }
+    },
+    "description": "紫藤缠绕的护手，保持手指灵活"
+  },
+  "vine_legs": {
+    "id": "vine_legs",
+    "type": "armor",
+    "name": "紫藤护腿",
+    "slot": "legs",
+    "class_req": "warrior",
+    "drop_tier": "vine",
+    "base_stats": {
+      "def": 4,
+      "max_hp": 30
+    },
+    "set_id": "vine_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "atk_spd": 0.04
+      },
+      "tier3": {
+        "crit_rate": 0.03
+      }
+    },
+    "description": "紫藤护腿，轻便利于冲刺"
+  },
+  "chain_helmet": {
+    "id": "chain_helmet",
+    "type": "armor",
+    "name": "锁链头盔",
+    "slot": "helmet",
+    "class_req": "warrior",
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 4,
+      "max_hp": 30
+    },
+    "set_id": "chain_warrior",
+    "effects": {
+      "tier1": {
+        "max_hp": 30
+      },
+      "tier2": {
+        "dodge": 0.03
+      },
+      "tier3": {
+        "damage_reduce": 0.05
+      }
+    },
+    "description": "精钢锁链编织的头盔"
+  },
+  "chain_armor": {
+    "id": "chain_armor",
+    "type": "armor",
+    "name": "锁链胸甲",
+    "slot": "armor",
+    "class_req": "warrior",
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 6,
+      "max_hp": 50
+    },
+    "set_id": "chain_warrior",
+    "effects": {
+      "tier1": {
+        "dodge": 0.03
+      },
+      "tier2": {
+        "def": 3
+      },
+      "tier3": {
+        "dodge": 0.05
+      }
+    },
+    "description": "锁链编织的中阶胸甲，兼顾防护与灵活"
+  },
+  "chain_gloves": {
+    "id": "chain_gloves",
+    "type": "armor",
+    "name": "锁链护手",
+    "slot": "gloves",
+    "class_req": "warrior",
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 3,
+      "max_hp": 20
+    },
+    "set_id": "chain_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "dodge": 0.02
+      },
+      "tier3": {
+        "damage_reduce": 0.04
+      }
+    },
+    "description": "锁链护手，格挡时不易受伤"
+  },
+  "chain_legs": {
+    "id": "chain_legs",
+    "type": "armor",
+    "name": "锁链护腿",
+    "slot": "legs",
+    "class_req": "warrior",
+    "drop_tier": "chain",
+    "base_stats": {
+      "def": 5,
+      "max_hp": 35
+    },
+    "set_id": "chain_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "max_hp": 40
+      },
+      "tier3": {
+        "dodge": 0.04
+      }
+    },
+    "description": "锁链护腿，步伐轻盈难以捉摸"
+  },
+  "plate_helmet": {
+    "id": "plate_helmet",
+    "type": "armor",
+    "name": "锻钢头盔",
+    "slot": "helmet",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 6,
+      "max_hp": 40
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 3
+      },
+      "tier2": {
+        "max_hp": 40
+      },
+      "tier3": {
+        "block_chance": 0.08
+      }
+    },
+    "description": "锻钢重盔，坚不可摧"
+  },
+  "plate_armor": {
+    "id": "plate_armor",
+    "type": "armor",
+    "name": "锻钢胸甲",
+    "slot": "armor",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 8,
+      "max_hp": 60
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 3
+      },
+      "tier2": {
+        "max_hp": 50
+      },
+      "tier3": {
+        "damage_reduce": 0.06
+      }
+    },
+    "description": "锻钢重甲，战士的终极壁垒"
+  },
+  "plate_gloves": {
+    "id": "plate_gloves",
+    "type": "armor",
+    "name": "锻钢护手",
+    "slot": "gloves",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 4,
+      "max_hp": 25
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 2
+      },
+      "tier2": {
+        "thorns_percent": 0.05
+      },
+      "tier3": {
+        "def": 4
+      }
+    },
+    "description": "锻钢护手，反震来袭之敌"
+  },
+  "plate_legs": {
+    "id": "plate_legs",
+    "type": "armor",
+    "name": "锻钢护腿",
+    "slot": "legs",
+    "class_req": "warrior",
+    "drop_tier": "plate",
+    "base_stats": {
+      "def": 7,
+      "max_hp": 45
+    },
+    "set_id": "plate_warrior",
+    "effects": {
+      "tier1": {
+        "def": 3
+      },
+      "tier2": {
+        "max_hp": 60
+      },
+      "tier3": {
+        "damage_reduce": 0.05
+      }
+    },
+    "description": "锻钢护腿，稳如磐石"
+  }
+}

@@ -694,9 +694,7 @@ func _enhance_confirm_server() -> void:
 	$EnhanceOverlay/Center/Dialog/Margin/VBox/BtnRow/ConfirmEnhanceBtn.disabled = false
 	if not result.get("ok", false):
 		if int(result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
-			var resolved = await CloudSaveService.handle_conflict(self, result)
-			if resolved.get("ok", false):
-				_show_enhance_result("存档冲突已解决，请重新强化", Color.YELLOW)
+			await CloudSaveService.handle_conflict(self, result)
 			return
 		_show_enhance_result("强化失败: %s" % result.get("message", ""), Color.RED)
 		return

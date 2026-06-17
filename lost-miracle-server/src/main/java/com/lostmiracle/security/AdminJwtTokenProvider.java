@@ -38,7 +38,7 @@ public class AdminJwtTokenProvider {
                 .subject(String.valueOf(gmAccountId))
                 .claim("username", username)
                 .claim(CLAIM_ROLE, role.toDbValue())
-                .claim("aud", AUD_ADMIN)
+                .audience().add(AUD_ADMIN).and()
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(expirationSeconds)))
                 .signWith(secretKey)
@@ -47,8 +47,7 @@ public class AdminJwtTokenProvider {
 
     public GmPrincipal parseToken(String token) {
         Claims claims = parseClaims(token);
-        String aud = claims.get("aud", String.class);
-        if (!AUD_ADMIN.equals(aud)) {
+        if (claims.getAudience() == null || !claims.getAudience().contains(AUD_ADMIN)) {
             throw new IllegalArgumentException("invalid admin token audience");
         }
         Long gmAccountId = Long.parseLong(claims.getSubject());
@@ -61,7 +60,7 @@ public class AdminJwtTokenProvider {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(String.valueOf(gmAccountId))
-                .claim("aud", AUD_CONFIRM)
+                .audience().add(AUD_CONFIRM).and()
                 .claim(CLAIM_CHARACTER_ID, characterId)
                 .claim(CLAIM_SAVE_CHECKSUM, saveChecksum)
                 .issuedAt(Date.from(now))
@@ -72,8 +71,7 @@ public class AdminJwtTokenProvider {
 
     public ConfirmTokenClaims parseConfirmToken(String token) {
         Claims claims = parseClaims(token);
-        String aud = claims.get("aud", String.class);
-        if (!AUD_CONFIRM.equals(aud)) {
+        if (claims.getAudience() == null || !claims.getAudience().contains(AUD_CONFIRM)) {
             throw new IllegalArgumentException("invalid confirm token audience");
         }
         long gmAccountId = Long.parseLong(claims.getSubject());

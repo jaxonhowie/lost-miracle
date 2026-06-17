@@ -36,8 +36,7 @@ func make_request(method: String, path: String, body: Dictionary = {}, token: St
 	var status: int = result[1]
 	var response_body: PackedByteArray = result[3]
 
-	# http_status 用于上层识别鉴权失败（服务端 token 过期/无效返回 403 空响应体，
-	# 不走 GlobalExceptionHandler，无法靠业务 code 区分）。
+	# http_status 用于上层识别鉴权失败（服务端未认证返回 401 + ApiResponse）。
 	if result_code != HTTPRequest.RESULT_SUCCESS:
 		return {
 			"ok": false, "code": -1, "http_status": 0,
@@ -67,7 +66,7 @@ func make_request(method: String, path: String, body: Dictionary = {}, token: St
 	}
 
 func _is_auth_failure(status: int) -> bool:
-	return status == 401 or status == ApiConfig.HTTP_UNAUTHORIZED
+	return status == ApiConfig.HTTP_UNAUTHORIZED
 
 func _auth_failure_response(status: int) -> Dictionary:
 	return {

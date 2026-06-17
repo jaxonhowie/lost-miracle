@@ -23,7 +23,7 @@ import com.lostmiracle.module.save.mapper.CharacterSaveMapper;
 import com.lostmiracle.module.save.util.PowerScoreCalculator;
 import com.lostmiracle.module.save.util.SaveChecksum;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -42,6 +42,7 @@ public class MailService {
     private final RedisLockService redisLockService;
     private final RateLimitService rateLimitService;
     private final SaveSnapshotService saveSnapshotService;
+    private final TransactionTemplate transactionTemplate;
 
     public MailService(
             CharacterService characterService,
@@ -51,7 +52,8 @@ public class MailService {
             ObjectMapper objectMapper,
             RedisLockService redisLockService,
             RateLimitService rateLimitService,
-            SaveSnapshotService saveSnapshotService
+            SaveSnapshotService saveSnapshotService,
+            TransactionTemplate transactionTemplate
     ) {
         this.characterService = characterService;
         this.characterSaveMapper = characterSaveMapper;
@@ -61,6 +63,7 @@ public class MailService {
         this.redisLockService = redisLockService;
         this.rateLimitService = rateLimitService;
         this.saveSnapshotService = saveSnapshotService;
+        this.transactionTemplate = transactionTemplate;
     }
 
     public MailListResponse listMail(long userId, long characterId) {
@@ -69,12 +72,12 @@ public class MailService {
         return new MailListResponse(mails.stream().map(this::toResponse).toList());
     }
 
-    @Transactional
     public ClaimMailResponse claim(long userId, long characterId, long mailId, ClaimMailRequest request) {
         String lockToken = redisLockService.acquireSaveLock(characterId);
         try {
             rateLimitService.checkSaveUpload(userId, characterId);
-            return claimLocked(userId, characterId, mailId, request);
+            // 事务体在锁内执行并提交；锁在事务提交后（finally）释放
+            return transactionTemplate.execute(status -> claimLocked(userId, characterId, mailId, request));
         } finally {
             redisLockService.releaseSaveLock(characterId, lockToken);
         }
@@ -111,12 +114,19 @@ public class MailService {
             applyAttachments(saveMap, parseAttachments(mail.getAttachments()));
             String saveJson = objectMapper.writeValueAsString(saveMap);
 
-            long newVersion = saveEntity.getSaveVersion() + 1;
+            long expectedVersion = saveEntity.getSaveVersion();
+            long newVersion = expectedVersion + 1;
             saveEntity.setSaveVersion(newVersion);
             saveEntity.setSaveJson(saveJson);
             saveEntity.setChecksum(SaveChecksum.sha256(saveJson));
             saveEntity.setClientUpdatedAt(System.currentTimeMillis() / 1000);
-            characterSaveMapper.updateById(saveEntity);
+            if (characterSaveMapper.updateWithVersion(saveEntity, expectedVersion) == 0) {
+                throw new BusinessException(
+                        ErrorCode.CONFLICT,
+                        "save version conflict",
+                        new SaveConflictResponse(expectedVersion, 0L, "choose_local_or_server")
+                );
+            }
 
             mailMapper.updateClaimed(mailId, 1, LocalDateTime.now());
 

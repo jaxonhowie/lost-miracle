@@ -3,12 +3,33 @@ import type { ApiResponse } from './types';
 
 const TOKEN_KEY = 'gm_token';
 
+// JSON 响应里 16 位以上整数在 JS 中会丢精度，先转成字符串再 parse
+const LARGE_INT_JSON = /(?<=[:\[,]\s*)(-?\d{16,})(?=\s*[,}\]])/g;
+
+function parseResponseJson(text: string): unknown {
+  try {
+    return JSON.parse(text.replace(LARGE_INT_JSON, '"$1"'));
+  } catch {
+    return JSON.parse(text);
+  }
+}
+
 // 登录/注册等不需要认证的路径，401/403 时不应自动踢出
 const PUBLIC_PATHS = ['/auth/login', '/auth/register'];
 
 export const api = axios.create({
   baseURL: '/api/v1/admin',
   timeout: 15000,
+  transformResponse: [(data, headers) => {
+    if (typeof data !== 'string' || data.length === 0) {
+      return data;
+    }
+    const contentType = String(headers?.['content-type'] ?? '');
+    if (!contentType.includes('application/json')) {
+      return data;
+    }
+    return parseResponseJson(data);
+  }],
 });
 
 api.interceptors.request.use((config) => {
@@ -31,14 +52,16 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const url = error.config?.url || '';
     const isPublicPath = PUBLIC_PATHS.some((p) => url.includes(p));
+    const bodyCode = error.response?.data?.code as number | undefined;
 
-    if ((status === 401 || status === 403) && !isPublicPath) {
+    // 仅未认证/过期时登出；权限不足(403)保留会话
+    const isAuthExpired = status === 401 || bodyCode === 40100;
+    if (isAuthExpired && !isPublicPath) {
       localStorage.removeItem(TOKEN_KEY);
-      // 使用 React Router 导航而非硬刷新，避免破坏路由状态
-      // 通过自定义事件通知 App 层处理跳转
       window.dispatchEvent(new Event('gm:auth-expired'));
     }
-    const message = error.response?.data?.message || error.message || '网络错误';
+    const message =
+      error.response?.data?.message || error.message || (status === 403 ? '权限不足' : '网络错误');
     return Promise.reject(new Error(message));
   },
 );

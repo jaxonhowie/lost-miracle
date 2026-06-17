@@ -1,20 +1,17 @@
 import { Card, Col, Row, Statistic, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { api, unwrap } from '../api/client';
-import type { ConfigList, GmMeResponse } from '../api/types';
+import { useAuth } from '../contexts/AuthContext';
+import type { ConfigList } from '../api/types';
 
 export default function DashboardPage() {
-  const [me, setMe] = useState<GmMeResponse | null>(null);
+  const { me } = useAuth();
   const [configVersion, setConfigVersion] = useState(0);
 
   useEffect(() => {
     void (async () => {
       try {
-        const [profile, config] = await Promise.all([
-          unwrap<GmMeResponse>(api.get('/auth/me')),
-          unwrap<ConfigList>(api.get('/config')),
-        ]);
-        setMe(profile);
+        const config = await unwrap<ConfigList>(api.get('/config'));
         setConfigVersion(config.version);
       } catch {
         // layout handles auth redirect

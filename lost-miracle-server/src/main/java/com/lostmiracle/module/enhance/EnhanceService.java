@@ -18,7 +18,7 @@ import com.lostmiracle.module.save.mapper.CharacterSaveMapper;
 import com.lostmiracle.module.save.util.PowerScoreCalculator;
 import com.lostmiracle.module.save.util.SaveChecksum;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -38,6 +38,7 @@ public class EnhanceService {
     private final RedisLockService redisLockService;
     private final RateLimitService rateLimitService;
     private final SaveSnapshotService saveSnapshotService;
+    private final TransactionTemplate transactionTemplate;
 
     public EnhanceService(
             CharacterService characterService,
@@ -48,7 +49,8 @@ public class EnhanceService {
             ObjectMapper objectMapper,
             RedisLockService redisLockService,
             RateLimitService rateLimitService,
-            SaveSnapshotService saveSnapshotService
+            SaveSnapshotService saveSnapshotService,
+            TransactionTemplate transactionTemplate
     ) {
         this.characterService = characterService;
         this.characterSaveMapper = characterSaveMapper;
@@ -59,14 +61,15 @@ public class EnhanceService {
         this.redisLockService = redisLockService;
         this.rateLimitService = rateLimitService;
         this.saveSnapshotService = saveSnapshotService;
+        this.transactionTemplate = transactionTemplate;
     }
 
-    @Transactional
     public EnhanceRollResponse roll(long userId, long characterId, EnhanceRollRequest request) {
         String lockToken = redisLockService.acquireSaveLock(characterId);
         try {
             rateLimitService.checkEnhanceRoll(userId, characterId);
-            return rollLocked(userId, characterId, request);
+            // 事务体在锁内执行并提交；锁在事务提交后（finally）释放
+            return transactionTemplate.execute(status -> rollLocked(userId, characterId, request));
         } finally {
             redisLockService.releaseSaveLock(characterId, lockToken);
         }
@@ -152,12 +155,19 @@ public class EnhanceService {
         }
 
         CharacterSaveEntity saveEntity = context.saveEntity();
-        long newVersion = saveEntity.getSaveVersion() + 1;
+        long expectedVersion = saveEntity.getSaveVersion();
+        long newVersion = expectedVersion + 1;
         saveEntity.setSaveVersion(newVersion);
         saveEntity.setSaveJson(saveJson);
         saveEntity.setChecksum(SaveChecksum.sha256(saveJson));
         saveEntity.setClientUpdatedAt(System.currentTimeMillis() / 1000);
-        characterSaveMapper.updateById(saveEntity);
+        if (characterSaveMapper.updateWithVersion(saveEntity, expectedVersion) == 0) {
+            throw new BusinessException(
+                    ErrorCode.CONFLICT,
+                    "save version conflict",
+                    new SaveConflictResponse(expectedVersion, 0L, "choose_local_or_server")
+            );
+        }
 
         int powerScore = PowerScoreCalculator.calculate(objectMapper, saveJson);
         CharacterEntity character = context.character();

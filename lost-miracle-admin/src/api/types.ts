@@ -7,19 +7,19 @@ export interface ApiResponse<T> {
 export interface GmAuthResponse {
   token: string;
   expiresInSeconds: number;
-  gmAccountId: number;
+  gmAccountId: string;
   username: string;
   role: string;
 }
 
 export interface GmMeResponse {
-  gmAccountId: number;
+  gmAccountId: string;
   username: string;
   role: string;
 }
 
 export interface GmUserSummary {
-  id: number;
+  id: string;
   username: string;
   status: number;
   createdAt: number;
@@ -33,7 +33,7 @@ export interface GmUserList {
 }
 
 export interface CharacterSummary {
-  id: number;
+  id: string;
   name: string;
   playerClass: string;
   level: number;
@@ -49,7 +49,7 @@ export interface CharacterList {
 }
 
 export interface CharacterSave {
-  characterId: number;
+  characterId: string;
   saveVersion: number;
   clientUpdatedAt: number;
   checksum: string;
@@ -69,8 +69,8 @@ export interface ConfigList {
 }
 
 export interface AuditLog {
-  id: number;
-  gmAccountId: number;
+  id: string;
+  gmAccountId: string;
   action: string;
   targetType: string;
   targetId: string;
@@ -80,7 +80,7 @@ export interface AuditLog {
 }
 
 export interface SpawnSlotView {
-  slotId: number;
+  slotId: string;
   monsterId: string;
   slotIndex: number;
   available: boolean;

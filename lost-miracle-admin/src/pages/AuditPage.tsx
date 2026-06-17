@@ -1,11 +1,21 @@
-import { Table, Typography } from 'antd';
+import { Button, Modal, Table, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { api, unwrap } from '../api/client';
 import type { AuditLog } from '../api/types';
+import { formatDateTime } from '../utils/formatDateTime';
+
+function formatDetailJson(raw: string): string {
+  try {
+    return JSON.stringify(JSON.parse(raw), null, 2);
+  } catch {
+    return raw;
+  }
+}
 
 export default function AuditPage() {
   const [rows, setRows] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(false);
+  const [detailRow, setDetailRow] = useState<AuditLog | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -28,7 +38,12 @@ export default function AuditPage() {
         dataSource={rows}
         pagination={{ pageSize: 20 }}
         columns={[
-          { title: '时间', dataIndex: 'createdAt', width: 180 },
+          {
+            title: '时间',
+            dataIndex: 'createdAt',
+            width: 180,
+            render: (v: string) => formatDateTime(v),
+          },
           { title: 'GM', dataIndex: 'gmAccountId', width: 80 },
           { title: '动作', dataIndex: 'action', width: 160 },
           { title: '目标类型', dataIndex: 'targetType', width: 100 },
@@ -37,11 +52,47 @@ export default function AuditPage() {
           {
             title: '详情',
             dataIndex: 'detailJson',
-            ellipsis: true,
-            render: (v: string | null) => v || '-',
+            width: 100,
+            render: (_: string | null, row: AuditLog) =>
+              row.detailJson ? (
+                <Button type="link" size="small" onClick={() => setDetailRow(row)}>
+                  查看
+                </Button>
+              ) : (
+                '-'
+              ),
           },
         ]}
       />
+      <Modal
+        title={detailRow ? `${detailRow.action} · 详情` : '详情'}
+        open={detailRow !== null}
+        onCancel={() => setDetailRow(null)}
+        footer={null}
+        width={640}
+        destroyOnClose
+      >
+        {detailRow?.detailJson ? (
+          <pre
+            style={{
+              margin: 0,
+              maxHeight: 480,
+              overflow: 'auto',
+              padding: 12,
+              background: '#f5f5f5',
+              borderRadius: 6,
+              fontSize: 13,
+              lineHeight: 1.5,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {formatDetailJson(detailRow.detailJson)}
+          </pre>
+        ) : (
+          <Typography.Text type="secondary">无详情</Typography.Text>
+        )}
+      </Modal>
     </div>
   );
 }

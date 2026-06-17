@@ -1,0 +1,32 @@
+{
+  "vine_warrior": {
+    "id": "vine_warrior",
+    "name": "紫藤战甲",
+    "description": "轻便藤甲，提升物理攻击速度",
+    "bonuses": [
+      {"pieces": 2, "effects": [{"stat": "atk_spd", "value": 0.06}]},
+      {"pieces": 4, "effects": [{"stat": "atk_spd", "value": 0.04}]}
+    ]
+  },
+  "chain_warrior": {
+    "id": "chain_warrior",
+    "name": "锁链战甲",
+    "description": "锁链中甲，提升闪避",
+    "bonuses": [
+      {"pieces": 2, "effects": [{"stat": "dodge", "value": 0.04}]},
+      {"pieces": 4, "effects": [{"stat": "dodge", "value": 0.04}]}
+    ]
+  },
+  "plate_warrior": {
+    "id": "plate_warrior",
+    "name": "锻钢重甲",
+    "description": "重型板甲，大幅提升防御",
+    "bonuses": [
+      {"pieces": 2, "effects": [{"stat": "def", "value": 0.08, "percent": true}]},
+      {"pieces": 4, "effects": [
+        {"stat": "def", "value": 0.04, "percent": true},
+        {"stat": "damage_reduce", "value": 0.05}
+      ]}
+    ]
+  }
+}

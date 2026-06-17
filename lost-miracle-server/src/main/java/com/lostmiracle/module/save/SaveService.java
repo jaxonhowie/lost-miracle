@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.ZoneId;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class SaveService {
     private final RedisLockService redisLockService;
     private final RateLimitService rateLimitService;
     private final SaveSnapshotService saveSnapshotService;
+    private final TransactionTemplate transactionTemplate;
 
     public SaveService(
             CharacterService characterService,
@@ -47,7 +49,8 @@ public class SaveService {
             ObjectMapper objectMapper,
             RedisLockService redisLockService,
             RateLimitService rateLimitService,
-            SaveSnapshotService saveSnapshotService
+            SaveSnapshotService saveSnapshotService,
+            TransactionTemplate transactionTemplate
     ) {
         this.characterService = characterService;
         this.characterSaveMapper = characterSaveMapper;
@@ -57,6 +60,7 @@ public class SaveService {
         this.redisLockService = redisLockService;
         this.rateLimitService = rateLimitService;
         this.saveSnapshotService = saveSnapshotService;
+        this.transactionTemplate = transactionTemplate;
     }
 
     @SuppressWarnings("unchecked")
@@ -83,13 +87,13 @@ public class SaveService {
         }
     }
 
-    @Transactional
     public UploadSaveResponse upload(long userId, long characterId, UploadSaveRequest request) {
         log.debug("save upload begin userId={} characterId={} clientVersion={}", userId, characterId, request.saveVersion());
         String lockToken = redisLockService.acquireSaveLock(characterId);
         try {
             rateLimitService.checkSaveUpload(userId, characterId);
-            return uploadLocked(userId, characterId, request);
+            // 事务体在锁内执行并提交；锁在事务提交后（finally）释放，避免提交前释放导致的并发覆盖窗口
+            return transactionTemplate.execute(status -> uploadLocked(userId, characterId, request));
         } finally {
             redisLockService.releaseSaveLock(characterId, lockToken);
         }
@@ -143,12 +147,15 @@ public class SaveService {
         }
 
         String checksum = SaveChecksum.sha256(saveJson);
-        long newVersion = existing.getSaveVersion() + 1;
+        long expectedVersion = existing.getSaveVersion();
+        long newVersion = expectedVersion + 1;
         existing.setSaveVersion(newVersion);
         existing.setSaveJson(saveJson);
         existing.setChecksum(checksum);
         existing.setClientUpdatedAt(request.clientUpdatedAt());
-        characterSaveMapper.updateById(existing);
+        if (characterSaveMapper.updateWithVersion(existing, expectedVersion) == 0) {
+            throw saveVersionConflict(characterId, expectedVersion);
+        }
 
         int powerScore = PowerScoreCalculator.calculate(objectMapper, saveJson);
         updateCharacterFromSave(character, saveJson, powerScore);
@@ -162,6 +169,19 @@ public class SaveService {
                 : existing.getServerUpdatedAt().atZone(ZoneId.systemDefault()).toEpochSecond();
 
         return new UploadSaveResponse(characterId, newVersion, serverUpdatedAt, powerScore);
+    }
+
+    /**
+     * DB 乐观锁 CAS 失败（save_version 已被并发修改）时构造冲突异常。
+     * 客户端收到 409 后会重新拉取云存档并让用户选择合并策略。
+     */
+    private BusinessException saveVersionConflict(long characterId, long expectedVersion) {
+        log.warn("save CAS conflict characterId={} expectedVersion={}", characterId, expectedVersion);
+        return new BusinessException(
+                ErrorCode.CONFLICT,
+                "save version conflict",
+                new SaveConflictResponse(expectedVersion, 0L, "choose_local_or_server")
+        );
     }
 
     @Transactional
@@ -186,12 +206,15 @@ public class SaveService {
         }
 
         String checksum = SaveChecksum.sha256(saveJson);
-        long newVersion = existing.getSaveVersion() + 1;
+        long expectedVersion = existing.getSaveVersion();
+        long newVersion = expectedVersion + 1;
         existing.setSaveVersion(newVersion);
         existing.setSaveJson(saveJson);
         existing.setChecksum(checksum);
         existing.setClientUpdatedAt(clientUpdatedAt);
-        characterSaveMapper.updateById(existing);
+        if (characterSaveMapper.updateWithVersion(existing, expectedVersion) == 0) {
+            throw saveVersionConflict(characterId, expectedVersion);
+        }
 
         int powerScore = PowerScoreCalculator.calculate(objectMapper, saveJson);
         updateCharacterFromSave(character, saveJson, powerScore);

@@ -22,7 +22,7 @@ import com.lostmiracle.module.save.mapper.CharacterSaveMapper;
 import com.lostmiracle.module.save.util.PowerScoreCalculator;
 import com.lostmiracle.module.save.util.SaveChecksum;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -51,6 +51,7 @@ public class AchievementService {
     private final RedisLockService redisLockService;
     private final RateLimitService rateLimitService;
     private final SaveSnapshotService saveSnapshotService;
+    private final TransactionTemplate transactionTemplate;
 
     public AchievementService(
             CharacterService characterService,
@@ -60,7 +61,8 @@ public class AchievementService {
             ObjectMapper objectMapper,
             RedisLockService redisLockService,
             RateLimitService rateLimitService,
-            SaveSnapshotService saveSnapshotService
+            SaveSnapshotService saveSnapshotService,
+            TransactionTemplate transactionTemplate
     ) {
         this.characterService = characterService;
         this.characterSaveMapper = characterSaveMapper;
@@ -70,6 +72,7 @@ public class AchievementService {
         this.redisLockService = redisLockService;
         this.rateLimitService = rateLimitService;
         this.saveSnapshotService = saveSnapshotService;
+        this.transactionTemplate = transactionTemplate;
     }
 
     public AchievementListResponse list(long userId, long characterId) {
@@ -96,12 +99,12 @@ public class AchievementService {
         return new AchievementListResponse(items);
     }
 
-    @Transactional
     public ClaimAchievementResponse claim(long userId, long characterId, String achievementId, ClaimAchievementRequest request) {
         String lockToken = redisLockService.acquireSaveLock(characterId);
         try {
             rateLimitService.checkSaveUpload(userId, characterId);
-            return claimLocked(userId, characterId, achievementId, request);
+            // 事务体在锁内执行并提交；锁在事务提交后（finally）释放
+            return transactionTemplate.execute(status -> claimLocked(userId, characterId, achievementId, request));
         } finally {
             redisLockService.releaseSaveLock(characterId, lockToken);
         }
@@ -150,12 +153,19 @@ public class AchievementService {
             applyRewards(saveMap, def.rewards());
             String saveJson = objectMapper.writeValueAsString(saveMap);
 
-            long newVersion = saveEntity.getSaveVersion() + 1;
+            long expectedVersion = saveEntity.getSaveVersion();
+            long newVersion = expectedVersion + 1;
             saveEntity.setSaveVersion(newVersion);
             saveEntity.setSaveJson(saveJson);
             saveEntity.setChecksum(SaveChecksum.sha256(saveJson));
             saveEntity.setClientUpdatedAt(System.currentTimeMillis() / 1000);
-            characterSaveMapper.updateById(saveEntity);
+            if (characterSaveMapper.updateWithVersion(saveEntity, expectedVersion) == 0) {
+                throw new BusinessException(
+                        ErrorCode.CONFLICT,
+                        "save version conflict",
+                        new SaveConflictResponse(expectedVersion, 0L, "choose_local_or_server")
+                );
+            }
 
             AchievementProgressEntity progress = existing == null ? new AchievementProgressEntity() : existing;
             progress.setCharacterId(characterId);
