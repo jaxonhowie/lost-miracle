@@ -39,17 +39,31 @@ public class JwtTokenProvider {
     }
 
     public UserPrincipal parseToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        Claims claims = parseClaims(token);
         if (!isGameAudience(claims)) {
             throw new IllegalArgumentException("invalid game token audience");
         }
         Long userId = Long.parseLong(claims.getSubject());
         String username = claims.get("username", String.class);
         return new UserPrincipal(userId, username);
+    }
+
+    public long getRemainingSeconds(String token) {
+        Claims claims = parseClaims(token);
+        Date expiration = claims.getExpiration();
+        if (expiration == null) {
+            return 0L;
+        }
+        long remaining = (expiration.getTime() - System.currentTimeMillis()) / 1000L;
+        return Math.max(0L, remaining);
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private static boolean isGameAudience(Claims claims) {

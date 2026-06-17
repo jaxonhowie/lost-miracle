@@ -126,10 +126,15 @@ func _apply_save_data(data: Dictionary) -> void:
 	PlayerData.blessed_jewelry_enhance_stone = p.get("blessed_jewelry_enhance_stone", 0)
 	PlayerData.health_potion = p.get("health_potion", 0)
 	PlayerData.altar_buffs = p.get("altar_buffs", []).duplicate(true)
+	var session_roar_remaining := PlayerData.battle_roar_remaining
+	var session_roar_percent := PlayerData.battle_roar_atk_spd_percent
 	PlayerData.battle_roar_remaining = float(p.get("battle_roar_remaining", 0.0))
 	PlayerData.battle_roar_atk_spd_percent = float(
 		p.get("battle_roar_atk_spd_percent", p.get("battle_roar_atk_percent", 0.0))
 	)
+	if session_roar_remaining > 0.0:
+		PlayerData.battle_roar_remaining = session_roar_remaining
+		PlayerData.battle_roar_atk_spd_percent = session_roar_percent
 	Game.player_class = p.get("class", "")
 	var saved_stats = p.get("base_stats", {})
 	for key in saved_stats:
@@ -150,7 +155,10 @@ func _apply_save_data(data: Dictionary) -> void:
 	Game.dungeon_progress = dungeon_data
 	var world = data.get("world", {})
 	Game.current_dungeon_id = world.get("current_dungeon_id", "bone_crypt")
+	var session_auto_battle := Game.auto_battle
 	Game.auto_battle = world.get("auto_battle", false)
+	if session_auto_battle:
+		Game.auto_battle = true
 	_migrate_equipped_slots()
 	_purge_obsolete_equipment()
 	_migrate_equipment_data(PlayerData.inventory)

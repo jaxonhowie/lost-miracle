@@ -74,7 +74,7 @@ lost-miracle/
 
 ```text
 启动
-  ├─ 未登录 → LoginScene（注册 / 登录，JWT）
+  ├─ 未登录（每次启动默认）→ LoginScene（注册 / 登录，JWT 仅内存）
   └─ 已登录 → 主菜单（须联网，离线则阻断并提示重试）
        ├─ 固定展示 3 个角色槽（服务端列表，按最近登录排序）
        ├─ 点击已有角色 → GET 云存档 → 地牢探索
@@ -182,7 +182,7 @@ lost-miracle/
 
 ### 5.6 战败 / 胜败后
 
-- 胜利：发奖励，云同步，回地牢（自动战斗 3 秒后继续）；HP/MP 保持战斗结束时的值
+- 胜利：服务端 **settle** 结算奖励并回写存档，客户端 `apply_server_save`；自动战斗 3 秒后继续探索；HP/MP 保持战斗结束时的值
 - 战败：HP 设为 **一半上限**，回地牢；靠自然回复与药水恢复
 
 ---
@@ -533,10 +533,10 @@ API（需登录 + 角色归属校验）：
 
 - `GET /characters/{id}/dungeons/{dungeonId}/spawns` — 查询槽位状态
 - `POST .../spawns/encounter` `{ "type": "normal|elite|boss" }` — 占用槽位并返回怪物 ID
-- `POST .../spawns/{slotId}/defeat` — 击杀，进入冷却
+- `POST .../spawns/{slotId}/settle` `{ "saveVersion", "monsterId" }` — 战斗胜利：服务端权威掉落/经验/金币，更新存档并进入冷却
 - `POST .../spawns/{slotId}/release` — 未击杀（玩家阵亡），释放占用
 
-客户端 `SpawnService` 拉取状态；战斗胜利/失败分别调用 defeat / release。
+客户端 `SpawnService` 拉取状态；战斗胜利调用 settle，失败调用 release。
 
 ### 10.3 地牢事件（探索随机池）
 
@@ -640,7 +640,8 @@ API（需登录 + 角色归属校验）：
 |------|------|
 | 持久化 | MySQL `character_save` 表（整包 JSON + 版本号） |
 | 客户端内存 | `SaveManager` 负责 `export_save_data()` / `import_save_data()`，**不写游戏存档到磁盘** |
-| 本地文件 | 仅 `user://auth_token.json`（JWT 与当前角色 ID，不含游戏数据） |
+| 登录态 | JWT **仅内存**；每次启动须登录；登出/退出/关窗时 `POST /auth/logout` 注销（Redis 黑名单） |
+| 本地文件 | **无**游戏数据或 JWT 持久化（启动时清理旧版 `user://auth_token.json` 若存在） |
 | 联网门禁 | `ConnectivityMonitor` 探活；主菜单离线阻断；关键操作前检查可达性 |
 | 主菜单 UI | 固定 **3 个槽位**，展示服务端角色列表（按最近登录排序）；不足 3 个时显示「+ 创建新角色」 |
 | 槽位上限 | 每账号最多 3 个角色（服务端 `maxSlots`） |
@@ -655,13 +656,16 @@ API（需登录 + 角色归属校验）：
 | 时机 | 行为 |
 |------|------|
 | 进入角色 | `GET /characters/{id}/save` 下载并 `import_save_data` |
-| 战斗胜利结算 | `await sync_to_cloud` |
-| 地牢事件确认 / 进战斗前 | `await sync_to_cloud` |
+| 战斗胜利结算 | `POST .../spawns/{slotId}/settle`（服务端权威奖励），客户端 `apply_server_save` |
+| 地牢事件确认 / 非自动战斗进战前 | `await sync_to_cloud` |
+| 自动战斗进战前 | 跳过阻塞同步（结算后仍走 settle） |
 | 背包穿戴 / 卸下 / 丢弃 / 强化 | `await sync_to_cloud`（强化 roll 走服务端 API，成功后应用返回档） |
-| 切换地牢 / 回主菜单 / 登出 / 退出 | `sync_before_scene_exit`，失败阻止离开 |
+| 切换地牢 / 回主菜单 / 登出 / 退出 | `sync_before_scene_exit`，失败阻止离开；随后 `end_session` 注销 token |
 | 同步失败 | 内存重试队列 + 指数退避；网络恢复后自动冲刺 |
 
-**版本冲突（409）**：弹窗选择「以云端为准」或「以本机为准」（force upload）。
+**版本冲突（409）**：自动以云端存档覆盖本机，弹窗提示后**强制重新登录**。
+
+**会话态保护**：`apply_server_save` 导入服务端档时，保留本机仍在生效的 **自动战斗开关** 与 **战吼剩余时间**（避免 settle 用陈旧云端值覆盖）。
 
 **断网行为**：内存中可继续游玩，但切场景与登出会被同步拦住；进程强杀时未同步进度丢失（无本地兜底）。
 
@@ -669,8 +673,9 @@ API（需登录 + 角色归属校验）：
 
 **已实现：**
 
-- 注册 / 登录（JWT）、角色 CRUD（含重命名、删档）
+- 注册 / 登录 / **登出**（JWT + Redis 黑名单）、角色 CRUD（含重命名、删档）
 - 云存档上下传、版本冲突、内存重试队列（`NetworkManager` + `CloudSaveService`）
+- 服务端权威战斗结算（`settle` + `LootEngine`）
 - 网络探活与离线 UI（`ConnectivityMonitor` + `SyncStatusHud`）
 - 战力排行榜查询
 - 服务端权威强化 roll（`POST /characters/{id}/enhance/roll`）
@@ -717,6 +722,7 @@ API（需登录 + 角色归属校验）：
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| v1.12 | 2026-06-17 | 会话制登录（JWT 不持久化、退出注销）；服务端 settle 结算；409 冲突强制重登；战吼/自动战斗会话态保护 |
 | v1.11 | 2026-06-16 | §12 全面在线化：取消本地存档，云端唯一持久化；必须登录联网；角色重命名/删档；同步策略与断网行为 |
 | v1.9 | 2026-06-12 | §12 三槽多存档与云同步；主菜单流程与 MVP 闭环；首饰章节更名；项链实例结构 |
 | v1.8 | 2026-06-12 | 永冻深渊怪物池与四系项链；项链掉落/强化与沼泽戒指对称 |

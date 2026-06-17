@@ -44,8 +44,8 @@ HTTP + JSON 对接 [`../lost-miracle-server`](../lost-miracle-server)（默认 `
 | 连接探活 | `scripts/network/ConnectivityMonitor.gd` |
 | 状态序列化 | Autoload `SaveManager`（内存 only，不写游戏档到磁盘） |
 
-**本地磁盘**：仅 `user://auth_token.json`（JWT，不含游戏数据）。
+**登录态**：JWT 仅存于内存；**每次启动须重新登录**；登出 / 退出游戏 / 关闭窗口时调用 `POST /auth/logout` 注销 token（Redis 黑名单），并清理本地会话。启动时会删除旧版遗留的 `user://auth_token.json`（若存在）。
 
-**同步**：战斗结算、背包操作、切场景等关键节点调用 `CloudSaveService.sync_to_cloud()`；失败时内存重试队列 + 指数退避，网络恢复后自动上传。切场景 / 登出 / 退出须同步成功，否则阻止离开。
+**同步**：战斗结算走服务端 `settle` API；背包操作、切场景等关键节点调用 `CloudSaveService.sync_to_cloud()`；自动战斗进战前跳过阻塞同步。失败时内存重试队列 + 指数退避，网络恢复后自动上传。切场景 / 登出 / 退出须同步成功，否则阻止离开。
 
 **离线**：主菜单阻断进入；游戏中断网可继续玩，但无法切场景或登出直至恢复连接。

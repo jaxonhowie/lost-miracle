@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" width="800" height="320">
+  <defs>
+    <!-- 暗红渐变 -->
+    <linearGradient id="fireGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff4422;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#cc1100;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#660000;stop-opacity:1"/>
+    </linearGradient>
+    <!-- 金色渐变 -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1"/>
+      <stop offset="40%" style="stop-color:#ffaa00;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#b8860b;stop-opacity:1"/>
+    </linearGradient>
+    <!-- 发光效果 -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="strongGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <!-- 内阴影 -->
+    <filter id="innerShadow">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur stdDeviation="2" result="offset-blur"/>
+      <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+      <feFlood flood-color="#000" flood-opacity="0.6" result="color"/>
+      <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
+      <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+    </filter>
+    <!-- 背景暗纹理 -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" style="stop-color:#1a0a0a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0a0000;stop-opacity:1"/>
+    </radialGradient>
+    <!-- 剑刃渐变 -->
+    <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#888;stop-opacity:1"/>
+      <stop offset="40%" style="stop-color:#ddd;stop-opacity:1"/>
+      <stop offset="60%" style="stop-color:#fff;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#999;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="800" height="320" fill="url(#bgGlow)"/>
+  <!-- 微妙的背景粒子/尘埃效果 -->
+  <circle cx="120" cy="80" r="1" fill="#ff4422" opacity="0.3"/>
+  <circle cx="680" cy="60" r="1.2" fill="#ff4422" opacity="0.25"/>
+  <circle cx="350" cy="250" r="0.8" fill="#ff6644" opacity="0.2"/>
+  <circle cx="500" cy="40" r="1" fill="#ffaa00" opacity="0.2"/>
+  <circle cx="200" cy="200" r="0.6" fill="#ff4422" opacity="0.3"/>
+  <circle cx="600" cy="230" r="1" fill="#ff6644" opacity="0.15"/>
+
+  <!-- 中央装饰剑 -->
+  <g transform="translate(400, 105)" filter="url(#glow)">
+    <!-- 剑刃 -->
+    <polygon points="-4,-70 4,-70 3,20 -3,20" fill="url(#bladeGrad)" opacity="0.9"/>
+    <!-- 剑刃中线 -->
+    <line x1="0" y1="-68" x2="0" y2="18" stroke="#fff" stroke-width="0.5" opacity="0.4"/>
+    <!-- 剑格 -->
+    <rect x="-18" y="18" width="36" height="6" rx="2" fill="url(#goldGrad)"/>
+    <rect x="-14" y="20" width="28" height="2" rx="1" fill="#fff" opacity="0.3"/>
+    <!-- 剑柄 -->
+    <rect x="-3" y="24" width="6" height="22" rx="1" fill="#4a3520"/>
+    <rect x="-2" y="26" width="4" height="18" rx="1" fill="#5a4530" opacity="0.6"/>
+    <!-- 剑柄缠绕 -->
+    <line x1="-3" y1="28" x2="3" y2="31" stroke="#8b6914" stroke-width="1" opacity="0.6"/>
+    <line x1="-3" y1="33" x2="3" y2="36" stroke="#8b6914" stroke-width="1" opacity="0.6"/>
+    <line x1="-3" y1="38" x2="3" y2="41" stroke="#8b6914" stroke-width="1" opacity="0.6"/>
+    <!-- 剑首宝石 -->
+    <circle cx="0" cy="48" r="4" fill="#cc1100" filter="url(#strongGlow)"/>
+    <circle cx="-1" cy="47" r="1.5" fill="#ff4444" opacity="0.6"/>
+  </g>
+
+  <!-- 主标题 LOST -->
+  <text x="400" y="175" text-anchor="middle" font-family="'Trajan Pro', 'Cinzel', 'Times New Roman', serif"
+        font-size="72" font-weight="bold" letter-spacing="18" fill="url(#goldGrad)" filter="url(#glow)">
+    LOST
+  </text>
+  <!-- LOST 内阴影叠加 -->
+  <text x="400" y="175" text-anchor="middle" font-family="'Trajan Pro', 'Cinzel', 'Times New Roman', serif"
+        font-size="72" font-weight="bold" letter-spacing="18" fill="none" stroke="#000" stroke-width="0.5" opacity="0.3">
+    LOST
+  </text>
+
+  <!-- 副标题 MIRACLE -->
+  <text x="400" y="225" text-anchor="middle" font-family="'Trajan Pro', 'Cinzel', 'Times New Roman', serif"
+        font-size="42" font-weight="normal" letter-spacing="24" fill="url(#fireGrad)" filter="url(#glow)">
+    MIRACLE
+  </text>
+
+  <!-- 装饰横线 - 左 -->
+  <line x1="80" y1="190" x2="200" y2="190" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.6"/>
+  <line x1="100" y1="194" x2="190" y2="194" stroke="url(#goldGrad)" stroke-width="0.8" opacity="0.3"/>
+  <!-- 装饰横线 - 右 -->
+  <line x1="600" y1="190" x2="720" y2="190" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.6"/>
+  <line x1="610" y1="194" x2="700" y2="194" stroke="url(#goldGrad)" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- 左装饰菱形 -->
+  <polygon points="72,190 80,184 88,190 80,196" fill="url(#goldGrad)" opacity="0.7"/>
+  <!-- 右装饰菱形 -->
+  <polygon points="712,190 720,184 728,190 720,196" fill="url(#goldGrad)" opacity="0.7"/>
+
+  <!-- 底部标语 -->
+  <text x="400" y="268" text-anchor="middle" font-family="'Cinzel', 'Times New Roman', serif"
+        font-size="13" letter-spacing="8" fill="#aa8866" opacity="0.7">
+    DARK FANTASY ACTION RPG
+  </text>
+
+  <!-- 底部装饰线 -->
+  <line x1="250" y1="280" x2="550" y2="280" stroke="#aa8866" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- 角落装饰 - 左上 -->
+  <path d="M 30,30 L 30,60 M 30,30 L 60,30" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4" fill="none"/>
+  <!-- 角落装饰 - 右上 -->
+  <path d="M 770,30 L 770,60 M 770,30 L 740,30" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4" fill="none"/>
+  <!-- 角落装饰 - 左下 -->
+  <path d="M 30,290 L 30,260 M 30,290 L 60,290" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4" fill="none"/>
+  <!-- 角落装饰 - 右下 -->
+  <path d="M 770,290 L 770,260 M 770,290 L 740,290" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4" fill="none"/>
+</svg>

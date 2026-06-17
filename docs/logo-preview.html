@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lost Miracle — Logo Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Cinzel', 'Times New Roman', serif;
+    color: #aa8866;
+  }
+  .logo-container {
+    padding: 60px;
+    border: 1px solid rgba(170, 136, 102, 0.15);
+    border-radius: 4px;
+    background: radial-gradient(ellipse at center, #1a0a0a 0%, #0a0000 100%);
+    box-shadow: 0 0 80px rgba(204, 17, 0, 0.08);
+  }
+  img { display: block; max-width: 100%; height: auto; }
+  .label {
+    margin-top: 24px;
+    font-size: 12px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+  .variants {
+    margin-top: 60px;
+    display: flex;
+    gap: 40px;
+  }
+  .variant {
+    text-align: center;
+  }
+  .variant img {
+    border: 1px solid rgba(170, 136, 102, 0.1);
+    border-radius: 2px;
+  }
+  .variant-label {
+    margin-top: 8px;
+    font-size: 11px;
+    letter-spacing: 4px;
+    opacity: 0.4;
+  }
+</style>
+</head>
+<body>
+  <div class="logo-container">
+    <img src="logo.svg" alt="Lost Miracle" width="800" height="320"/>
+  </div>
+  <p class="label">Lost Miracle — Dark Fantasy Action RPG</p>
+
+  <div class="variants">
+    <div class="variant">
+      <img src="logo.svg" alt="Small" width="400" height="160"/>
+      <p class="variant-label">50% Scale</p>
+    </div>
+    <div class="variant" style="background:#fff; padding:20px; border-radius:4px;">
+      <img src="logo.svg" alt="On White" width="400" height="160"/>
+      <p class="variant-label" style="color:#333;">Light Background</p>
+    </div>
+  </div>
+</body>
+</html>

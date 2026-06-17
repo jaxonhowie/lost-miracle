@@ -24,7 +24,7 @@ func create_http_request() -> HTTPRequest:
 	return http
 
 func _ready() -> void:
-	_try_restore_token()
+	_clear_token()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
@@ -33,41 +33,17 @@ func _notification(what: int) -> void:
 func exit_application() -> void:
 	if logged_in and has_character() and SaveManager.session_active:
 		await cloud_sync_save_await()
-	logout()
+	await end_session()
 	get_tree().quit()
 
-func _try_restore_token() -> void:
-	if not FileAccess.file_exists(TOKEN_PATH):
-		return
-	var file = FileAccess.open(TOKEN_PATH, FileAccess.READ)
-	if not file:
-		return
-	var json = JSON.new()
-	if json.parse(file.get_as_text()) != OK:
-		file.close()
-		return
-	file.close()
-	var data: Dictionary = json.data
-	token = str(data.get("token", ""))
-	user_id = ApiIds.from_value(data.get("user_id", ""))
-	username = str(data.get("username", ""))
-	if not token.is_empty():
-		logged_in = true
-		_character_id = ApiIds.from_value(data.get("character_id", ""))
-		_save_version = int(data.get("save_version", 0))
-		loginStateChanged.emit()
+func end_session() -> void:
+	await _revoke_server_token()
+	logout()
 
-func _persist_token() -> void:
-	var file = FileAccess.open(TOKEN_PATH, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify({
-			"token": token,
-			"user_id": user_id,
-			"username": username,
-			"character_id": _character_id,
-			"save_version": _save_version,
-		}, "\t"))
-		file.close()
+func _revoke_server_token() -> void:
+	if token.is_empty():
+		return
+	await _api.make_request("POST", "/auth/logout", {}, token)
 
 func _clear_token() -> void:
 	if FileAccess.file_exists(TOKEN_PATH):
@@ -98,7 +74,6 @@ func _apply_auth(data: Dictionary, user: String) -> void:
 	logged_in = true
 	_character_id = ""
 	_save_version = 0
-	_persist_token()
 	loginStateChanged.emit()
 
 func logout() -> void:
@@ -235,14 +210,12 @@ func get_character_id() -> String:
 
 func set_character_id(id: String) -> void:
 	_character_id = ApiIds.from_value(id)
-	_persist_token()
 
 func get_save_version() -> int:
 	return _save_version
 
 func set_save_version(v: int) -> void:
 	_save_version = v
-	_persist_token()
 
 func cloud_sync_save() -> void:
 	var cloud: Node = _cloud_save_service()

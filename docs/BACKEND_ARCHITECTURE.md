@@ -305,6 +305,8 @@ Top100：  ZREVRANGE lb:power:all 0 99 WITHSCORES
 
 `POST /auth/login` — 请求/响应同上。
 
+`POST /auth/logout` — 请求头 `Authorization: Bearer <token>`；将 token 写入 Redis 黑名单（TTL = 剩余有效期），客户端登出/退出/关窗时调用。**每次启动客户端须重新登录**（JWT 不持久化到磁盘）。
+
 `POST /auth/refresh` — Phase 1 可省略，Token 2h + 重新登录即可。
 
 #### 7.2 角色列表 / 创建
@@ -385,11 +387,32 @@ Top100：  ZREVRANGE lb:power:all 0 99 WITHSCORES
 }
 ```
 
-**冲突策略（客户端弹窗三选一）：**
+**冲突策略（客户端）：**
 
-1. **以云端为准** — 下载覆盖本地  
-2. **以本地为准** — 强制上传（`force: true` + 服务端版本校验）  
-3. **取消** — 保持离线  
+409 时自动下载云端存档覆盖本机，弹窗提示后强制重新登录（`CloudSaveService.handle_conflict`）。
+
+#### 7.4.1 战斗结算 — settle
+
+`POST /characters/{characterId}/dungeons/{dungeonId}/spawns/{slotId}/settle`
+
+```json
+// Request
+{
+  "saveVersion": 45,
+  "monsterId": "rotting_skeleton"
+}
+
+// Response data：更新后的 save + 奖励摘要
+{
+  "saveVersion": 46,
+  "exp": 120,
+  "gold": 35,
+  "items": [ /* ... */ ],
+  "save": { /* 完整 save JSON */ }
+}
+```
+
+服务端 `LootEngine` 权威掉落；客户端 `apply_server_save` 应用返回档（会话中的 `auto_battle` / 战吼计时由客户端保留）。
 
 #### 7.5 排行榜
 
@@ -457,7 +480,7 @@ Top100：  ZREVRANGE lb:power:all 0 99 WITHSCORES
 | 项 | 方案 |
 |----|------|
 | 密码 | BCrypt 哈希，禁止明文 |
-| Token | JWT HS256 或 RS256；`sub=userId`，`exp=2h` |
+| Token | JWT HS256；`sub=userId`，`aud=game`，`exp=2h`；**登出黑名单**（Redis `auth:blacklist:*`，TTL=剩余有效期） |
 | HTTPS | 生产环境强制 TLS |
 | 限流 | Redis：`/save` 上传 10 次/分钟/角色；`/leaderboards/submit` 30 次/分钟 |
 | 存档校验 | `checksum` = SHA-256(canonical JSON)；异常膨胀 > 512KB 拒绝 |
@@ -510,21 +533,22 @@ lost-miracle-client/scripts/
     NetworkManager.gd      # 可选 Autoload：登录态、联网开关
 ```
 
-### 10.2 存档双通道
+### 10.2 存档与同步
 
 ```text
 SaveManager
-  ├─ _build_save_data() / _apply_save_data()   # 保持不变
-  ├─ save_game_local()                          # 现有本地逻辑
-  └─ save_game_cloud()                          # 调用 CloudSaveService.upload()
+  ├─ _build_save_data() / _apply_save_data()   # 内存序列化
+  └─ CloudSaveService.upload / apply_server_save
 ```
+
+**客户端 JWT**：仅内存；`NetworkManager.end_session()` 在登出/退出/关窗时调用 `POST /auth/logout` 并清理本地态。
 
 **同步时机（联网时）：**
 
-- 战斗胜利结算后  
-- 强化成功/失败后  
-- 进入主菜单 / 退出游戏  
-- 手动「同步云端」按钮（设置页）
+- 战斗胜利 → `settle` API（非 PUT save）  
+- 强化 roll → 服务端 API 返回新档  
+- 背包变更、切场景、登出、退出 → `sync_to_cloud`  
+- 自动战斗进战前 → 跳过阻塞同步  
 
 **流程：**
 

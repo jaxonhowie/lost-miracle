@@ -32,10 +32,15 @@ mvn spring-boot:run
 |------|------|------|
 | POST | `/auth/register` | 注册 |
 | POST | `/auth/login` | 登录 |
+| POST | `/auth/logout` | 登出（Bearer token 加入 Redis 黑名单） |
 | GET | `/characters` | 角色列表 |
 | POST | `/characters` | 创建角色 |
 | GET | `/characters/{id}/save` | 下载云存档 |
 | PUT | `/characters/{id}/save` | 上传云存档 |
+| GET | `/characters/{id}/dungeons/{dungeonId}/spawns` | 刷怪槽状态 |
+| POST | `/characters/{id}/dungeons/{dungeonId}/spawns/encounter` | 占用槽位 |
+| POST | `/characters/{id}/dungeons/{dungeonId}/spawns/{slotId}/settle` | 战斗胜利结算 |
+| POST | `/characters/{id}/dungeons/{dungeonId}/spawns/{slotId}/release` | 战败释放槽位 |
 | GET | `/leaderboards/power` | 战力榜 |
 | POST | `/characters/{id}/enhance/roll` | 服务端权威强化（需 `saveVersion`） |
 | GET | `/characters/{id}/mail` | 邮件列表 |
@@ -93,6 +98,10 @@ curl -s -X POST http://127.0.0.1:8080/api/v1/characters \
   -H "Authorization: Bearer <token>" \
   -H 'Content-Type: application/json' \
   -d '{}'
+
+# 登出（token 失效，下次须重新登录）
+curl -s -X POST http://127.0.0.1:8080/api/v1/auth/logout \
+  -H "Authorization: Bearer <token>"
 ```
 
 ## 配置

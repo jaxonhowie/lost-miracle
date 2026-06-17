@@ -29,7 +29,7 @@ Autoloads: `Game`, `PlayerData`, `DataManager`, `SaveManager`, `NetworkManager`,
 - **Equipment**: 8 slots (dual rings), vine/chain/plate tiers, +0~+10 enhance (**stones only, no gold**)
 - **Rings/Necklace**: swamp rings, forge jewelry stones, frozen necklaces — see `docs/DESIGN.md` §11
 - **Dungeon**: 4 maps; explore 75/10/10/5; global spawn slots (normal×3/type 60s, elite 180s, boss 300s)
-- **Save**: **Online-only** — must login + network; cloud is sole persistence (`CloudSaveService`); `SaveManager` is in-memory serialize only; local disk keeps JWT only (`user://auth_token.json`)
+- **Save**: **Online-only** — must login + network; cloud is sole persistence (`CloudSaveService`); `SaveManager` is in-memory serialize only; **JWT 仅内存持有，退出/关闭客户端时注销，不写入磁盘**
 
 ### Key Formulas
 
