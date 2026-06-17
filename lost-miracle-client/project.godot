@@ -21,13 +21,12 @@ DataManager="*res://scripts/autoload/DataManager.gd"
 PlayerData="*res://scripts/autoload/PlayerData.gd"
 SaveManager="*res://scripts/autoload/SaveManager.gd"
 NetworkManager="*res://scripts/autoload/NetworkManager.gd"
-ConnectivityMonitor="*res://scripts/network/ConnectivityMonitor.gd"
 CloudSaveService="*res://scripts/network/CloudSaveService.gd"
-ConfigService="*res://scripts/network/ConfigService.gd"
-SpawnService="*res://scripts/network/SpawnService.gd"
 SyncStatusHud="*res://scenes/ui/SyncStatusHud.tscn"
 ApiIds="*res://scripts/network/ApiIds.gd"
-MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
+ConnectivityMonitor="*res://scripts/network/ConnectivityMonitor.gd"
+SpawnService="*res://scripts/network/SpawnService.gd"
+ConfigService="*res://scripts/network/ConfigService.gd"
 
 [display]
 

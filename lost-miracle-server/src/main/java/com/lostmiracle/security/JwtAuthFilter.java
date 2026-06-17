@@ -30,6 +30,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        // 如果已有认证（由其他 filter 设置），不覆盖
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);

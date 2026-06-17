@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +18,8 @@ import java.util.List;
 
 @Component
 public class AdminJwtAuthFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminJwtAuthFilter.class);
 
     private final AdminJwtTokenProvider adminJwtTokenProvider;
 
@@ -36,6 +40,13 @@ public class AdminJwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        // 如果已有认证（由其他 filter 设置），不覆盖
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            log.debug("admin filter: auth already set, skipping path={}", path);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
@@ -47,9 +58,13 @@ public class AdminJwtAuthFilter extends OncePerRequestFilter {
                         List.of(new SimpleGrantedAuthority("ROLE_GM"))
                 );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception ignored) {
+                log.debug("admin filter: set auth for gm={} path={}", principal.username(), path);
+            } catch (Exception ex) {
+                log.warn("admin filter: token parse failed path={} error={}", path, ex.getMessage());
                 SecurityContextHolder.clearContext();
             }
+        } else {
+            log.debug("admin filter: no Bearer token, path={}", path);
         }
         filterChain.doFilter(request, response);
     }

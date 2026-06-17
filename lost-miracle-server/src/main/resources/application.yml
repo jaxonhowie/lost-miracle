@@ -59,3 +59,4 @@ management:
 logging:
   level:
     com.lostmiracle: INFO
+    com.lostmiracle.security.AdminJwtAuthFilter: DEBUG
