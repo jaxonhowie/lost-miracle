@@ -107,8 +107,8 @@ public class SaveService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "save not found");
         }
 
-        boolean force = Boolean.TRUE.equals(request.force());
-        if (!force && !existing.getSaveVersion().equals(request.saveVersion())) {
+        // force 参数已废弃，始终执行版本冲突检查（仅 admin 端可绕过）
+        if (!existing.getSaveVersion().equals(request.saveVersion())) {
             log.warn(
                     "save version conflict userId={} characterId={} clientVersion={} serverVersion={}",
                     userId,

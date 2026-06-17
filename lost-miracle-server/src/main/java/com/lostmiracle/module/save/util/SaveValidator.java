@@ -5,6 +5,7 @@ import com.lostmiracle.common.ErrorCode;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class SaveValidator {
 
@@ -17,6 +18,12 @@ public final class SaveValidator {
     private static final int MAX_JEWELRY_ENHANCE_STONE = 99_999;
     private static final int MAX_BLESSED_JEWELRY_ENHANCE_STONE = 9_999;
     private static final int MAX_HEALTH_POTION = 9_999;
+    private static final int MAX_ENHANCE_LEVEL = 10;
+
+    private static final Set<String> VALID_EQUIPMENT_SLOTS = Set.of(
+            "weapon", "head", "body", "legs", "feet",
+            "ring_left", "ring_right", "necklace"
+    );
 
     private SaveValidator() {
     }
@@ -57,6 +64,49 @@ public final class SaveValidator {
         }
         if (inventory.size() > MAX_INVENTORY_SIZE) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "inventory too large");
+        }
+        validateInventoryItems(inventory);
+        validateEquipped(save);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void validateInventoryItems(List<?> inventory) {
+        for (int i = 0; i < inventory.size(); i++) {
+            Object itemObj = inventory.get(i);
+            if (!(itemObj instanceof Map<?, ?> itemMap)) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "inventory[" + i + "] not an object");
+            }
+            Map<String, Object> item = (Map<String, Object>) itemMap;
+
+            Object idObj = item.get("id");
+            if (!(idObj instanceof String id) || id.isBlank()) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "inventory[" + i + "].id must be a non-empty string");
+            }
+
+            if (item.containsKey("enhance_level")) {
+                int enhanceLevel = intValue(item.get("enhance_level"));
+                if (enhanceLevel < 0 || enhanceLevel > MAX_ENHANCE_LEVEL) {
+                    throw new BusinessException(ErrorCode.BAD_REQUEST,
+                            "inventory[" + i + "].enhance_level must be 0-" + MAX_ENHANCE_LEVEL);
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void validateEquipped(Map<String, Object> save) {
+        Object equippedObj = save.get("equipped");
+        if (equippedObj == null) {
+            return;
+        }
+        if (!(equippedObj instanceof Map<?, ?> equippedMap)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "equipped must be an object");
+        }
+        Map<String, Object> equipped = (Map<String, Object>) equippedMap;
+        for (String slot : equipped.keySet()) {
+            if (!VALID_EQUIPMENT_SLOTS.contains(slot)) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "invalid equipment slot: " + slot);
+            }
         }
     }
 

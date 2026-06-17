@@ -55,6 +55,61 @@ class SaveValidatorTest {
         assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
     }
 
+    @Test
+    void validate_rejectsInventoryItemWithoutId() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> badItem = new HashMap<>();
+        badItem.put("name", "no_id");
+        inventory.add(badItem);
+        save.put("inventory", inventory);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsEnhanceLevelOverMax() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "vine_wood_sword");
+        item.put("enhance_level", 11);
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsValidEnhanceLevel() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "vine_wood_sword");
+        item.put("enhance_level", 10);
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsInvalidEquippedSlot() {
+        Map<String, Object> save = validSave(1, 0);
+        Map<String, Object> equipped = new HashMap<>();
+        equipped.put("invalid_slot", "vine_wood_sword");
+        save.put("equipped", equipped);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsValidEquippedSlots() {
+        Map<String, Object> save = validSave(1, 0);
+        Map<String, Object> equipped = new HashMap<>();
+        equipped.put("weapon", "vine_wood_sword");
+        equipped.put("ring_left", "swamp_ring_1");
+        equipped.put("necklace", "frozen_necklace_1");
+        save.put("equipped", equipped);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
     private Map<String, Object> validSave(int level, int exp) {
         Map<String, Object> player = new HashMap<>();
         player.put("level", level);
