@@ -26,7 +26,10 @@ public class AdminJwtTokenProvider {
     private final long confirmExpirationSeconds;
 
     public AdminJwtTokenProvider(LostMiracleProperties properties) {
-        String secret = properties.getJwt().getSecret();
+        String secret = properties.getJwt().getEffectiveAdminSecret();
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException("lost-miracle.jwt.admin-secret must be at least 32 characters");
+        }
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationSeconds = properties.getGm().getExpirationSeconds();
         this.confirmExpirationSeconds = properties.getGm().getConfirmExpirationSeconds();

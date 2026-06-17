@@ -8,8 +8,8 @@ spring:
     name: lost-miracle-server
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/lost_miracle?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
+    username: ${LOST_MIRACLE_DB_USER:root}
+    password: ${LOST_MIRACLE_DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
@@ -28,11 +28,12 @@ mybatis:
 
 lost-miracle:
   jwt:
-    secret: change-me-to-a-long-random-secret-key-in-production
+    secret: ${LOST_MIRACLE_JWT_SECRET:change-me-to-a-long-random-secret-key-in-production}
+    admin-secret: ${LOST_MIRACLE_GM_JWT_SECRET:}
     expiration-seconds: 7200
   gm:
-    bootstrap-super-username: super
-    bootstrap-super-password: gm-admin-change-me
+    bootstrap-super-username: ${LOST_MIRACLE_GM_USER:super}
+    bootstrap-super-password: ${LOST_MIRACLE_GM_PASSWORD:gm-admin-change-me}
     expiration-seconds: 7200
     confirm-expiration-seconds: 300
   character:

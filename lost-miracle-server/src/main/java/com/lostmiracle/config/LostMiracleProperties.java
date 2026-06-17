@@ -72,6 +72,7 @@ public class LostMiracleProperties {
 
     public static class Jwt {
         private String secret;
+        private String adminSecret;
         private long expirationSeconds = 7200;
 
         public String getSecret() {
@@ -80,6 +81,21 @@ public class LostMiracleProperties {
 
         public void setSecret(String secret) {
             this.secret = secret;
+        }
+
+        /**
+         * Admin 独立签名密钥。若未配置则回退到 player secret（向后兼容）。
+         */
+        public String getEffectiveAdminSecret() {
+            return (adminSecret != null && !adminSecret.isBlank()) ? adminSecret : secret;
+        }
+
+        public String getAdminSecret() {
+            return adminSecret;
+        }
+
+        public void setAdminSecret(String adminSecret) {
+            this.adminSecret = adminSecret;
         }
 
         public long getExpirationSeconds() {
