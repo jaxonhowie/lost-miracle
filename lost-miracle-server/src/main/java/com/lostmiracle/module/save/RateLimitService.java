@@ -28,6 +28,14 @@ public class RateLimitService {
         check("ratelimit:enhance:" + userId + ":" + characterId, 30, Duration.ofMinutes(1));
     }
 
+    /**
+     * 登录接口速率限制：每个 IP 每分钟最多 10 次。
+     * 同时覆盖 /auth/login、/auth/register 和 /admin/auth/login。
+     */
+    public void checkLogin(String clientIp) {
+        check("ratelimit:login:" + clientIp, 10, Duration.ofMinutes(1));
+    }
+
     private void check(String key, int maxCount, Duration window) {
         Long count = redisTemplate.opsForValue().increment(key);
         if (count != null && count == 1L) {

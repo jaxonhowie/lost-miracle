@@ -8,6 +8,7 @@ import com.lostmiracle.module.auth.dto.RegisterRequest;
 import com.lostmiracle.module.user.entity.UserEntity;
 import com.lostmiracle.module.user.mapper.UserMapper;
 import com.lostmiracle.security.JwtTokenProvider;
+import com.lostmiracle.security.TokenBlacklistService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,18 +19,26 @@ public class AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public AuthService(UserMapper userMapper, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+    public AuthService(
+            UserMapper userMapper,
+            PasswordEncoder passwordEncoder,
+            JwtTokenProvider jwtTokenProvider,
+            TokenBlacklistService tokenBlacklistService
+    ) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         long count = userMapper.countByUsername(request.username());
         if (count > 0) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "username already exists");
+            // 使用与登录相同的模糊消息，避免用户名枚举
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "invalid username or password");
         }
 
         UserEntity user = new UserEntity();
@@ -49,6 +58,17 @@ public class AuthService {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "invalid username or password");
         }
         return buildAuthResponse(user);
+    }
+
+    public void logout(String token) {
+        if (token == null || token.isBlank()) {
+            return;
+        }
+        try {
+            tokenBlacklistService.blacklist(token, jwtTokenProvider.getRemainingSeconds(token));
+        } catch (Exception ignored) {
+            // Token already invalid or expired; treat logout as idempotent.
+        }
     }
 
     private AuthResponse buildAuthResponse(UserEntity user) {

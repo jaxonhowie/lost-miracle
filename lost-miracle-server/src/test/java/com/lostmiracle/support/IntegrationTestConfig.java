@@ -46,6 +46,10 @@ public class IntegrationTestConfig {
             @Override
             public void checkEnhanceRoll(long userId, long characterId) {
             }
+
+            @Override
+            public void checkLogin(String clientIp) {
+            }
         };
     }
 
