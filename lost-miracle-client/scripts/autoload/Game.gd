@@ -30,7 +30,7 @@ func _on_auth_invalid() -> void:
 	await dialog.confirmed
 	dialog.queue_free()
 	_auth_dialog_open = false
-	get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.LOGIN)
 
 func reset_dungeon() -> void:
 	dungeon_progress = {

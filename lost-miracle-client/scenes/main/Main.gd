@@ -102,7 +102,7 @@ func _build_account_bar() -> void:
 		var login_btn := Button.new()
 		login_btn.text = "登录 / 注册"
 		login_btn.add_theme_font_size_override("font_size", 15)
-		login_btn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn"))
+		login_btn.pressed.connect(func(): get_tree().change_scene_to_file(ScenePaths.LOGIN))
 		bar.add_child(login_btn)
 
 func _refresh_character_list() -> void:
@@ -386,7 +386,7 @@ func _on_cloud_sync() -> void:
 		_show_alert("同步失败: %s" % result.get("message", ""))
 
 func _on_leaderboard() -> void:
-	get_tree().change_scene_to_file("res://scenes/leaderboard/LeaderboardScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.LEADERBOARD)
 
 func _on_logout() -> void:
 	if SaveManager.session_active and NetworkManager.has_character():
@@ -396,17 +396,17 @@ func _on_logout() -> void:
 		if not result.get("ok", false):
 			return
 	SaveManager.clear_session()
-	NetworkManager.logout()
-	get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn")
+	await NetworkManager.end_session()
+	get_tree().change_scene_to_file(ScenePaths.LOGIN)
 
 func _go_to_dungeon() -> void:
 	var stats = PlayerData.get_final_stats()
 	PlayerData.current_hp = stats["max_hp"]
 	PlayerData.current_mp = stats["max_mp"]
-	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.DUNGEON)
 
 func _go_to_map() -> void:
-	get_tree().change_scene_to_file("res://scenes/map/MapSelectScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.MAP)
 
 func _show_alert(message: String) -> void:
 	var dialog = AcceptDialog.new()

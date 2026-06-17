@@ -40,7 +40,7 @@ func _on_select_dungeon(dungeon_id: String) -> void:
 		return
 	if not result.get("ok", false):
 		return
-	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.DUNGEON)
 
 func _on_back() -> void:
-	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+	get_tree().change_scene_to_file(ScenePaths.MAIN)

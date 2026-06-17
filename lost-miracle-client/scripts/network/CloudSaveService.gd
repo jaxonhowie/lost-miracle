@@ -284,7 +284,7 @@ func _prompt_relogin_after_conflict(parent: Node) -> void:
 	await dialog.confirmed
 	dialog.queue_free()
 	await NetworkManager.end_session()
-	get_tree().change_scene_to_file("res://scenes/login/LoginScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.LOGIN)
 
 
 func flush_sync_queue(parent: Node = null) -> void:

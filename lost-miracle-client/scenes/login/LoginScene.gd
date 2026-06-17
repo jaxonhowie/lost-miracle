@@ -178,7 +178,7 @@ func _on_submit() -> void:
 	_set_inputs_enabled(true)
 
 	if result.get("ok", false):
-		get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+		get_tree().change_scene_to_file(ScenePaths.MAIN)
 	else:
 		_show_error(_friendly_error(int(result.get("code", -1)), str(result.get("message", ""))))
 

@@ -300,7 +300,7 @@ func _start_battle(monster_id: String, spawn_slot_id: String = "") -> void:
 	if not Game.auto_battle:
 		await CloudSaveService.sync_to_cloud(self, false)
 	PlayerData.reset_for_battle()
-	var battle_scene = load("res://scenes/battle/BattleScene.tscn").instantiate()
+	var battle_scene = load(ScenePaths.BATTLE).instantiate()
 	battle_scene.set_meta("monster_id", monster_id)
 	if not spawn_slot_id.is_empty():
 		battle_scene.set_meta("spawn_slot_id", spawn_slot_id)
@@ -309,7 +309,7 @@ func _start_battle(monster_id: String, spawn_slot_id: String = "") -> void:
 	self.queue_free()
 
 func _on_inventory(open_enhance: bool = false) -> void:
-	var scene = load("res://scenes/inventory/InventoryScene.tscn").instantiate()
+	var scene = load(ScenePaths.INVENTORY).instantiate()
 	if open_enhance:
 		scene.set_meta("open_enhance", true)
 	get_tree().root.add_child(scene)
@@ -322,7 +322,7 @@ func _on_map_select() -> void:
 		return
 	if not result.get("ok", false):
 		return
-	get_tree().change_scene_to_file("res://scenes/map/MapSelectScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.MAP)
 
 func _on_menu() -> void:
 	var result = await CloudSaveService.sync_before_scene_exit(self)
@@ -330,7 +330,7 @@ func _on_menu() -> void:
 		return
 	if not result.get("ok", false):
 		return
-	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+	get_tree().change_scene_to_file(ScenePaths.MAIN)
 
 func _toggle_auto() -> void:
 	if Game.auto_battle:
@@ -340,8 +340,7 @@ func _toggle_auto() -> void:
 	else:
 		Game.auto_battle = true
 		if not $EventResult.visible and not $CenterPanel/ExploreBtn.disabled:
-			$CenterPanel/ExploreBtn.disabled = true
-			dungeon_manager.explore()
+			_on_explore()
 	_update_auto_btn()
 
 func _update_auto_btn() -> void:

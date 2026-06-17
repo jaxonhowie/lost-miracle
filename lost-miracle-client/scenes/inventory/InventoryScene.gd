@@ -794,7 +794,7 @@ func _on_close() -> void:
 	var result = await CloudSaveService.sync_before_scene_exit(self)
 	if result.get("cancelled", false):
 		return
-	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.DUNGEON)
 
 func _slot_name(slot: String) -> String:
 	match slot:

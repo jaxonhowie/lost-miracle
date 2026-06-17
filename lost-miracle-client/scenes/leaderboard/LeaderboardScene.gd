@@ -47,4 +47,4 @@ func _load_leaderboard() -> void:
 		list.add_child(row)
 
 func _on_back() -> void:
-	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+	get_tree().change_scene_to_file(ScenePaths.MAIN)

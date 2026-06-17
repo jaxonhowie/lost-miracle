@@ -45,7 +45,7 @@ func _ready() -> void:
 		dialog.dialog_text = "怪物数据加载失败: %s\n请返回重试。" % monster_id
 		add_child(dialog)
 		dialog.popup_centered()
-		dialog.confirmed.connect(func(): get_tree().change_scene_to_file("res://scenes/map/MapSelectScene.tscn"))
+		dialog.confirmed.connect(func(): get_tree().change_scene_to_file(ScenePaths.MAP))
 		return
 	for child in $SkillPanel/SkillBar.get_children():
 		if child is Control:
@@ -269,7 +269,7 @@ func _log_settle_rewards(data: Dictionary) -> void:
 				_on_log_message("[color=#66dd88]  获得生命药水 x%d[/color]" % int(item.get("amount", 0)))
 
 func _return_to_dungeon() -> void:
-	get_tree().change_scene_to_file("res://scenes/dungeon/DungeonScene.tscn")
+	get_tree().change_scene_to_file(ScenePaths.DUNGEON)
 
 func _auto_use_potion() -> void:
 	if potion_cooldown > 0 or PlayerData.health_potion <= 0:
@@ -345,7 +345,7 @@ func _open_inventory() -> void:
 	if _inventory_open or battle_over:
 		return
 	_inventory_open = true
-	var inv_scene = load("res://scenes/inventory/InventoryScene.tscn").instantiate()
+	var inv_scene = load(ScenePaths.INVENTORY).instantiate()
 	inv_scene.set_meta("overlay_mode", true)
 	inv_scene.set_meta("open_enhance", false)
 	inv_scene.tree_exited.connect(_on_inventory_closed)
