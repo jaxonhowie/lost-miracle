@@ -4,7 +4,7 @@ import type { ApiResponse } from './types';
 const TOKEN_KEY = 'gm_token';
 
 // JSON 响应里 16 位以上整数在 JS 中会丢精度，先转成字符串再 parse
-const LARGE_INT_JSON = /(?<=[:\[,]\s*)(-?\d{16,})(?=\s*[,}\]])/g;
+const LARGE_INT_JSON = /(?<=[:,[]\s*)(-?\d{16,})(?=\s*[,}\]])/g;
 
 function parseResponseJson(text: string): unknown {
   try {
