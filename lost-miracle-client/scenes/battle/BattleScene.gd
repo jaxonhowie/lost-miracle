@@ -39,7 +39,14 @@ func _ready() -> void:
 	_update_potion_btn()
 	_update_auto_btn_style()
 	battle_manager.auto_battle = Game.auto_battle
-	battle_manager.start_battle(monster_id)
+	if not battle_manager.start_battle(monster_id):
+		var dialog := AcceptDialog.new()
+		dialog.title = "战斗错误"
+		dialog.dialog_text = "怪物数据加载失败: %s\n请返回重试。" % monster_id
+		add_child(dialog)
+		dialog.popup_centered()
+		dialog.confirmed.connect(func(): get_tree().change_scene_to_file("res://scenes/map/MapSelectScene.tscn"))
+		return
 	for child in $SkillPanel/SkillBar.get_children():
 		if child is Control:
 			child.focus_mode = Control.FOCUS_NONE

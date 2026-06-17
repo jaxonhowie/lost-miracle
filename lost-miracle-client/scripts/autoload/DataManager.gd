@@ -2,6 +2,8 @@ extends Node
 
 ## 数据管理 — 加载所有 JSON 配置
 
+signal load_errors(errors: Array)
+
 var monsters: Dictionary = {}
 var skills: Dictionary = {}
 var equipment_base: Dictionary = {}
@@ -10,6 +12,7 @@ var dungeon_events: Dictionary = {}
 var enhance_rules: Dictionary = {}
 var jewelry: Dictionary = {}
 var _runtime_config: Dictionary = {}
+var _load_error_list: Array = []
 
 func _ready() -> void:
 	monsters = _load_json("res://data/monsters.json")
@@ -19,6 +22,11 @@ func _ready() -> void:
 	dungeon_events = _load_json("res://data/dungeon_events.json")
 	enhance_rules = _load_json("res://data/enhance_rules.json")
 	jewelry = _load_json("res://data/jewelry.json")
+	if not _load_error_list.is_empty():
+		load_errors.emit(_load_error_list)
+
+func get_load_errors() -> Array:
+	return _load_error_list
 
 func apply_runtime_config(configs: Dictionary) -> void:
 	_runtime_config = configs.duplicate(true)
@@ -29,14 +37,21 @@ func apply_runtime_config(configs: Dictionary) -> void:
 
 func _load_json(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
-		push_warning("DataManager: file not found: " + path)
+		var msg := "数据文件缺失: " + path
+		push_warning("DataManager: " + msg)
+		_load_error_list.append(msg)
 		return {}
 	var file = FileAccess.open(path, FileAccess.READ)
 	if not file:
+		var msg := "数据文件读取失败: " + path
+		push_error("DataManager: " + msg)
+		_load_error_list.append(msg)
 		return {}
 	var json = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
-		push_error("DataManager: JSON parse error in " + path)
+		var msg := "数据文件格式错误: " + path
+		push_error("DataManager: " + msg)
+		_load_error_list.append(msg)
 		return {}
 	return json.data
 

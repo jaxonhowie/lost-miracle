@@ -18,12 +18,12 @@ var auto_battle: bool = false
 var player_attack_timer: float = 0.0
 var monster_attack_timer: float = 0.0
 
-func start_battle(monster_id: String) -> void:
+func start_battle(monster_id: String) -> bool:
 	player = BattleUnit.create_player()
 	monster = BattleUnit.create_monster(monster_id)
 	if monster == null:
 		push_error("BattleManager: unknown monster " + monster_id)
-		return
+		return false
 	is_battle_active = true
 	player_skill_pending = ""
 	# 初始化攻击计时器（首次攻击延迟 = 攻击间隔的一半，让战斗快速开始）
@@ -31,6 +31,7 @@ func start_battle(monster_id: String) -> void:
 	monster_attack_timer = get_attack_cooldown(monster) * 0.5
 	battle_started.emit(player, monster)
 	log_message.emit("⚔ 战斗开始！遭遇 %s" % monster.display_name)
+	return true
 
 ## 根据攻速计算攻击间隔（秒）
 ## spd=10 → 1.33s, spd=15 → 0.89s, spd=6 → 2.22s
