@@ -221,25 +221,30 @@ func _on_challenge_elite() -> void:
 func _on_challenge_boss() -> void:
 	$CenterPanel/ExploreBtn.disabled = true
 	if not Game.is_boss_available():
-		var slot_id := SpawnService.get_spawn_slot_id("boss")
-		if Game.get_boss_cooldown_remaining() <= 0 and not slot_id.is_empty():
-			var release_result := await SpawnService.report_release(Game.current_dungeon_id, slot_id)
-			if not release_result.get("ok", false):
-				_log_event("Boss正在被占用，请稍后再试")
-				$CenterPanel/ExploreBtn.disabled = false
-				await SpawnService.refresh(Game.current_dungeon_id)
-				_update_spawn_buttons()
-				return
-			await SpawnService.refresh(Game.current_dungeon_id)
-			_update_spawn_buttons()
-		if not Game.is_boss_available():
+		if not await _try_release_boss_slot():
 			$CenterPanel/ExploreBtn.disabled = false
 			return
-	var sync_result := await CloudSaveService.sync_to_cloud(self, true)
-	if not sync_result.get("ok", false) or sync_result.get("refreshed_from_cloud", false):
+	if not await _sync_before_battle():
 		$CenterPanel/ExploreBtn.disabled = false
 		return
 	await _begin_spawn_battle("boss", true)
+
+func _try_release_boss_slot() -> bool:
+	var slot_id := SpawnService.get_spawn_slot_id("boss")
+	if Game.get_boss_cooldown_remaining() <= 0 and not slot_id.is_empty():
+		var release_result := await SpawnService.report_release(Game.current_dungeon_id, slot_id)
+		if not release_result.get("ok", false):
+			_log_event("Boss正在被占用，请稍后再试")
+			await SpawnService.refresh(Game.current_dungeon_id)
+			_update_spawn_buttons()
+			return false
+		await SpawnService.refresh(Game.current_dungeon_id)
+		_update_spawn_buttons()
+	return Game.is_boss_available()
+
+func _sync_before_battle() -> bool:
+	var sync_result := await CloudSaveService.sync_to_cloud(self, true)
+	return sync_result.get("ok", false) and not sync_result.get("refreshed_from_cloud", false)
 
 func _handle_non_combat_event(event_type: String, event_data: Dictionary) -> void:
 	match event_type:
@@ -324,8 +329,7 @@ func _on_event_confirm() -> void:
 
 func _start_battle(monster_id: String, spawn_slot_id: String = "", skip_sync: bool = false) -> void:
 	if not Game.auto_battle and not skip_sync:
-		var sync_result := await CloudSaveService.sync_to_cloud(self, true)
-		if not sync_result.get("ok", false) or sync_result.get("refreshed_from_cloud", false):
+		if not await _sync_before_battle():
 			$CenterPanel/ExploreBtn.disabled = false
 			return
 	PlayerData.reset_for_battle()

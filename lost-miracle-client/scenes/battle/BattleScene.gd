@@ -207,50 +207,47 @@ func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 	var spawn_slot_id := str(get_meta("spawn_slot_id", ""))
 	var monster_id := str(rewards.get("monster_id", battle_manager.monster.unit_id))
 	if player_won:
-		if spawn_slot_id.is_empty():
-			_on_log_message("[color=#ff6666]战斗结算失败：缺少刷怪槽信息[/color]")
-			return
-		var settle_result = await SpawnService.settle_victory(
-			Game.current_dungeon_id,
-			spawn_slot_id,
-			monster_id
-		)
-		if not settle_result.get("ok", false):
-			if int(settle_result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
-				var resolved := await CloudSaveService.handle_conflict(self, settle_result)
-				if resolved.get("ok", false):
-					_return_to_dungeon()
-				return
-			else:
-				_on_log_message("[color=#ff6666]战斗结算失败：%s[/color]" % str(settle_result.get("message", "未知错误")))
-				return
-		else:
-			var data: Dictionary = settle_result.get("data", {})
-			NetworkManager.apply_server_save(
-				data.get("save", {}),
-				int(data.get("saveVersion", NetworkManager.get_save_version()))
-			)
-			_log_settle_rewards(data)
-		var monster_type = DataManager.get_monster(monster_id).get("type", "normal")
-		if monster_type == "boss":
-			_on_log_message("[color=#ffaa44]击败了地牢领主！[/color]")
-		if finish_then_return:
-			await get_tree().create_timer(2.0).timeout
-			_return_to_dungeon()
-		elif Game.auto_battle:
-			_on_log_message("[color=#8899aa]--- 3秒后继续探索 ---[/color]")
-			await get_tree().create_timer(3.0).timeout
-			_return_to_dungeon()
-		else:
-			await get_tree().create_timer(2.0).timeout
-			_return_to_dungeon()
+		await _handle_victory(spawn_slot_id, monster_id)
 	else:
-		_on_log_message("[color=#ff6666]💀 你阵亡了，返回地牢...[/color]")
-		if not spawn_slot_id.is_empty():
-			await SpawnService.report_release(Game.current_dungeon_id, spawn_slot_id)
-		PlayerData.current_hp = PlayerData.get_final_stats()["max_hp"] / 2
-		await get_tree().create_timer(2.0).timeout
-		_return_to_dungeon()
+		await _handle_defeat(spawn_slot_id)
+
+func _handle_victory(spawn_slot_id: String, monster_id: String) -> void:
+	if spawn_slot_id.is_empty():
+		_on_log_message("[color=#ff6666]战斗结算失败：缺少刷怪槽信息[/color]")
+		return
+	var settle_result = await SpawnService.settle_victory(
+		Game.current_dungeon_id, spawn_slot_id, monster_id
+	)
+	if not settle_result.get("ok", false):
+		if int(settle_result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
+			var resolved := await CloudSaveService.handle_conflict(self, settle_result)
+			if resolved.get("ok", false):
+				_return_to_dungeon()
+			return
+		_on_log_message("[color=#ff6666]战斗结算失败：%s[/color]" % str(settle_result.get("message", "未知错误")))
+		return
+	var data: Dictionary = settle_result.get("data", {})
+	NetworkManager.apply_server_save(
+		data.get("save", {}),
+		int(data.get("saveVersion", NetworkManager.get_save_version()))
+	)
+	_log_settle_rewards(data)
+	var monster_type = DataManager.get_monster(monster_id).get("type", "normal")
+	if monster_type == "boss":
+		_on_log_message("[color=#ffaa44]击败了地牢领主！[/color]")
+	var delay := 3.0 if Game.auto_battle and not finish_then_return else 2.0
+	if Game.auto_battle and not finish_then_return:
+		_on_log_message("[color=#8899aa]--- 3秒后继续探索 ---[/color]")
+	await get_tree().create_timer(delay).timeout
+	_return_to_dungeon()
+
+func _handle_defeat(spawn_slot_id: String) -> void:
+	_on_log_message("[color=#ff6666]💀 你阵亡了，返回地牢...[/color]")
+	if not spawn_slot_id.is_empty():
+		await SpawnService.report_release(Game.current_dungeon_id, spawn_slot_id)
+	PlayerData.current_hp = PlayerData.get_final_stats()["max_hp"] / 2
+	await get_tree().create_timer(2.0).timeout
+	_return_to_dungeon()
 
 func _log_settle_rewards(data: Dictionary) -> void:
 	var exp_gain := int(data.get("exp", 0))
