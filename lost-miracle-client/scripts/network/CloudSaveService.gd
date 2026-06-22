@@ -203,7 +203,7 @@ func sync_to_cloud(parent: Node = null, interact_on_conflict: bool = true) -> Di
 
 	if int(result.get("code", 0)) == CONFLICT_CODE:
 		var host := parent if parent != null and is_instance_valid(parent) else get_tree().root
-		return await handle_conflict(host, result)
+		return await handle_conflict(host, result, interact_on_conflict)
 
 	if _is_auth_failure(result):
 		_set_status(SyncStatus.OFFLINE, "登录已失效，请重新登录")
@@ -230,8 +230,6 @@ func _reset_retry_delay() -> void:
 
 func sync_before_scene_exit(parent: Node) -> Dictionary:
 	var result := await sync_to_cloud(parent, true)
-	if result.get("relogin", false):
-		return result
 	if not result.get("ok", false) and not _is_auth_failure(result):
 		_show_toast(parent, "存档同步失败，请检查网络后重试")
 	return result
@@ -249,7 +247,7 @@ func queue_progress_sync() -> void:
 	request_background_sync()
 
 
-func handle_conflict(parent: Node, _conflict_result: Dictionary) -> Dictionary:
+func handle_conflict(parent: Node, _conflict_result: Dictionary, show_dialog: bool = true) -> Dictionary:
 	var char_id := NetworkManager.get_character_id()
 	if char_id.is_empty():
 		return {"ok": false, "resolved": false}
@@ -261,30 +259,28 @@ func handle_conflict(parent: Node, _conflict_result: Dictionary) -> Dictionary:
 
 	var data: Dictionary = dl.get("data", {})
 	apply_server_save(data.get("save", {}), int(data.get("saveVersion", 0)))
-	await _prompt_relogin_after_conflict(parent)
+	Game.auto_battle = false
+	_set_status(SyncStatus.OK, "已刷新云端存档")
+	if show_dialog:
+		await _prompt_conflict_resolved(parent)
 	return {
-		"ok": false,
+		"ok": true,
 		"resolved": true,
-		"relogin": true,
+		"refreshed_from_cloud": true,
 		"source": "server",
-		"message": "请重新登录",
+		"message": "云端存档版本较新，已刷新当前进度，请重试刚才的操作",
 	}
 
 
-func _prompt_relogin_after_conflict(parent: Node) -> void:
+func _prompt_conflict_resolved(parent: Node) -> void:
 	var host := parent if parent != null and is_instance_valid(parent) else get_tree().root
-	SaveManager.session_active = false
-	Game.auto_battle = false
-	_set_status(SyncStatus.OFFLINE, "请重新登录")
 	var dialog := AcceptDialog.new()
 	dialog.title = "存档冲突"
-	dialog.dialog_text = "云端存档已被其他设备更新，已用云端存档覆盖。\n请重新登录。"
+	dialog.dialog_text = "云端存档版本较新，已刷新当前进度。\n请重试刚才的操作。"
 	host.add_child(dialog)
 	dialog.popup_centered()
 	await dialog.confirmed
 	dialog.queue_free()
-	await NetworkManager.end_session()
-	get_tree().change_scene_to_file(ScenePaths.LOGIN)
 
 
 func flush_sync_queue(parent: Node = null) -> void:

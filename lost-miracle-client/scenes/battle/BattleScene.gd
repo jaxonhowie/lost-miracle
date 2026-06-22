@@ -217,7 +217,9 @@ func _on_battle_ended(player_won: bool, rewards: Dictionary) -> void:
 		)
 		if not settle_result.get("ok", false):
 			if int(settle_result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
-				await CloudSaveService.handle_conflict(self, settle_result)
+				var resolved := await CloudSaveService.handle_conflict(self, settle_result)
+				if resolved.get("ok", false):
+					_return_to_dungeon()
 				return
 			else:
 				_on_log_message("[color=#ff6666]战斗结算失败：%s[/color]" % str(settle_result.get("message", "未知错误")))
@@ -269,6 +271,8 @@ func _log_settle_rewards(data: Dictionary) -> void:
 				_on_log_message("[color=#66dd88]  获得生命药水 x%d[/color]" % int(item.get("amount", 0)))
 
 func _return_to_dungeon() -> void:
+	if _inventory_open:
+		Game.request_inventory_overlay_restore(false)
 	get_tree().change_scene_to_file(ScenePaths.DUNGEON)
 
 func _auto_use_potion() -> void:

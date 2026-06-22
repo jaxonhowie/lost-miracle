@@ -4,6 +4,7 @@ extends Control
 
 var dungeon_manager: DungeonManager
 var _xp_bar_hover := false
+var _inventory_overlay_open := false
 
 func _ready() -> void:
 	dungeon_manager = DungeonManager.new()
@@ -23,7 +24,12 @@ func _ready() -> void:
 	await SpawnService.refresh(Game.current_dungeon_id)
 	_update_spawn_buttons()
 	_start_spawn_poll()
+	var restored_inventory := _restore_inventory_overlay_if_requested()
 	if Game.auto_battle:
+		if restored_inventory:
+			Game.auto_battle = false
+			_update_auto_btn()
+			return
 		$CenterPanel/ExploreBtn.disabled = true
 		await get_tree().create_timer(1.0).timeout
 		await _do_explore()
@@ -120,6 +126,9 @@ func _update_spawn_buttons() -> void:
 	if Game.is_boss_available():
 		boss_btn.disabled = false
 		boss_btn.text = "挑战Boss"
+	elif Game.get_boss_cooldown_remaining() <= 0 and not SpawnService.get_spawn_slot_id("boss").is_empty():
+		boss_btn.disabled = false
+		boss_btn.text = "恢复Boss"
 	else:
 		boss_btn.disabled = true
 		boss_btn.text = "Boss刷新 %s" % Game.format_cooldown(Game.get_boss_cooldown_remaining())
@@ -163,7 +172,7 @@ func _do_explore() -> void:
 		return
 	_handle_non_combat_event(event_type, dungeon_manager.generate_event_data(event_type))
 
-func _begin_spawn_battle(spawn_type: String) -> void:
+func _begin_spawn_battle(spawn_type: String, skip_start_sync: bool = false) -> void:
 	var result = await SpawnService.encounter(spawn_type, Game.current_dungeon_id)
 	if not result.get("ok", false):
 		await _on_spawn_unavailable(spawn_type)
@@ -183,7 +192,7 @@ func _begin_spawn_battle(spawn_type: String) -> void:
 			"spawn_slot_id": slot_id,
 		})
 		return
-	_start_battle(monster_id, slot_id)
+	_start_battle(monster_id, slot_id, skip_start_sync)
 
 func _on_spawn_unavailable(spawn_type: String) -> void:
 	var msg := "暂无可用怪物，请稍后再试"
@@ -210,10 +219,27 @@ func _on_challenge_elite() -> void:
 	await _begin_spawn_battle("elite")
 
 func _on_challenge_boss() -> void:
-	if not Game.is_boss_available():
-		return
 	$CenterPanel/ExploreBtn.disabled = true
-	await _begin_spawn_battle("boss")
+	if not Game.is_boss_available():
+		var slot_id := SpawnService.get_spawn_slot_id("boss")
+		if Game.get_boss_cooldown_remaining() <= 0 and not slot_id.is_empty():
+			var release_result := await SpawnService.report_release(Game.current_dungeon_id, slot_id)
+			if not release_result.get("ok", false):
+				_log_event("Boss正在被占用，请稍后再试")
+				$CenterPanel/ExploreBtn.disabled = false
+				await SpawnService.refresh(Game.current_dungeon_id)
+				_update_spawn_buttons()
+				return
+			await SpawnService.refresh(Game.current_dungeon_id)
+			_update_spawn_buttons()
+		if not Game.is_boss_available():
+			$CenterPanel/ExploreBtn.disabled = false
+			return
+	var sync_result := await CloudSaveService.sync_to_cloud(self, true)
+	if not sync_result.get("ok", false) or sync_result.get("refreshed_from_cloud", false):
+		$CenterPanel/ExploreBtn.disabled = false
+		return
+	await _begin_spawn_battle("boss", true)
 
 func _handle_non_combat_event(event_type: String, event_data: Dictionary) -> void:
 	match event_type:
@@ -296,9 +322,12 @@ func _on_event_confirm() -> void:
 		CloudSaveService.queue_progress_sync()
 		$CenterPanel/ExploreBtn.disabled = false
 
-func _start_battle(monster_id: String, spawn_slot_id: String = "") -> void:
-	if not Game.auto_battle:
-		await CloudSaveService.sync_to_cloud(self, false)
+func _start_battle(monster_id: String, spawn_slot_id: String = "", skip_sync: bool = false) -> void:
+	if not Game.auto_battle and not skip_sync:
+		var sync_result := await CloudSaveService.sync_to_cloud(self, true)
+		if not sync_result.get("ok", false) or sync_result.get("refreshed_from_cloud", false):
+			$CenterPanel/ExploreBtn.disabled = false
+			return
 	PlayerData.reset_for_battle()
 	var battle_scene = load(ScenePaths.BATTLE).instantiate()
 	battle_scene.set_meta("monster_id", monster_id)
@@ -315,6 +344,29 @@ func _on_inventory(open_enhance: bool = false) -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	self.queue_free()
+
+func _restore_inventory_overlay_if_requested() -> bool:
+	var state := Game.consume_inventory_overlay_restore()
+	if not bool(state.get("open", false)):
+		return false
+	_open_inventory_overlay(bool(state.get("open_enhance", false)))
+	return true
+
+func _open_inventory_overlay(open_enhance: bool = false) -> void:
+	if _inventory_overlay_open:
+		return
+	_inventory_overlay_open = true
+	var scene = load(ScenePaths.INVENTORY).instantiate()
+	scene.set_meta("overlay_mode", true)
+	if open_enhance:
+		scene.set_meta("open_enhance", true)
+	scene.tree_exited.connect(_on_inventory_overlay_closed)
+	add_child(scene)
+
+func _on_inventory_overlay_closed() -> void:
+	_inventory_overlay_open = false
+	Game.clear_inventory_overlay_restore()
+	_update_ui()
 
 func _on_map_select() -> void:
 	var result = await CloudSaveService.sync_before_scene_exit(self)

@@ -163,9 +163,9 @@ func _claim_achievement(achievement_id: String) -> void:
 
 	if not result.get("ok", false):
 		if int(result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
-			var resolved := await CloudSaveService.handle_conflict(self, result)
+			var resolved := await CloudSaveService.handle_conflict(self, result, false)
 			if resolved.get("ok", false):
-				await _show_alert("存档冲突已解决，请重新领取")
+				await _show_alert("云端存档已刷新，请重新领取")
 				await _load_achievements()
 			return
 		await _show_alert("领取失败: %s" % result.get("message", ""))

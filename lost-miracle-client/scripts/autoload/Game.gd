@@ -6,6 +6,10 @@ var player_class: String = ""
 var auto_battle: bool = false
 var current_dungeon_id: String = "bone_crypt"
 var _auth_dialog_open: bool = false
+var _pending_inventory_overlay: Dictionary = {
+	"open": false,
+	"open_enhance": false,
+}
 
 var dungeon_progress := {
 	"normal_kill_count": 0,
@@ -75,3 +79,19 @@ func get_player_class() -> String:
 
 func set_player_class(new_class: String) -> void:
 	player_class = new_class
+
+func request_inventory_overlay_restore(open_enhance: bool = false) -> void:
+	_pending_inventory_overlay = {
+		"open": true,
+		"open_enhance": open_enhance,
+	}
+
+func consume_inventory_overlay_restore() -> Dictionary:
+	var state := _pending_inventory_overlay.duplicate(true)
+	_pending_inventory_overlay["open"] = false
+	_pending_inventory_overlay["open_enhance"] = false
+	return state
+
+func clear_inventory_overlay_restore() -> void:
+	_pending_inventory_overlay["open"] = false
+	_pending_inventory_overlay["open_enhance"] = false

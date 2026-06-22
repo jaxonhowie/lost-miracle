@@ -694,7 +694,16 @@ func _enhance_confirm_server() -> void:
 	$EnhanceOverlay/Center/Dialog/Margin/VBox/BtnRow/ConfirmEnhanceBtn.disabled = false
 	if not result.get("ok", false):
 		if int(result.get("code", 0)) == CloudSaveService.CONFLICT_CODE:
-			await CloudSaveService.handle_conflict(self, result)
+			var resolved := await CloudSaveService.handle_conflict(self, result, false)
+			if resolved.get("ok", false):
+				selected_item = PlayerData.get_equipment_by_uid(uid)
+				_show_enhance_result("云端存档已刷新，请重新强化", Color(1.0, 0.85, 0.35))
+				_init_stone_select()
+				if not selected_item.is_empty():
+					_update_enhance_info()
+				_refresh_equipped()
+				_refresh_inventory()
+				_refresh_stats()
 			return
 		_show_enhance_result("强化失败: %s" % result.get("message", ""), Color.RED)
 		return

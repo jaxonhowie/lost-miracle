@@ -49,6 +49,18 @@ func is_boss_available() -> bool:
 	return bool(_state.get("boss", {}).get("available", false))
 
 
+func get_spawn_slot_id(spawn_type: String) -> String:
+	var slot: Dictionary = {}
+	match spawn_type:
+		"elite":
+			slot = _state.get("elite", {})
+		"boss":
+			slot = _state.get("boss", {})
+		_:
+			return ""
+	return ApiIds.from_value(slot.get("slotId", ""))
+
+
 func get_elite_cooldown_remaining() -> int:
 	return int(_state.get("elite", {}).get("cooldownSec", 0))
 
