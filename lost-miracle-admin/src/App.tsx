@@ -12,6 +12,7 @@ const CharacterPage = lazy(() => import('./pages/CharacterPage'));
 const SpawnsPage = lazy(() => import('./pages/SpawnsPage'));
 const ConfigPage = lazy(() => import('./pages/ConfigPage'));
 const AuditPage = lazy(() => import('./pages/AuditPage'));
+const MailPage = lazy(() => import('./pages/MailPage'));
 
 function PageFallback() {
   return <Spin size="large" style={{ display: 'block', margin: '48px auto' }} />;
@@ -66,6 +67,7 @@ export default function App() {
             <Route path="characters/:characterId" element={<CharacterPage />} />
             <Route path="spawns" element={<SpawnsPage />} />
             <Route path="config" element={<ConfigPage />} />
+            <Route path="mail" element={<MailPage />} />
             <Route path="audit" element={<AuditPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

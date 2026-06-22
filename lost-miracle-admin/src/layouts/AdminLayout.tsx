@@ -2,6 +2,7 @@ import {
   AuditOutlined,
   CloudServerOutlined,
   DashboardOutlined,
+  MailOutlined,
   SettingOutlined,
   TeamOutlined,
   ThunderboltOutlined,
@@ -17,6 +18,7 @@ const items = [
   { key: '/players', icon: <TeamOutlined />, label: '玩家管理' },
   { key: '/spawns', icon: <ThunderboltOutlined />, label: '刷怪状态' },
   { key: '/config', icon: <SettingOutlined />, label: '配置中心' },
+  { key: '/mail', icon: <MailOutlined />, label: '邮件管理' },
   { key: '/audit', icon: <AuditOutlined />, label: '审计日志' },
 ];
 

@@ -93,3 +93,19 @@ export interface DungeonSpawnState {
   elite: SpawnSlotView | null;
   boss: SpawnSlotView | null;
 }
+
+export interface AdminSendMailRequest {
+  characterId?: number | null;
+  title: string;
+  body: string;
+  attachments?: Record<string, number>;
+}
+
+export interface AdminSendMailResponse {
+  sent: number;
+}
+
+export interface SystemSettings {
+  maintenance_mode: boolean;
+  maintenance_message: string;
+}
