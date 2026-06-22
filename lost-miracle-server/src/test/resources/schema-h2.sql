@@ -135,3 +135,12 @@ CREATE TABLE leaderboard_snapshot (
     snapshot_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_leaderboard_board_season ON leaderboard_snapshot (board_type, season, rank);
+
+CREATE TABLE system_settings (
+    `key`       VARCHAR(64)  NOT NULL PRIMARY KEY,
+    `value`     CLOB         NULL,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO system_settings (`key`, `value`) VALUES ('maintenance_mode', 'false');
+INSERT INTO system_settings (`key`, `value`) VALUES ('maintenance_message', '服务器维护中，请稍后再试');

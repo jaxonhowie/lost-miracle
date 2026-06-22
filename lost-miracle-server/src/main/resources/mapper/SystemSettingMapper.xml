@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lostmiracle.module.system.mapper.SystemSettingMapper">
+
+    <resultMap id="settingResultMap" type="com.lostmiracle.module.system.entity.SystemSettingEntity">
+        <result property="key" column="key"/>
+        <result property="value" column="value"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectByKey" resultMap="settingResultMap">
+        SELECT * FROM system_settings WHERE `key` = #{key}
+    </select>
+
+    <insert id="upsert">
+        INSERT INTO system_settings (`key`, `value`)
+        VALUES (#{key}, #{value})
+        ON DUPLICATE KEY UPDATE `value` = #{value}
+    </insert>
+
+</mapper>

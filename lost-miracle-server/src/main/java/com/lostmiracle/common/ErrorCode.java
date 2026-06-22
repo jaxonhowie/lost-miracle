@@ -9,6 +9,7 @@ public final class ErrorCode {
     public static final int NOT_FOUND = 40400;
     public static final int CONFLICT = 40901;
     public static final int TOO_MANY_REQUESTS = 42900;
+    public static final int SERVICE_UNAVAILABLE = 50301;
     public static final int INTERNAL_ERROR = 50000;
 
     private ErrorCode() {
