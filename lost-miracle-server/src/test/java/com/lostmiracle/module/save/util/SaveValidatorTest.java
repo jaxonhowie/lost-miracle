@@ -80,6 +80,142 @@ class SaveValidatorTest {
     }
 
     @Test
+    void validate_acceptsInventoryItemWithIdOnly() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "vine_wood_sword");
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsInventoryItemWithBothIdAndUid() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "vine_wood_sword");
+        item.put("uid", "eq_1");
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsInventoryItemWithBlankIdAndEmptyUid() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "   ");
+        item.put("uid", "");
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsInventoryItemWithEmptyIdAndBlankUid() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "");
+        item.put("uid", "   ");
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsNonMapInventoryItem() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Object> inventory = new ArrayList<>();
+        inventory.add("not_a_map");
+        save.put("inventory", inventory);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsInventoryOverMaxSize() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        for (int i = 0; i < 201; i++) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", "item_" + i);
+            inventory.add(item);
+        }
+        save.put("inventory", inventory);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsInventoryAtMaxSize() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        for (int i = 0; i < 200; i++) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", "item_" + i);
+            inventory.add(item);
+        }
+        save.put("inventory", inventory);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsEnhanceLevelZero() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "vine_wood_sword");
+        item.put("enhance_level", 0);
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsNegativeEnhanceLevel() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", "vine_wood_sword");
+        item.put("enhance_level", -1);
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsNullEquippedField() {
+        Map<String, Object> save = validSave(1, 0);
+        // equipped not present — should be fine
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsNonMapEquipped() {
+        Map<String, Object> save = validSave(1, 0);
+        save.put("equipped", "not_a_map");
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsAllValidEquippedSlots() {
+        Map<String, Object> save = validSave(1, 0);
+        Map<String, Object> equipped = new HashMap<>();
+        equipped.put("weapon", "vine_wood_sword");
+        equipped.put("head", "vine_helm");
+        equipped.put("body", "vine_armor");
+        equipped.put("legs", "vine_legs");
+        equipped.put("feet", "vine_boots");
+        equipped.put("ring_left", "swamp_ring_1");
+        equipped.put("ring_right", "swamp_ring_2");
+        equipped.put("necklace", "frozen_necklace_1");
+        save.put("equipped", equipped);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
     void validate_rejectsEnhanceLevelOverMax() {
         Map<String, Object> save = validSave(1, 0);
         ArrayList<Map<String, Object>> inventory = new ArrayList<>();
