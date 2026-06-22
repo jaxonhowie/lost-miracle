@@ -14,6 +14,8 @@ public interface MailMapper {
 
     List<MailEntity> selectByCharacterId(@Param("characterId") long characterId);
 
+    int insert(MailEntity mail);
+
     int updateClaimed(@Param("id") long id, @Param("claimed") int claimed, @Param("claimedAt") LocalDateTime claimedAt);
 
     int deleteByCharacterId(@Param("characterId") long characterId);

@@ -33,4 +33,9 @@
         DELETE FROM mail WHERE character_id = #{characterId}
     </delete>
 
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mail (character_id, title, body, attachments, claimed)
+        VALUES (#{characterId}, #{title}, #{body}, #{attachments}, 0)
+    </insert>
+
 </mapper>

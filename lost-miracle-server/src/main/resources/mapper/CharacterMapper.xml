@@ -48,4 +48,8 @@
         DELETE FROM `character` WHERE id = #{id}
     </delete>
 
+    <select id="selectAllIds" resultType="long">
+        SELECT id FROM `character`
+    </select>
+
 </mapper>

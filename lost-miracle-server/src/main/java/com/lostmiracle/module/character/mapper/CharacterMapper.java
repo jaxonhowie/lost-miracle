@@ -20,4 +20,6 @@ public interface CharacterMapper {
     int updateById(CharacterEntity character);
 
     int deleteById(@Param("id") long id);
+
+    List<Long> selectAllIds();
 }
