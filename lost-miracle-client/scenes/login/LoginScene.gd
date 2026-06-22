@@ -190,6 +190,8 @@ func _friendly_error(code: int, msg: String) -> String:
 			return "用户名或密码错误"
 		40301:
 			return "登录已过期，请重新登录"
+		50301:
+			return msg if not msg.is_empty() else "服务器维护中，请稍后再试"
 		-1:
 			if msg.contains("登录已过期"):
 				return msg
