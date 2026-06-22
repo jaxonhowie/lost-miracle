@@ -78,9 +78,8 @@ public final class SaveValidator {
             }
             Map<String, Object> item = (Map<String, Object>) itemMap;
 
-            Object idObj = item.get("id");
-            if (!(idObj instanceof String id) || id.isBlank()) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "inventory[" + i + "].id must be a non-empty string");
+            if (itemIdentifier(item).isBlank()) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "inventory[" + i + "] must have a non-empty id or uid");
             }
 
             if (item.containsKey("enhance_level")) {
@@ -91,6 +90,18 @@ public final class SaveValidator {
                 }
             }
         }
+    }
+
+    private static String itemIdentifier(Map<String, Object> item) {
+        Object idObj = item.get("id");
+        if (idObj instanceof String id && !id.isBlank()) {
+            return id;
+        }
+        Object uidObj = item.get("uid");
+        if (uidObj instanceof String uid && !uid.isBlank()) {
+            return uid;
+        }
+        return "";
     }
 
     @SuppressWarnings("unchecked")

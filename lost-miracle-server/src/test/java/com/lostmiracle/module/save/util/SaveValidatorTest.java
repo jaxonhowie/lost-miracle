@@ -56,14 +56,27 @@ class SaveValidatorTest {
     }
 
     @Test
-    void validate_rejectsInventoryItemWithoutId() {
+    void validate_rejectsInventoryItemWithoutIdOrUid() {
         Map<String, Object> save = validSave(1, 0);
         ArrayList<Map<String, Object>> inventory = new ArrayList<>();
         Map<String, Object> badItem = new HashMap<>();
-        badItem.put("name", "no_id");
+        badItem.put("name", "no_identifier");
         inventory.add(badItem);
         save.put("inventory", inventory);
         assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsInventoryItemWithUid() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Map<String, Object>> inventory = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("uid", "eq_1");
+        item.put("base_id", "vine_wood_sword");
+        item.put("enhance_level", 0);
+        inventory.add(item);
+        save.put("inventory", inventory);
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
     }
 
     @Test
