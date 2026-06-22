@@ -1,6 +1,8 @@
 package com.lostmiracle.module.loot;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.lostmiracle.module.config.ConfigDefaults;
+import com.lostmiracle.module.config.GameConfigService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,17 +12,17 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class LootEngine {
 
-    private static final Map<String, RateRange> DEFAULT_EQUIP = Map.of(
+    private static final Map<String, RateRange> FALLBACK_EQUIP = Map.of(
             "normal", new RateRange(0.30, 1, 1),
             "elite", new RateRange(0.60, 1, 2),
             "boss", new RateRange(1.00, 2, 3)
     );
-    private static final Map<String, IntRange> DEFAULT_GOLD = Map.of(
+    private static final Map<String, IntRange> FALLBACK_GOLD = Map.of(
             "normal", new IntRange(10, 30),
             "elite", new IntRange(30, 80),
             "boss", new IntRange(100, 300)
     );
-    private static final Map<String, RateRange> DEFAULT_STONE = Map.of(
+    private static final Map<String, RateRange> FALLBACK_STONE = Map.of(
             "normal", new RateRange(0.10, 0, 1),
             "elite", new RateRange(0.25, 1, 2),
             "boss", new RateRange(0.50, 2, 5)
@@ -28,15 +30,18 @@ public class LootEngine {
 
     private final GameDataCatalog catalog;
     private final EquipmentGenerator equipmentGenerator;
+    private final GameConfigService configService;
 
-    public LootEngine(GameDataCatalog catalog, EquipmentGenerator equipmentGenerator) {
+    public LootEngine(GameDataCatalog catalog, EquipmentGenerator equipmentGenerator, GameConfigService configService) {
         this.catalog = catalog;
         this.equipmentGenerator = equipmentGenerator;
+        this.configService = configService;
     }
 
     public LootRollResult rollBattleRewards(String dungeonId, String monsterId) {
         String monsterType = catalog.getMonsterType(monsterId);
-        int exp = catalog.getMonsterLevel(monsterId) * 30;
+        int expPerLevel = readConfigInt(ConfigDefaults.LOOT_EXP_PER_LEVEL, "exp_per_level", 30);
+        int exp = catalog.getMonsterLevel(monsterId) * expPerLevel;
         List<Map<String, Object>> items = new ArrayList<>();
 
         switch (dungeonId) {
@@ -46,8 +51,12 @@ public class LootEngine {
             default -> rollDefaultDungeon(items, monsterType);
         }
 
-        if (ThreadLocalRandom.current().nextDouble() <= 0.5) {
-            items.add(resourceDrop("health_potion", randomBetween(1, 5)));
+        Map<String, Object> potionCfg = getConfigMap(ConfigDefaults.LOOT_POTION_DROP);
+        double potionRate = readDouble(potionCfg, "rate", 0.50);
+        int potionMin = readInt(potionCfg, "min", 1);
+        int potionMax = readInt(potionCfg, "max", 5);
+        if (ThreadLocalRandom.current().nextDouble() <= potionRate) {
+            items.add(resourceDrop("health_potion", randomBetween(potionMin, potionMax)));
         }
 
         int gold = sumGold(items);
@@ -55,7 +64,7 @@ public class LootEngine {
     }
 
     private void rollDefaultDungeon(List<Map<String, Object>> items, String monsterType) {
-        RateRange equipInfo = DEFAULT_EQUIP.getOrDefault(monsterType, DEFAULT_EQUIP.get("normal"));
+        RateRange equipInfo = readEquipRate(monsterType);
         if (ThreadLocalRandom.current().nextDouble() <= equipInfo.rate()) {
             int count = randomBetween(equipInfo.min(), equipInfo.max());
             for (int i = 0; i < count; i++) {
@@ -65,10 +74,10 @@ public class LootEngine {
                 }
             }
         }
-        IntRange goldRange = DEFAULT_GOLD.getOrDefault(monsterType, DEFAULT_GOLD.get("normal"));
+        IntRange goldRange = readGoldRange(monsterType);
         items.add(resourceDrop("gold", randomBetween(goldRange.min(), goldRange.max())));
 
-        RateRange stoneInfo = DEFAULT_STONE.getOrDefault(monsterType, DEFAULT_STONE.get("normal"));
+        RateRange stoneInfo = readStoneRate(monsterType);
         if (ThreadLocalRandom.current().nextDouble() <= stoneInfo.rate()) {
             int stoneCount = randomBetween(stoneInfo.min(), stoneInfo.max());
             if (stoneCount > 0) {
@@ -94,7 +103,7 @@ public class LootEngine {
             addJewelryIfPresent(items, equipmentGenerator.generateJewelry());
         }
 
-        IntRange gold = readGoldRange(cfg.path("gold").path(monsterType), DEFAULT_GOLD.get(monsterType));
+        IntRange gold = readGoldRange(cfg.path("gold").path(monsterType), FALLBACK_GOLD.get(monsterType));
         items.add(resourceDrop("gold", randomBetween(gold.min(), gold.max())));
 
         JsonNode stoneCfg = cfg.path("enhance_stone").path(monsterType);
@@ -124,7 +133,7 @@ public class LootEngine {
             addJewelryIfPresent(items, equipmentGenerator.generateNecklace());
         }
 
-        IntRange gold = readGoldRange(cfg.path("gold").path(monsterType), DEFAULT_GOLD.get(monsterType));
+        IntRange gold = readGoldRange(cfg.path("gold").path(monsterType), FALLBACK_GOLD.get(monsterType));
         items.add(resourceDrop("gold", randomBetween(gold.min(), gold.max())));
 
         JsonNode stoneCfg = cfg.path("enhance_stone").path(monsterType);
@@ -138,7 +147,7 @@ public class LootEngine {
 
     private void rollForgeRuins(List<Map<String, Object>> items, String monsterType) {
         JsonNode cfg = catalog.getJewelryConfig().path("forge_ruins_drops");
-        IntRange gold = readGoldRange(cfg.path("gold").path(monsterType), DEFAULT_GOLD.get(monsterType));
+        IntRange gold = readGoldRange(cfg.path("gold").path(monsterType), FALLBACK_GOLD.get(monsterType));
         items.add(resourceDrop("gold", randomBetween(gold.min(), gold.max())));
 
         JsonNode stoneCfg = catalog.getJewelryConfig()
@@ -175,6 +184,81 @@ public class LootEngine {
             items.add(jewelry);
         }
     }
+
+    // ---------- config-driven helpers ----------
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getConfigMap(String configKey) {
+        Map<String, Object> map = configService.getPublishedMap(configKey);
+        return map.isEmpty() ? Map.of() : map;
+    }
+
+    private int readConfigInt(String configKey, String field, int fallback) {
+        Map<String, Object> map = getConfigMap(configKey);
+        return readInt(map, field, fallback);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getTypeSection(Map<String, Object> cfg, String monsterType) {
+        Object section = cfg.get(monsterType);
+        if (section instanceof Map<?, ?> m) {
+            return (Map<String, Object>) m;
+        }
+        Object normal = cfg.get("normal");
+        if (normal instanceof Map<?, ?> m) {
+            return (Map<String, Object>) m;
+        }
+        return Map.of();
+    }
+
+    private RateRange readEquipRate(String monsterType) {
+        Map<String, Object> cfg = getConfigMap(ConfigDefaults.LOOT_EQUIP_DROP);
+        if (cfg.isEmpty()) {
+            return FALLBACK_EQUIP.getOrDefault(monsterType, FALLBACK_EQUIP.get("normal"));
+        }
+        Map<String, Object> section = getTypeSection(cfg, monsterType);
+        return new RateRange(
+                readDouble(section, "rate", 0.30),
+                readInt(section, "min", 1),
+                readInt(section, "max", 1)
+        );
+    }
+
+    private IntRange readGoldRange(String monsterType) {
+        Map<String, Object> cfg = getConfigMap(ConfigDefaults.LOOT_GOLD_DROP);
+        if (cfg.isEmpty()) {
+            return FALLBACK_GOLD.getOrDefault(monsterType, FALLBACK_GOLD.get("normal"));
+        }
+        Map<String, Object> section = getTypeSection(cfg, monsterType);
+        return new IntRange(readInt(section, "min", 10), readInt(section, "max", 30));
+    }
+
+    private RateRange readStoneRate(String monsterType) {
+        Map<String, Object> cfg = getConfigMap(ConfigDefaults.LOOT_STONE_DROP);
+        if (cfg.isEmpty()) {
+            return FALLBACK_STONE.getOrDefault(monsterType, FALLBACK_STONE.get("normal"));
+        }
+        Map<String, Object> section = getTypeSection(cfg, monsterType);
+        return new RateRange(
+                readDouble(section, "rate", 0.10),
+                readInt(section, "min", 0),
+                readInt(section, "max", 1)
+        );
+    }
+
+    private double readDouble(Map<String, Object> map, String key, double fallback) {
+        Object v = map.get(key);
+        if (v instanceof Number n) return n.doubleValue();
+        return fallback;
+    }
+
+    private int readInt(Map<String, Object> map, String key, int fallback) {
+        Object v = map.get(key);
+        if (v instanceof Number n) return n.intValue();
+        return fallback;
+    }
+
+    // ---------- existing helpers ----------
 
     private IntRange readGoldRange(JsonNode node, IntRange fallback) {
         if (node == null || node.isMissingNode() || node.isEmpty()) {

@@ -11,6 +11,8 @@ public final class ConfigDefaults {
     public static final String LOOT_EQUIP_DROP = "loot.equip_drop";
     public static final String LOOT_GOLD_DROP = "loot.gold_drop";
     public static final String LOOT_STONE_DROP = "loot.stone_drop";
+    public static final String LOOT_POTION_DROP = "loot.potion_drop";
+    public static final String LOOT_EXP_PER_LEVEL = "loot.exp_per_level";
     public static final String DUNGEON_EXPLORE = "dungeon.explore";
     public static final String ENHANCE_RULES = "enhance.rules";
     public static final String SPAWN_CONSTANTS = "spawn.constants";
@@ -23,6 +25,8 @@ public final class ConfigDefaults {
         entries.put(LOOT_EQUIP_DROP, entry("装备掉率", lootEquipDrop()));
         entries.put(LOOT_GOLD_DROP, entry("金币掉落区间", lootGoldDrop()));
         entries.put(LOOT_STONE_DROP, entry("强化石掉落", lootStoneDrop()));
+        entries.put(LOOT_POTION_DROP, entry("药水掉落", lootPotionDrop()));
+        entries.put(LOOT_EXP_PER_LEVEL, entry("经验系数", lootExpPerLevel()));
         entries.put(DUNGEON_EXPLORE, entry("地牢探索事件权重", dungeonExplore(objectMapper)));
         entries.put(ENHANCE_RULES, entry("强化规则", enhanceRules(objectMapper)));
         entries.put(SPAWN_CONSTANTS, entry("刷怪槽常量", spawnConstants()));
@@ -54,6 +58,20 @@ public final class ConfigDefaults {
                 "normal", Map.of("min", 0, "max", 1, "rate", 0.10),
                 "elite", Map.of("min", 1, "max", 2, "rate", 0.25),
                 "boss", Map.of("min", 2, "max", 5, "rate", 0.50)
+        );
+    }
+
+    private static Map<String, Object> lootPotionDrop() {
+        return Map.of(
+                "rate", 0.50,
+                "min", 1,
+                "max", 5
+        );
+    }
+
+    private static Map<String, Object> lootExpPerLevel() {
+        return Map.of(
+                "exp_per_level", 30
         );
     }
 
