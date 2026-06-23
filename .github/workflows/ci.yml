@@ -53,30 +53,54 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Type-check & Build
         run: npm run build
 
   client:
-    name: Client — GDScript Lint
+    name: Client — GDScript Lint & Project Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GODOT_VERSION: "4.6.2"
     steps:
       - uses: actions/checkout@v4
 
-      - name: GDScript syntax check
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
         run: |
-          # Check for common GDScript issues
-          echo "=== Checking scene references ==="
-          for scene in $(find lost-miracle-client/scenes -name '*.gd'); do
-            # Verify referenced .tscn files exist
-            base=$(basename "$scene" .gd)
-            dir=$(dirname "$scene")
-            tscn="$dir/$base.tscn"
-            if [ ! -f "$tscn" ]; then
-              echo "WARNING: Missing scene file $tscn for $scene"
-            fi
-          done
-          echo "=== Checking autoload references ==="
-          grep -rn 'change_scene_to_file("res://' lost-miracle-client/scenes/ lost-miracle-client/scripts/ | head -20
-          echo "=== GDScript files found ==="
+          mkdir -p ~/.local/share/godot
+          cd ~/.local/share/godot
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -O godot.zip
+          unzip godot.zip
+          chmod +x "Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          ln -sf "$(pwd)/Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+
+      - name: Link Godot binary
+        if: steps.cache-godot.outputs.cache-hit == 'true'
+        run: |
+          ln -sf ~/.local/share/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+
+      - name: Godot headless project validation
+        run: |
+          godot --headless --path lost-miracle-client --quit 2>&1 | tee /tmp/godot-output.txt
+          if grep -qiE "SCRIPT ERROR|FATAL|Cannot load|Parse Error|GDScript Error" /tmp/godot-output.txt; then
+            echo "::error::Godot headless check found errors"
+            exit 1
+          fi
+
+      - name: GDScript file stats
+        run: |
+          echo "=== GDScript files ==="
           find lost-miracle-client -name '*.gd' | wc -l
-          echo "scene check complete"
+          echo "=== Scene files ==="
+          find lost-miracle-client -name '*.tscn' | wc -l

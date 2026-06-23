@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lostmiracle.common.BusinessException;
 import com.lostmiracle.common.ErrorCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.lostmiracle.module.character.CharacterService;
 import com.lostmiracle.module.character.entity.CharacterEntity;
 import com.lostmiracle.module.leaderboard.LeaderboardService;
@@ -33,6 +35,8 @@ import java.util.Map;
 
 @Service
 public class MailService {
+
+    private static final Logger log = LoggerFactory.getLogger(MailService.class);
 
     private final CharacterService characterService;
     private final CharacterSaveMapper characterSaveMapper;
@@ -157,6 +161,10 @@ public class MailService {
         Map<String, Object> player = (Map<String, Object>) playerMap;
         for (Map.Entry<String, Object> entry : attachments.entrySet()) {
             String key = entry.getKey();
+            if (!MailAttachmentPolicy.ALLOWED_KEYS.contains(key)) {
+                log.warn("skipping disallowed attachment key={}", key);
+                continue;
+            }
             int delta = intValue(entry.getValue());
             player.put(key, intValue(player.get(key)) + delta);
         }

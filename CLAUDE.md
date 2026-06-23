@@ -42,6 +42,32 @@ Data: `lost-miracle-client/data/*.json`
 
 Controls: Tab=inventory, R=enhance, 1/2/3=skills, 4=potion
 
+### Godot MCP（编辑器实时连接）
+
+客户端已安装 `godot_mcp` 插件（`addons/godot_mcp/`，v1.0.6），通过 HTTP 协议暴露编辑器工具链。
+
+| 项 | 值 |
+|----|-----|
+| 传输模式 | HTTP（Streamable HTTP） |
+| 地址 | `http://localhost:9080/mcp` |
+| 配置文件 | `.mcp.json`（项目根） |
+| 认证 | 未启用（本地开发） |
+| 插件版本 | 1.0.6（154 工具：30 核心 + 124 补充） |
+
+**前提**：Godot 编辑器须处于运行状态，且插件已启用（项目 → 项目设置 → 插件 → Godot MCP Native）。
+
+**常用能力**：
+
+| 类别 | 典型操作 |
+|------|---------|
+| 节点 | 创建/删除/复制/移动节点、读取场景树、连接信号 |
+| 脚本 | 读写 GDScript、语法验证、符号搜索、定义/引用跳转 |
+| 场景 | 创建/打开/保存场景、列出场景标签页 |
+| 调试 | 运行时截图、断点、变量读取、性能指标 |
+| 项目 | 项目设置、资源清单、健康审计 |
+
+**注意**：MCP 工具为 `.mcp.json` 配置后自动注入本会话；新会话需 Godot 编辑器在线才可使用。
+
 ## Server (`lost-miracle-server/`)
 
 JDK 17 + Spring Boot 3 + MySQL + Redis. Base URL: `http://127.0.0.1:8080/api/v1`

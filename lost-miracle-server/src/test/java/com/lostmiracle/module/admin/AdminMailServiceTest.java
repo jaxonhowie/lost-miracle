@@ -1,5 +1,6 @@
 package com.lostmiracle.module.admin;
 
+import com.lostmiracle.common.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lostmiracle.module.admin.dto.AdminSendMailRequest;
 import com.lostmiracle.module.character.mapper.CharacterMapper;
@@ -103,5 +104,123 @@ class AdminMailServiceTest {
         ArgumentCaptor<MailEntity> captor = ArgumentCaptor.forClass(MailEntity.class);
         verify(mailMapper).insert(captor.capture());
         assertNull(captor.getValue().getAttachments());
+    }
+
+    @Test
+    void sendMail_rejectsUnknownAttachmentKey() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("非法key");
+        request.setBody("内容");
+        request.setAttachments(Map.of("hacked_resource", 100));
+
+        assertThrows(BusinessException.class, () -> adminMailService.sendMail(request));
+        verify(mailMapper, never()).insert(any());
+    }
+
+    @Test
+    void sendMail_acceptsAttachmentAtExactCap() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("边界值");
+        request.setBody("内容");
+        request.setAttachments(Map.of("gold", 1_000_000));
+
+        assertDoesNotThrow(() -> adminMailService.sendMail(request));
+        verify(mailMapper).insert(any(MailEntity.class));
+    }
+
+    @Test
+    void sendMail_rejectsAttachmentOverCap() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("超上限");
+        request.setBody("内容");
+        request.setAttachments(Map.of("gold", 1_000_001));
+
+        assertThrows(BusinessException.class, () -> adminMailService.sendMail(request));
+        verify(mailMapper, never()).insert(any());
+    }
+
+    @Test
+    void sendMail_rejectsNegativeAttachmentValue() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("负值");
+        request.setBody("内容");
+        request.setAttachments(Map.of("enhance_stone", -5));
+
+        assertThrows(BusinessException.class, () -> adminMailService.sendMail(request));
+        verify(mailMapper, never()).insert(any());
+    }
+
+    @Test
+    void sendMail_rejectsZeroAttachmentValue() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("零值");
+        request.setBody("内容");
+        request.setAttachments(Map.of("gold", 0));
+
+        assertThrows(BusinessException.class, () -> adminMailService.sendMail(request));
+        verify(mailMapper, never()).insert(any());
+    }
+
+    @Test
+    void sendMail_rejectsNonNumericAttachmentValue() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("非法值");
+        request.setBody("内容");
+        request.setAttachments(Map.of("gold", "abc"));
+
+        assertThrows(BusinessException.class, () -> adminMailService.sendMail(request));
+        verify(mailMapper, never()).insert(any());
+    }
+
+    @Test
+    void sendMail_acceptsAllSixAllowedKeys() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("全key");
+        request.setBody("内容");
+        request.setAttachments(Map.of(
+                "gold", 100,
+                "enhance_stone", 10,
+                "blessed_enhance_stone", 5,
+                "jewelry_enhance_stone", 10,
+                "blessed_jewelry_enhance_stone", 5,
+                "health_potion", 20
+        ));
+
+        assertDoesNotThrow(() -> adminMailService.sendMail(request));
+        verify(mailMapper).insert(any(MailEntity.class));
+    }
+
+    @Test
+    void sendMail_rejectsLevelAsAttachmentKey() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(1L);
+        request.setTitle("越权");
+        request.setBody("内容");
+        request.setAttachments(Map.of("level", 99));
+
+        assertThrows(BusinessException.class, () -> adminMailService.sendMail(request));
+        verify(mailMapper, never()).insert(any());
+    }
+
+    @Test
+    void sendMail_acceptsValidAttachments() {
+        AdminSendMailRequest request = new AdminSendMailRequest();
+        request.setCharacterId(42L);
+        request.setTitle("正常奖励");
+        request.setBody("恭喜");
+        request.setAttachments(Map.of("gold", 500, "enhance_stone", 10));
+
+        adminMailService.sendMail(request);
+
+        ArgumentCaptor<MailEntity> captor = ArgumentCaptor.forClass(MailEntity.class);
+        verify(mailMapper).insert(captor.capture());
+        assertNotNull(captor.getValue().getAttachments());
     }
 }

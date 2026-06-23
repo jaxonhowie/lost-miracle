@@ -186,32 +186,32 @@ class SaveValidatorTest {
     }
 
     @Test
-    void validate_acceptsNullEquippedField() {
+    void validate_acceptsNullEquipmentField() {
         Map<String, Object> save = validSave(1, 0);
-        // equipped not present — should be fine
+        // equipment not present — should be fine
         assertDoesNotThrow(() -> SaveValidator.validate(save));
     }
 
     @Test
-    void validate_rejectsNonMapEquipped() {
+    void validate_rejectsNonMapEquipment() {
         Map<String, Object> save = validSave(1, 0);
-        save.put("equipped", "not_a_map");
+        save.put("equipment", "not_a_map");
         assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
     }
 
     @Test
-    void validate_acceptsAllValidEquippedSlots() {
+    void validate_acceptsAllValidEquipmentSlots() {
         Map<String, Object> save = validSave(1, 0);
-        Map<String, Object> equipped = new HashMap<>();
-        equipped.put("weapon", "vine_wood_sword");
-        equipped.put("head", "vine_helm");
-        equipped.put("body", "vine_armor");
-        equipped.put("legs", "vine_legs");
-        equipped.put("feet", "vine_boots");
-        equipped.put("ring_left", "swamp_ring_1");
-        equipped.put("ring_right", "swamp_ring_2");
-        equipped.put("necklace", "frozen_necklace_1");
-        save.put("equipped", equipped);
+        Map<String, Object> equipment = new HashMap<>();
+        equipment.put("weapon", "vine_wood_sword");
+        equipment.put("helmet", "vine_helm");
+        equipment.put("armor", "vine_armor");
+        equipment.put("legs", "vine_legs");
+        equipment.put("gloves", "vine_gloves");
+        equipment.put("ring_left", "swamp_ring_1");
+        equipment.put("ring_right", "swamp_ring_2");
+        equipment.put("necklace", "frozen_necklace_1");
+        save.put("equipment", equipment);
         assertDoesNotThrow(() -> SaveValidator.validate(save));
     }
 
@@ -240,23 +240,101 @@ class SaveValidatorTest {
     }
 
     @Test
-    void validate_rejectsInvalidEquippedSlot() {
+    void validate_rejectsInvalidEquipmentSlot() {
         Map<String, Object> save = validSave(1, 0);
-        Map<String, Object> equipped = new HashMap<>();
-        equipped.put("invalid_slot", "vine_wood_sword");
-        save.put("equipped", equipped);
+        Map<String, Object> equipment = new HashMap<>();
+        equipment.put("invalid_slot", "vine_wood_sword");
+        save.put("equipment", equipment);
         assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
     }
 
     @Test
-    void validate_acceptsValidEquippedSlots() {
+    void validate_acceptsValidEquipmentSlots() {
         Map<String, Object> save = validSave(1, 0);
-        Map<String, Object> equipped = new HashMap<>();
-        equipped.put("weapon", "vine_wood_sword");
-        equipped.put("ring_left", "swamp_ring_1");
-        equipped.put("necklace", "frozen_necklace_1");
-        save.put("equipped", equipped);
+        Map<String, Object> equipment = new HashMap<>();
+        equipment.put("weapon", "vine_wood_sword");
+        equipment.put("ring_left", "swamp_ring_1");
+        equipment.put("necklace", "frozen_necklace_1");
+        save.put("equipment", equipment);
         assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsInvalidPlayerClass() {
+        Map<String, Object> save = validSave(1, 0);
+        ((Map<String, Object>) save.get("player")).put("class", "hacker");
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsValidPlayerClass() {
+        Map<String, Object> save = validSave(1, 0);
+        ((Map<String, Object>) save.get("player")).put("class", "warrior");
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsNegativePrimaryStat() {
+        Map<String, Object> save = validSave(1, 0);
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("STR", -1);
+        stats.put("AGI", 3);
+        stats.put("INT", 3);
+        ((Map<String, Object>) save.get("player")).put("primary_stats", stats);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsPrimaryStatOverMax() {
+        Map<String, Object> save = validSave(1, 0);
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("STR", 10_000);
+        ((Map<String, Object>) save.get("player")).put("primary_stats", stats);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsAltarBuffsTooLarge() {
+        Map<String, Object> save = validSave(1, 0);
+        ArrayList<Object> buffs = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            buffs.add(Map.of("stat", "STR", "value", 5, "battles_remaining", 3));
+        }
+        ((Map<String, Object>) save.get("player")).put("altar_buffs", buffs);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_acceptsValidExtendedFields() {
+        Map<String, Object> save = validSave(1, 0);
+        Map<String, Object> player = (Map<String, Object>) save.get("player");
+        player.put("class", "warrior");
+        player.put("primary_stats", Map.of("STR", 10, "AGI", 3, "INT", 3));
+        player.put("base_stats", Map.of("max_hp", 150, "atk", 13));
+        player.put("altar_buffs", new ArrayList<>());
+        player.put("battle_roar_remaining", 120.0);
+        player.put("battle_roar_atk_spd_percent", 20.0);
+        Map<String, Object> dungeon = new HashMap<>();
+        dungeon.put("normal_kill_count", 50);
+        dungeon.put("elite_kill_count", 10);
+        dungeon.put("boss_kill_count", 3);
+        save.put("dungeon", dungeon);
+        save.put("world", Map.of("current_dungeon_id", "bone_crypt", "auto_battle", true));
+        assertDoesNotThrow(() -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsNegativeBattleRoar() {
+        Map<String, Object> save = validSave(1, 0);
+        ((Map<String, Object>) save.get("player")).put("battle_roar_remaining", -1.0);
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
+    }
+
+    @Test
+    void validate_rejectsNonMapDungeon() {
+        Map<String, Object> save = validSave(1, 0);
+        save.put("dungeon", "not_a_map");
+        assertThrows(BusinessException.class, () -> SaveValidator.validate(save));
     }
 
     private Map<String, Object> validSave(int level, int exp) {
